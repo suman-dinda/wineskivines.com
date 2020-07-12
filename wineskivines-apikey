@@ -1,0 +1,31 @@
+Keystore type: PKCS12
+Keystore type: PKCS12
+Keystore provider: SUN
+
+Your keystore contains 1 entry
+
+Alias name: wineskivines
+Creation date: Jul 8, 2020
+Entry type: PrivateKeyEntry
+Certificate chain length: 1
+Certificate[1]:
+Owner: CN=wineskivines, OU=wineskivines, O=wineskivines, L=la, ST=california, C=US
+Issuer: CN=wineskivines, OU=wineskivines, O=wineskivines, L=la, ST=california, C=US
+Serial number: 2ad5a2f8
+Valid from: Wed Jul 08 19:25:13 UTC 2020 until: Sun Nov 24 19:25:13 UTC 2047
+Certificate fingerprints:
+         SHA1: F3:1F:3B:EF:01:A5:A0:19:50:F0:53:0D:0B:E7:A5:5B:DB:A4:5A:DF
+         SHA256: A7:85:D3:47:E4:A7:25:3F:90:1F:D9:1D:48:B2:15:2C:BE:40:76:D8:E9:CE:D9:A4:3C:49:A4:68:09:BB:00:A4
+Signature algorithm name: SHA256withRSA
+Subject Public Key Algorithm: 2048-bit RSA key
+Version: 3
+
+Extensions: 
+
+#1: ObjectId: 2.5.29.14 Criticality=false
+SubjectKeyIdentifier [
+KeyIdentifier [
+0000: 19 53 19 46 CA F3 AD 7C   ED 04 18 43 23 13 95 4C  .S.F.......C#..L
+0010: 87 14 E9 A5                                        ....
+]
+]
