@@ -1,0 +1,29 @@
+
+/* INVENTORY CSS */
+
+.remaining_stock{
+display:block;padding-top:5px;color:#999999;
+}
+
+.remaining_stock.out_of_stock{
+color:#a94442;
+}
+
+.add_to_cart[disabled],
+.add_to_cart[disabled]:hover,
+
+.inv_qty_plus[disabled],
+.inv_qty_plus[disabled]:hover,
+.inv_qty_plus[disabled]:active,
+.inv_qty_plus[disabled]:focus,
+.inv_qty_minus[disabled],
+.inv_qty_minus[disabled]:hover,
+.inv_qty_minus[disabled]:active,
+.inv_qty_minus[disabled]:focus
+{
+background:#6c757d;
+color:#fff;
+border:1px solid #6c757d;
+opacity:0.5;
+cursor:not-allowed;
+}

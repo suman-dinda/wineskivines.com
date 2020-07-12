@@ -73,6 +73,7 @@ return array(
 		'printer'=>array('require_login'=>true),
 		'singlemerchant'=>array(),
 		'mobileappv2'=>array(),
+		'inventory'=>array(),
 	),
 	
 	'components'=>array(		   
@@ -109,11 +110,12 @@ return array(
                 'store/mollie_webhook',
                 'singlemerchant/ajax/upload',
                 'singlemerchant/voguepay',
-		'singlemerchant/braintree',
-		'mobileappv2/api',
- 		'mobileappv2/voguepay',
-		'mobileappv2/braintree',
-  		'mobileappv2/ajax/uploadFile',
+				'singlemerchant/braintree',
+				'mobileappv2/api',
+ 				'mobileappv2/voguepay',
+				'mobileappv2/braintree',
+		  		'mobileappv2/ajax/uploadFile',
+		  		'inventory/upload',
 	        ),
         ),
         'session' => array(
