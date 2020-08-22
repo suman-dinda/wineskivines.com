@@ -8,7 +8,7 @@ $this->widget(APP_FOLDER.'.components.languageBar');
 
  <div class="col-md-5 left">
   <div class="absolute">
-    <h1><?php echo translate("KARENDERIA")?></h1>
+    <h1><?php echo translate("Wines Ki Vines")?></h1>
     <h5><?php echo translate("Inventory System")?> <?php echo APP_VERSION;?></h5>
   </div>
  </div>

@@ -221,6 +221,17 @@ echo CHtml::hiddenField('mobile_country_code',Yii::app()->functions->getAdminCou
                'required'=>true
                ))?>
 		     </div>
+		  </div> <!--row-->	
+
+		  <div class="row top10">
+		     <div class="col-md-12 ">
+		     <?php echo CHtml::dateField('dob','',
+                array('class'=>'grey-fields',
+                'placeholder'=>t("Date Of Birth"),
+               'required'=>true
+               ))?>
+			   <span class="text-muted"><i>Please enter your Date Of Birth</i></span>
+		     </div>
 		  </div> <!--row-->	    
 		  
 		  
@@ -259,7 +270,7 @@ echo CHtml::hiddenField('mobile_country_code',Yii::app()->functions->getAdminCou
          
          <div class="row top10">
          <div class="col-md-12 ">
-          <input type="submit" value="<?php echo t("Create Account")?>" class="orange-button medium block full-width">
+          <input type="submit" id='create_account' value="<?php echo t("Create Account")?>" class="orange-button medium block full-width">
           </div>
          </div>
 		  

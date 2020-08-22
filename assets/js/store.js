@@ -341,7 +341,20 @@ function form_submit(formid)
         	btn.val(btn_cap);        	
     		return;
     	}    	
-    }   
+	}
+	if( action=="clientRegistrationModal"){
+		var dob = $('#dob').val();
+		var dob_year=new Date(dob).getFullYear();
+		var curr_year=new Date().getFullYear();
+		let yearsDiff=curr_year-dob_year;
+		if(yearsDiff < 21){
+			alert('As per Goernement Policy you must be 21 years old.');
+			btn.attr("disabled", false );
+    		btn.val(js_lang.create_account);
+    		busy(false);
+			return false;
+		}
+	}   
     
     /*if(!empty(csrf_token)){
     	params+="&csrf_token="+csrf_token;

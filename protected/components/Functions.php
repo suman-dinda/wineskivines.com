@@ -366,7 +366,8 @@ class Functions extends CApplicationComponent
     	  
     	  'Hour'=>Yii::t("default","Hour"),
     	  'Minute'=>Yii::t("default","Minute"),
-    	  'processing'=>Yii::t("default","processing."),
+		  'processing'=>Yii::t("default","processing."),
+		  'create_account'=>Yii::t("default", "Create Account"),
     	  'merchantStats'=>Yii::t("default","Your merchant membership is expired. Please renew your membership.").$link,
     	  "Status"=>Yii::t("default","Status"),
     	  

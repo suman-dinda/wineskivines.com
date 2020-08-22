@@ -9,6 +9,7 @@
 	var timenow;
 	var item_row;
 	var heart_beat;
+        var transaction_type='';
 	
 	jQuery.fn.exists = function(){return this.length>0;}
 	
