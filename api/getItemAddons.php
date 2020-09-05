@@ -57,8 +57,11 @@ $data = (array) $data;
 
         }
     }
-
-print_r(json_encode($ffOutput[0]));
+    if (isset($ffOutput)){
+       print_r(json_encode($ffOutput[0]));
+    }else{
+       print_r(json_encode($ffOutput));
+    }
 } 
 }
 else {
