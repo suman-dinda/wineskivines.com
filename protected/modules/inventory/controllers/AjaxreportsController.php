@@ -152,7 +152,7 @@ class AjaxreportsController extends CController
 		$order = $resp['order'];
 		$limit = $resp['limit'];
 		
-		$and = "AND a.merchant_id = ".FunctionsV3::q($this->merchant_id)." AND a.merchant_id=b.merchant_id AND a.sku=b.sku AND b.transaction_type='sale'";
+		$and = "AND a.merchant_id = ".FunctionsV3::q($this->merchant_id)." ";
 		$range1 = isset($this->data['range1'])?$this->data['range1']:'';
 		$range2 = isset($this->data['range2'])?$this->data['range2']:'';		
 		if( InventoryWrapper::validDate($range1) && InventoryWrapper::validDate($range2)){
@@ -188,6 +188,8 @@ class AjaxreportsController extends CController
 		
 		from {{view_inventory_order_details}} a						
 		left join {{view_inventory_stocks}} b
+		on
+		a.sku=b.sku AND b.transaction_type='sale'
 		WHERE 1		
 		$and
 		$where
