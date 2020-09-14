@@ -146,13 +146,13 @@ class AjaxreportsController extends CController
 	{
 		$feed_data = array();
     	    					
-    	$cols = array('item_name','categories_name','item_sold','discount','net_sale','total_cost','gross_profit');
+    	$cols = array('item_name','categories_name','item_sold','discount','net_sale','total_cost','gross_profit','current_stock');
     	$resp = DatatablesWrapper::format($cols,$this->data);    	
     	$where = $resp['where'];
 		$order = $resp['order'];
 		$limit = $resp['limit'];
 		
-		$and = "AND a.merchant_id = ".FunctionsV3::q($this->merchant_id)." ";
+		$and = "AND a.merchant_id = ".FunctionsV3::q($this->merchant_id)." AND a.merchant_id=b.merchant_id AND a.sku=b.sku AND b.transaction_type='sale'";
 		$range1 = isset($this->data['range1'])?$this->data['range1']:'';
 		$range2 = isset($this->data['range2'])?$this->data['range2']:'';		
 		if( InventoryWrapper::validDate($range1) && InventoryWrapper::validDate($range2)){
@@ -183,10 +183,11 @@ class AjaxreportsController extends CController
 		sum(a.total_sale) - sum(a.discount) as net_sale,
 		sum(a.total_cost) as total_cost,
 		
-		(sum(a.total_sale)-sum(a.discount)) - sum(a.total_cost) as gross_profit
+		(sum(a.total_sale)-sum(a.discount)) - sum(a.total_cost) as gross_profit,
+		b.stock_after as current_stock
 		
 		from {{view_inventory_order_details}} a						
-		
+		left join {{view_inventory_stocks}} b
 		WHERE 1		
 		$and
 		$where
