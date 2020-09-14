@@ -4,10 +4,7 @@ if(empty($website_review_type)){
 }
 ?>
 
-<div class="review_notification">
-	<!--<div class="review_notification_wrap rounded">
-	<p>You've got 1 left for this Merchant. Please rate</p>
-	</div>-->
+<div class="review_notification">	
 </div>
 
 <div class="text-right">
@@ -24,7 +21,6 @@ if(empty($website_review_type)){
 
 
 <div class="review-input-wrap bottom10 row">
-<!--<form class="forms" id="forms" onsubmit="return false;">-->
 <form class="forms-review" id="forms-review" onsubmit="return false;">
 <?php echo CHtml::hiddenField('action','addReviews')?>
 <?php echo CHtml::hiddenField('currentController','store')?>

@@ -47,7 +47,7 @@ $p = new CHtmlPurifier();
 <label class="uk-form-label"><?php echo Yii::t('default',"New Password")?></label>  
 <?php echo CHtml::passwordField("password",'',array(
  'class'=>"uk-form-width-large",
- //'data-validation'=>"required"
+ 'autocomplete'=>"new-password"
 ))?>
 </div>
 
@@ -55,7 +55,7 @@ $p = new CHtmlPurifier();
 <label class="uk-form-label"><?php echo Yii::t('default',"Confirm New Password")?></label>  
 <?php echo CHtml::passwordField("cpassword",'',array(
  'class'=>"uk-form-width-large",
- //'data-validation'=>"required"
+ 'autocomplete'=>"new-password"
 ))?>
 </div>
 

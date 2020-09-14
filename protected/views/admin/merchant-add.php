@@ -1,7 +1,7 @@
 <?php 
 $url_login='';
 if (isset($_GET['id'])){
-	if (!$data=Yii::app()->functions->getMerchant($_GET['id'])){
+	if (!$data=FunctionsV3::getMerchant($_GET['id'])){
 		echo "<div class=\"uk-alert uk-alert-danger\">".
 		Yii::t("default","Sorry but we cannot find what your are looking for.")."</div>";
 		return ;
@@ -27,7 +27,7 @@ if (isset($_GET['id'])){
 
 <div class="right" style="margin-top:-30px">
 <h3 style="margin:0 0 8px;"><?php echo t("Charges Type")?>: <span class="uk-text-danger">
-<?php echo FunctionsV3::DisplayMembershipType($data['merchant_type']);?></span>
+<?php echo FunctionsV3::DisplayMembershipType( isset($data['merchant_type'])?$data['merchant_type']:'' );?></span>
 </h3>
 
 </div>
@@ -199,9 +199,48 @@ FunctionsV3::addCsrfToken(false);
           ))?>
         </div>
         
+          <?php 
+          $tag_id = isset($data['tag_id'])?$data['tag_id']:'';
+          if(!empty($tag_id)){
+          	 $tag_id = explode(",",$tag_id);
+          }          
+          ?>
+          <div class="uk-form-row">
+          <label class="uk-form-label"><?php echo Yii::t("default","Tags")?></label>
+          <?php echo CHtml::dropDownList('tag_id[]',
+          (array)$tag_id,
+          (array)$tags,          
+          array(
+          'class'=>'uk-form-width-large chosen',
+          'multiple'=>true,          
+          ))?>
+        </div>
+		        
+		        
+		<div class="uk-form-row">
+		<label class="uk-form-label"><?php echo Yii::t("default","Delivery Distance Covered")?></label>
+		<?php 
+		  echo CHtml::textField('delivery_distance_covered',
+		  isset($data['delivery_distance_covered'])?$data['delivery_distance_covered']:""
+		  ,array(
+		  'placeholder'=>"",
+		  "class"=>"numeric_only",
+		  'data-validation'=>"required"
+		  ));
+		  ?>		  
+		  <?php 
+		  echo CHtml::dropDownList('distance_unit',
+		  isset($data['distance_unit'])?$data['distance_unit']:"",
+		  Yii::app()->functions->distanceOption());
+		  ?>
+		</div>
+        
          <div class="uk-form-row">
           <label class="uk-form-label"><?php echo Yii::t("default","Published Merchant")?></label>
           <?php 
+          if(!isset($data['is_ready'])){
+          	 $data['is_ready']=''; 
+          }
           echo CHtml::checkBox('is_ready',
           $data['is_ready']==2?true:false
           ,array(
@@ -242,7 +281,7 @@ FunctionsV3::addCsrfToken(false);
   ""
   ,array(
   'class'=>'uk-form-width-large',
-  'autocomplete'=>"off"
+  'autocomplete'=>"new-password"     
   ))?>
 </div>
 </li>
@@ -264,22 +303,22 @@ Yii::app()->functions->data="list";
 	<label class="uk-form-label"><?php echo Yii::t("default","Package Name")?></label>
 	<?php 
 	echo CHtml::dropDownList('package_id',
-	$data['package_id']
+	isset($data['package_id'])?$data['package_id']:0
 	,(array)Yii::app()->functions->getPackagesList())
 	?>
 </div>
   
 <div class="uk-form-row">
   <label class="uk-form-label"><?php echo Yii::t("default","Package Price")?></label>
-  <span class="uk-text-primary"><?php echo adminCurrencySymbol().standardPrettyFormat($data['package_price'])?></span>
+  <span class="uk-text-primary"><?php echo adminCurrencySymbol().standardPrettyFormat( isset($data['package_price'])?$data['package_price']:'' )?></span>
 </div>
   
   <div class="uk-form-row">
   <label class="uk-form-label"><?php echo Yii::t("default","Membership Expired On")?></label>
   <span class="uk-text-success">
   <?php 
-  echo CHtml::hiddenField('membership_expired',$data['membership_expired']);
-  echo CHtml::textField('membership_expired1',FormatDateTime($data['membership_expired'],false),array(
+  echo CHtml::hiddenField('membership_expired', isset($data['membership_expired'])?$data['membership_expired']:'');
+  echo CHtml::textField('membership_expired1',FormatDateTime( isset($data['membership_expired'])?$data['membership_expired']:'' ,false),array(
     'class'=>"j_date",
     'data-validation'=>"requiredx",
     'data-id'=>'membership_expired'
@@ -294,9 +333,11 @@ Yii::app()->functions->data="list";
   <label class="uk-form-label"><?php echo Yii::t("default","commission on orders")?></label>
   <?php 
   $percent_commision=Yii::app()->functions->getOptionAdmin('admin_commision_percent');
-  if ($data['percent_commision']<=0){
-  	  $data['percent_commision']=$percent_commision;
-  }
+  if(isset($data['percent_commision'])){
+	  if ($data['percent_commision']<=0){
+	  	  $data['percent_commision']=$percent_commision;
+	  }
+  } else $data['percent_commision'] = 0;
   
   $commision_type=Yii::app()->functions->getOptionAdmin('admin_commision_type');
   if (!empty($data['commision_type'])){
@@ -330,6 +371,9 @@ Yii::app()->functions->data="list";
  <div class="uk-form-row">
   <label class="uk-form-label"><?php echo Yii::t("default","Featured")?>?</label>
   <?php 
+  if(!isset($data['is_featured'])){
+  	$data['is_featured']='';
+  }
   echo CHtml::checkBox('is_featured',
   $data['is_featured']==2?true:false
   ,array('class'=>"icheck",'value'=>2))

@@ -88,8 +88,11 @@ class InstallController extends CController
 					  'password'=>md5($data['password']),
 					  'date_created'=>FunctionsV3::dateNow(),
 					  'ip_address'=>$_SERVER['REMOTE_ADDR'],
-					  'user_access'=>InstallHelper::UserAccessString()
-					);					
+					  'user_access'=>InstallHelper::UserAccessString(),
+					  'first_name'=>isset($data['first_name'])?$data['first_name']:'',
+					  'last_name'=>isset($data['last_name'])?$data['last_name']:'',
+					  'email_address'=>isset($data['website_contact_email'])?$data['website_contact_email']:''
+					);							
 					$DbExt->qry("TRUNCATE TABLE {{admin_user}}");
 					$DbExt->insertData("{{admin_user}}",$params);
 					

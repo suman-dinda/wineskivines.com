@@ -254,6 +254,13 @@ class AjaxadminController extends CController
 		  'order_request_cancel_to_admin_email',
 		  'order_request_cancel_to_admin_sms',
 		  'order_request_cancel_to_admin_push',
+
+		  'booking_request_cancel_email',
+		  'booking_request_cancel_sms',
+		  'booking_request_cancel_push',
+		  
+		  'offline_new_bank_deposit_email',
+		  'offline_new_bank_deposit_sms',		  
 		  
 		);
 		
@@ -726,7 +733,7 @@ class AjaxadminController extends CController
 						FunctionsV3::updateReviews($order_id , $cancel_status);
 					}
 					
-					FunctionsV3::notifyCustomerCancelOrder($res, t($params['request_cancel_status']) );
+					FunctionsV3::notifyCustomerCancelOrder($res, $params['request_cancel_status'] );
 					
 					/*UPDATE POINTS BASED ON ORDER STATUS*/
     				if (FunctionsV3::hasModuleAddon("pointsprogram")){
@@ -813,6 +820,76 @@ class AjaxadminController extends CController
 			    $this->msg = $e->getMessage();
 			}
 		} else $this->msg = t("order id not valid");
+		$this->jsonResponse();
+	}
+	
+	public function actiongetNotification()
+	{
+		$error  = array();
+		
+		try {
+		   NotificationWrapper::checkRequiredFile();
+		} catch (Exception $e) {
+    		$error[] =  $e->getMessage();
+    	}
+								    	
+    	try {
+		   NotificationWrapper::checkCurrency();
+		} catch (Exception $e) {
+    		$error[] =  $e->getMessage();
+    	}
+		    	
+    	try {
+    		/*5.4*/
+    	    NotificationWrapper::checkFields('client',array(
+    	      'payment_customer_id'=>""
+    	    ));    	        	    
+    	    NotificationWrapper::checkFields('order',array(
+    	      'distance'=>"",
+    	      'cancel_reason'=>"",    	      
+    	    ));    	       	    
+    	    NotificationWrapper::checkFields('merchant',array(
+    	      'distance_unit'=>"",
+    	      'delivery_distance_covered'=>"",    	      
+    	    ));    	        	   
+    	    NotificationWrapper::checkFields('bookingtable',array(
+    	      'request_cancel'=>""    	      
+    	    ));  
+    	    NotificationWrapper::checkFields('cuisine',array(
+    	      'slug'=>""    	      
+    	    ));  
+    	    /*5.4*/
+    	    
+    	} catch (Exception $e) {
+    		$error[] =  $e->getMessage();
+    	}
+    	
+    	try {
+    	   NotificationWrapper::checkCuisine();
+    	} catch (Exception $e) {
+    		$error[] =  $e->getMessage();
+    	}
+    	
+    	try {
+    	    NotificationWrapper::checkOpeningHours();
+    	} catch (Exception $e) {
+    		$error[] =  $e->getMessage();
+    	}
+    	
+    	try {
+    	    NotificationWrapper::checkDeliveryDistanceCovered();
+    	} catch (Exception $e) {
+    		$error[] =  $e->getMessage();
+    	}
+    	    	    	
+    	if(is_array($error) && count($error)>=1){    		
+    		$this->code = 1;    	
+    		$this->msg = "ERROR";
+    		$this->details = array(
+    		  'count'=>count($error),
+    		  'error'=>$error
+    		);
+    	} else $this->msg = t("No new notification");
 		$this->jsonResponse();
 	}
 	

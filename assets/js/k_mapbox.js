@@ -28,11 +28,10 @@ mapbox_plot_browse_map = function()
 			mapbox = L.map(this,{
 				scrollWheelZoom:false
 			}).setView([lat,lng], mapbox_default_zoom );
-			
-			L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token='+mapbox_access_token, {		    
-			//L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {		    
+								   
+			L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token='+mapbox_access_token, {		    
 			    maxZoom: 18,
-			    id: 'mapbox.streets',		    
+			    id: 'mapbox/streets-v11',	    
 			}).addTo(mapbox);
 					
 			if(!empty(default_icon)){
@@ -64,10 +63,10 @@ mapbox_plot_contact = function(data){
 		scrollWheelZoom:false,
 		zoomControl:false,
 	 }).setView([lat,lng], mapbox_default_zoom );
-	
-	L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token='+mapbox_access_token, {		    
+		
+	L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token='+mapbox_access_token, {	
 	    maxZoom: 18,
-	    id: 'mapbox.streets',		    
+	    id: 'mapbox/streets-v11',
 	}).addTo(mapbox);
 	
 	marker = L.marker([lat,lng], { icon : default_icon } ).addTo(mapbox);
@@ -82,12 +81,12 @@ mapbox_fullmap = function(lat , lng , div){
 	//mapbox_handle = L.map("full-map",{ 
 	mapbox_handle = L.map(div,{ 		
 	 }).setView([lat,lng], 6 );
-	
-	var url = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token='+mapbox_access_token;
+		
+	var url = 'https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token='+mapbox_access_token;
 	 
 	L.tileLayer(url, {		    
 	    maxZoom: 18,
-	    id: 'mapbox.streets',		    
+	    id: 'mapbox/streets-v11',	    
 	}).addTo(mapbox_handle);
 	
 	setTimeout(function(){ 
@@ -154,10 +153,10 @@ mapbox_merchantmap = function(lat, lng){
 			scrollWheelZoom:false,
 			//zoomControl:false,
 		 }).setView([lat,lng], mapbox_default_zoom );
-		
-		L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token='+mapbox_access_token, {		    
+				
+		L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token='+mapbox_access_token, {	    
 		    maxZoom: 18,
-		    id: 'mapbox.streets',		    
+		    id: 'mapbox/streets-v11',
 		}).addTo(mapbox_handle);
 		
 		mapbox_marker = L.marker([lat,lng], { icon : default_icon } ).addTo(mapbox_handle);
@@ -194,10 +193,10 @@ mapbox_direction = function(data){
 	});
 	
 	mapbox_handle.off();
-	
-	L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token='+mapbox_access_token, {		    
+		
+	L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token='+mapbox_access_token, {	
 	    maxZoom: 18,
-	    id: 'mapbox.streets',		    
+	    id: 'mapbox/streets-v11',
 	}).addTo(mapbox_handle);
 
 	bounds = [];
@@ -340,11 +339,11 @@ mapbox_select_address = function(){
 		scrollWheelZoom:false,		
 	 }).setView([lat,lng], mapbox_default_zoom );
 	
-	var url = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token='+mapbox_access_token;
+	var url  = 'https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token='+mapbox_access_token;
 	 
 	L.tileLayer(url, {		    
 	    maxZoom: 18,
-	    id: 'mapbox.streets',		    
+	    id: 'mapbox/streets-v11',    
 	}).addTo(mapbox_handle);
 	
 	mapbox_marker = L.marker([lat,lng], { draggable : true } ).addTo(mapbox_handle);
@@ -376,12 +375,12 @@ mapbox_delivery_location = function(div){
 	mapbox_delivery_accuracy = L.map(div,{ 
 		scrollWheelZoom:false,		
 	 }).setView([lat,lng], mapbox_default_zoom );
-	
-	var url = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token='+mapbox_access_token;
+		
+	var url  = 'https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token='+mapbox_access_token;
 	 
 	L.tileLayer(url, {		    
 	    maxZoom: 18,
-	    id: 'mapbox.streets',		    
+	    id: 'mapbox/streets-v11',
 	}).addTo(mapbox_delivery_accuracy);
 	
 	mapbox_delivery_accuracy_marker = L.marker([lat,lng], { draggable : true } ).addTo(mapbox_delivery_accuracy);
@@ -391,6 +390,22 @@ mapbox_delivery_location = function(div){
 	    $("#map_accurate_address_lat").val( mapbox_delivery_accuracy_marker.getLatLng().lat ) ;
 	    $("#map_accurate_address_lng").val( mapbox_delivery_accuracy_marker.getLatLng().lng ) ;
 	});
+	
+	
+	if (typeof address_list === "undefined" || address_list==null ) {
+		//
+	} else {
+		try {
+			address_book_id =  $("#address_book_id").val();
+			lat = address_list[address_book_id].lat;
+			lng = address_list[address_book_id].lng;					
+			mapbox_delivery_accuracy_marker.setLatLng([lat, lng]).update();
+			mapbox_delivery_accuracy.setView([lat, lng], 14);
+			return;		
+		} catch(err) {
+		  //
+		}
+	}
 	
 	mapbox_delivery_accuracy.locate({setView: true, maxZoom: 15});
 	

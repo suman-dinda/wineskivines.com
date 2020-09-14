@@ -204,44 +204,7 @@ CREATE TABLE IF NOT EXISTS ".$prefix."payment_order (
                 
         /*END 1.0.1*/
         
-        
-$stmt="CREATE TABLE IF NOT EXISTS ".$prefix."voucher (
-  `voucher_id` int(14) NOT NULL AUTO_INCREMENT,
-  `voucher_name` varchar(255) NOT NULL DEFAULT '',
-  `merchant_id` int(14) NOT NULL DEFAULT '0',
-  `number_of_voucher` int(14) NOT NULL DEFAULT '0',
-  `amount` float NOT NULL,
-  `voucher_type` varchar(100) NOT NULL DEFAULT 'fixed amount',
-  `status` varchar(100) NOT NULL DEFAULT '',
-  `date_created` varchar(50) NOT NULL DEFAULT '',
-  `date_modified` $date_default,
-  `ip_address` varchar(50) NOT NULL DEFAULT '',
-  PRIMARY KEY (`voucher_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;";        
-echo "Creating Table voucher..<br/>";	
-	    if ( !Yii::app()->functions->isTableExist("voucher") ){			
-			if ($DbExt->qry($stmt)){
-		        echo "(Done)<br/>";
-            } else echo "(Failed)<br/>";	
-		} else echo "Table voucher already exist.<br/>";         								        
-		
-$stmt="
-CREATE TABLE IF NOT EXISTS ".$prefix."voucher_list (
-  `voucher_id` int(14) NOT NULL AUTO_INCREMENT,
-  `voucher_code` varchar(50) NOT NULL DEFAULT '',
-  `status` varchar(50) CHARACTER SET latin1 NOT NULL DEFAULT 'unused',
-  `client_id` int(14) NOT NULL DEFAULT '0',
-  `date_used` varchar(50) NOT NULL DEFAULT '',
-  `order_id` int(14) NOT NULL DEFAULT '0'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-";        
-echo "Creating Table voucher_list..<br/>";	
-	    if ( !Yii::app()->functions->isTableExist("voucher_list") ){			
-			if ($DbExt->qry($stmt)){
-		        echo "(Done)<br/>";
-            } else echo "(Failed)<br/>";	
-		} else echo "Table voucher_list already exist.<br/>";         								        		
-				
+        								        						
 $stmt="
 CREATE TABLE IF NOT EXISTS ".$prefix."merchant_user (
   `merchant_user_id` int(14) NOT NULL AUTO_INCREMENT,
@@ -813,15 +776,7 @@ echo "(Done)<br/>";
         $this->alterTable('cooking_ref',$new_field);
         echo "<br/>";     
         
-        
-        $stmt_alter="
-        ALTER TABLE ".$table_prefix."languages CHANGE 
-        `language_code` `language_code` VARCHAR( 255 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT ''
-        ";
-        dump($stmt_alter);
-        $DbExt->qry($stmt_alter);
-        
-        
+                       
         $new_field=array(         
           'used_once'=>"int(1) NOT NULL DEFAULT '1'"          
         );	 
@@ -1478,8 +1433,8 @@ echo "(Done)<br/>";
 		`payment_intent` varchar(255) NOT NULL DEFAULT '',
 		`post_receive` text,
 		`webhooks_response` text,
-		`date_created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-		`post_receive_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+		`date_created` $date_default,
+		`post_receive_date` $date_default,
 		`ip_address` varchar(50) NOT NULL DEFAULT ''
 		) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 				
@@ -1503,10 +1458,148 @@ echo "(Done)<br/>";
 		$stmt="
 		ALTER TABLE ".$prefix."payment_order CHANGE `payment_type` `payment_type` 
         VARCHAR(100) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT ''; 
-		";
-		dump($stmt);
+		";		
 		$DbExt->qry($stmt);
 		/*END 5.2*/
+		
+		
+		/*5.4*/
+		$new_field=array( 		  		   
+		   'payment_customer_id'=>"varchar(255) NOT NULL DEFAULT ''",
+		   'social_id'=>"varchar(255) NOT NULL DEFAULT ''",
+		   'verify_code_requested'=>$date_default,
+		   'single_app_merchant_id'=>"int(14) NOT NULL DEFAULT '0'"
+		);
+		$this->alterTable('client',$new_field);
+				
+		$new_field=array( 		  		   
+		   'update_by_type'=>"varchar(255) NOT NULL DEFAULT ''",
+		   'update_by_id'=>"int(14) NOT NULL DEFAULT '0'",
+		   'update_by_name'=>"varchar(255) NOT NULL DEFAULT ''",
+		);
+		$this->alterTable('order_history',$new_field);
+		
+		$new_field=array( 		  		   
+		   'page_name_trans'=>"text",
+		   'content_trans'=>"text",
+		   'seo_title_trans'=>"text",
+		   'meta_description_trans'=>"text",
+		   'meta_keywords_trans'=>"text",
+		);
+		$this->alterTable('custom_page',$new_field);
+		
+		$new_field=array( 		  		   
+		   'distance'=>"varchar(100) NOT NULL DEFAULT ''",
+		   'cancel_reason'=>"text"		   
+		);
+		$this->alterTable('order',$new_field);
+		
+		$new_field=array( 		  		   
+		   'latitude'=>"varchar(255) NOT NULL DEFAULT ''",
+		   'longitude'=>"varchar(255) NOT NULL DEFAULT ''",
+		);
+		$this->alterTable('address_book',$new_field);
+		
+		$new_field=array( 		  		   
+		   'distance_unit'=>"varchar(20) NOT NULL DEFAULT 'mi'",
+		   'delivery_distance_covered'=>"float(14,2) NOT NULL DEFAULT '0.00'",
+		);
+		$this->alterTable('merchant',$new_field);
+		
+		$new_field=array( 		  		   
+		   'slug'=>"varchar(255) NOT NULL DEFAULT ''"		   
+		);
+		$this->alterTable('cuisine',$new_field);
+				
+		$this->alterTable('bookingtable',array(
+		  'request_cancel'=>"int(1) NOT NULL DEFAULT '0'"		   
+		));
+		
+		$this->alterTable('review',array(
+		  'as_anonymous'=>"varchar(1) NOT NULL DEFAULT '0'",	   
+		));
+		
+		$new_field=array( 		  		   
+		   'first_name'=>"varchar(255) NOT NULL DEFAULT ''",
+		   'last_name'=>"varchar(255) NOT NULL DEFAULT ''",
+		   'contact_email'=>"varchar(255) NOT NULL DEFAULT ''",
+		   'dinein_number_of_guest'=>"varchar(14) NOT NULL DEFAULT ''",
+		   'dinein_special_instruction'=>"varchar(255) NOT NULL DEFAULT ''",
+		   'dinein_table_number'=>"varchar(50) NOT NULL DEFAULT ''",
+		   'opt_contact_delivery'=>"int(1) NOT NULL DEFAULT '0'",
+		);
+		$this->alterTable('order_delivery_address',$new_field);
+		
+		$new_field=array( 		  		   
+		   'size_id'=>"int(14) NOT NULL DEFAULT '0'",
+		   'cat_id'=>"int(14) NOT NULL DEFAULT '0'",
+		);
+		$this->alterTable('order_details',$new_field);
+		
+		$stmt="		
+		CREATE TABLE IF NOT EXISTS ".$prefix."tags (
+		  `tag_id` bigint(20) NOT NULL,
+		  `tag_name` varchar(255) NOT NULL DEFAULT '',
+		  `slug` varchar(255) NOT NULL DEFAULT '',
+		  `description` text,
+		  `tag_name_trans` text,
+		  `description_trans` text,
+		  `date_created` $date_default,
+		  `ip_address` varchar(50) NOT NULL DEFAULT ''
+		) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+		
+		  ALTER TABLE ".$prefix."tags
+		  ADD PRIMARY KEY (`tag_id`);
+		  
+		  ALTER TABLE ".$prefix."tags
+		  MODIFY `tag_id` bigint(20) NOT NULL AUTO_INCREMENT;
+		";		
+		$DbExt->qry($stmt);
+		
+		$stmt="		
+		CREATE TABLE IF NOT EXISTS ".$prefix."opening_hours (
+		  `id` int(14) NOT NULL,
+		  `merchant_id` int(14) NOT NULL DEFAULT '0',
+		  `day` varchar(20) NOT NULL DEFAULT '',
+		  `status` varchar(100) NOT NULL DEFAULT 'open',
+		  `start_time` varchar(14) NOT NULL DEFAULT '',
+		  `end_time` varchar(14) NOT NULL DEFAULT '',
+		  `start_time_pm` varchar(14) NOT NULL DEFAULT '',
+		  `end_time_pm` varchar(14) NOT NULL DEFAULT ''
+		) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+				
+		ALTER TABLE ".$prefix."opening_hours
+		  ADD PRIMARY KEY (`id`),
+		  ADD KEY `merchant_id` (`merchant_id`),
+		  ADD KEY `day` (`day`),
+		  ADD KEY `status` (`status`),
+		  ADD KEY `start_time` (`start_time`),
+		  ADD KEY `end_time` (`end_time`),
+		  ADD KEY `start_time_pm` (`start_time_pm`),
+		  ADD KEY `end_time_pm` (`end_time_pm`);
+		  
+		  ALTER TABLE ".$prefix."opening_hours
+		  MODIFY `id` int(14) NOT NULL AUTO_INCREMENT;
+		";
+		$DbExt->qry($stmt);
+		
+		$stmt="			
+		CREATE TABLE IF NOT EXISTS ".$prefix."cuisine_merchant (
+		  `id` int(14) NOT NULL,
+		  `merchant_id` varchar(14) NOT NULL DEFAULT '0',
+		  `cuisine_id` varchar(14) NOT NULL DEFAULT '0'
+		) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+		
+		ALTER TABLE ".$prefix."cuisine_merchant
+		  ADD PRIMARY KEY (`id`),
+		  ADD KEY `merchant_id` (`merchant_id`),
+		  ADD KEY `cuisine_id` (`cuisine_id`);
+		  
+		  ALTER TABLE ".$prefix."cuisine_merchant
+		  MODIFY `id` int(14) NOT NULL AUTO_INCREMENT;
+		";
+		$DbExt->qry($stmt);
+		/*END 5.4*/
 		
 		/*ADD INDEX*/
 		/*MERCHANT TABLE*/
@@ -1754,11 +1847,6 @@ echo "(Done)<br/>";
 		$this->addIndex("subcategory_item","sub_item_name");
 		$this->addIndex("subcategory_item","status");
 		
-		/*voucher*/
-		$this->addIndex("voucher","voucher_name");
-		$this->addIndex("voucher","merchant_id");
-		$this->addIndex("voucher","voucher_type");
-		$this->addIndex("voucher","status");
 		
 		/*voucher_new*/
 		$this->addIndex("voucher_new","voucher_owner");
@@ -1779,20 +1867,12 @@ echo "(Done)<br/>";
 		/*UPDATE TEMPLATES*/
 		$this->actionUpdateTemplate();
 		
-		/*VIEW TABLES*/		
-		/*$stmt="
-		create OR REPLACE VIEW ".$prefix."view_ratings as
-		select 
-		merchant_id,
-		SUM(ratings)/COUNT(*) AS ratings
-		from
-		".$prefix."rating
-		group by merchant_id
-		";*/
+		/*VIEW TABLES*/				
 		$stmt="
 		create OR REPLACE VIEW ".$prefix."view_ratings as
 		select 
 		merchant_id,
+		COUNT(*) AS review_count,
 		SUM(rating)/COUNT(*) AS ratings
 		from
 		".$prefix."review
@@ -1808,8 +1888,10 @@ echo "(Done)<br/>";
 		
 		$stmt="
 		create OR REPLACE VIEW ".$prefix."view_merchant as
-		select a.*,
-		f.ratings
+		select a.*,		
+		IFNULL(f.ratings,0) as ratings,
+		IFNULL(f.review_count,0) as review_count,
+		IFNULL(f.review_count,0) as ratings_votes
 		
 		from ".$prefix."merchant a
 		
@@ -1884,6 +1966,37 @@ echo "(Done)<br/>";
 		echo "Creating Table view_location_rate..<br/>";	
 		$DbExt->qry($stmt);
 		echo "(Done)<br/>";				
+		
+		
+		/*5.4 view*/
+		$stmt="
+		CREATE OR REPLACE VIEW ".$prefix."view_cuisine_merchant as
+		select 
+		a.merchant_id,
+		a.cuisine_id,
+		b.cuisine_name,
+		b.cuisine_name_trans,
+		b.status,
+		b.featured_image,
+		c.restaurant_name
+		
+		from ".$prefix."cuisine_merchant a
+		left join ".$prefix."cuisine b
+		on
+		a.cuisine_id = b.cuisine_id	
+		
+		left join ".$prefix."merchant c
+		on
+		a.merchant_id = c.merchant_id
+		
+		where 
+		a.merchant_id = c.merchant_id
+		";
+		echo "Creating Table view_cuisine_merchant..<br/>";	
+		$DbExt->qry($stmt);
+		echo "(Done)<br/>";				
+		
+		/*END 5.4 view*/
 		        
 		echo "<br/>";
 		echo "FINISH UPDATE(s)";

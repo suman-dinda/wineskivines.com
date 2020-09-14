@@ -64,7 +64,7 @@
 	  </div> <!--row-->
 	  
 	  <div class="form-group">
-	     <label for=""><?php echo translate("Notes")?></label>
+	     <label for=""><?php echo "Purchase Receipt Number"?></label>
 	     <?php 
 	     echo CHtml::textField('notes',
 	     isset($first_row['notes'])?$first_row['notes']:''

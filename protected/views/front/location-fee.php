@@ -41,6 +41,7 @@ jQuery(document).ready(function() {
 </script>
 
 <?php else :?>
+<p><?php echo t("Delivery fee table is not available for this merchant")?></p>
 <?php endif;?>
 
 <a class="btn btn-primary" href="javascript:close_fb();"><?php echo t("Close")?></a>

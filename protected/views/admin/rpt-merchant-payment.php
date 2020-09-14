@@ -44,8 +44,8 @@ $order_stats=paymentStatus();
 
 <input type="hidden" name="action" id="action" value="rptMerchantPayment">
 <input type="hidden" name="tbl" id="tbl" value="item">
-<table id="table_list" class="uk-table uk-table-hover uk-table-striped uk-table-condensed">
-  <!--<caption>Merchant Payment</caption>-->
+<input type="hidden" name="server_side" id="server_side" value="1">
+<table id="table_list" class="uk-table uk-table-hover uk-table-striped uk-table-condensed">  
    <thead>
         <tr> 
             <th width="2%"><?php echo Yii::t('default',"TransID")?></th>

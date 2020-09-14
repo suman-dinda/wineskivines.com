@@ -3,21 +3,50 @@
 
 <?php
 $do=isset($_GET['do'])?$_GET['do']:'';
+$lat ='';$lng='';
 ?>
 
 <?php if ( $do==="add" && $tabs==2 ) :?>
+<?php 
+ScriptManager::includeMappLibrary();
+$provider = FunctionsV3::getMapProvider();
+$map_provider = $provider['provider'];
+
+$zoom = 15;
+$set_data = array('latitude'=>'#latitude','longitude'=>'#longitude');
+
+$lat = isset($data['latitude'])?$data['latitude']:'';
+$lng = isset($data['longitude'])?$data['longitude']:'';
+
+$cs = Yii::app()->getClientScript();
+$cs->registerScriptFile(Yii::app()->baseUrl."/assets/js/map_wrapper.js",CClientScript::POS_END); 
+$cs->registerScript(
+  'init_map',
+  'fill_map("'.$map_provider.'","map_addressbook","'.$lat.'","'.$lng.'","'.$zoom.'",'.json_encode($set_data).');',
+  CClientScript::POS_END 
+);
+?>
 
 <form id="frm-addressbook" class="frm-addressbook" onsubmit="return false;">
 <?php echo CHtml::hiddenField('action','addAddressBook')?>
 <?php echo CHtml::hiddenField('currentController','store')?>  
 <?php if (isset($_GET['id'])):?>
-<?php echo CHtml::hiddenField('id',$_GET['id'])?>
+<?php 
+if(!is_array($data)){	
+	$this->redirect(array('store/profile?tab=2'));
+	Yii::app()->end;
+}
+echo CHtml::hiddenField('id', isset($_GET['id'])?$_GET['id']:'' );
+?>
 <?php else :?>
-<?php /*echo CHtml::hiddenField('redirect', FunctionsV3::getHostURL().Yii::app()->createUrl('store/profile',array(
-  'tab'=>2,
-  'do'=>'add'
-)) )*/?>
 <?php endif;?>
+
+<?php 
+echo CHtml::hiddenField('latitude',$lat);
+echo CHtml::hiddenField('longitude',$lng);
+?>
+
+<div id="map_addressbook" class="map_addressbook"></div>
 
 <div class="row bottom10">
   <div class="col-md-6">

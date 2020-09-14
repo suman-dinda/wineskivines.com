@@ -9,17 +9,23 @@ if (FunctionsV3::isMerchantPaymentToUseAdmin($merchant_id)){
 	$cod_change_required=getOption($merchant_id,'cod_change_required_merchant');
 }
 echo CHtml::hiddenField('cod_change_required',$cod_change_required);
+
+$opt_contact_delivery = isset($opt_contact_delivery)?$opt_contact_delivery:0;
+if($opt_contact_delivery==1){
+	$offline_payment = FunctionsV3::getOfflinePaymentList();
+	foreach ($offline_payment as $offline_key=>$offline_val) {
+		if(array_key_exists($offline_key,(array)$payment_list)){
+			unset($payment_list[$offline_key]);
+		}
+	}	
+}
+
 ?>
 
 <?php if (is_array($payment_list) && count($payment_list)>=1):?>
 <?php foreach ($payment_list as $key => $val):?>
 
-  <?php   
-  /*if ($key=="ip8" || $key=="mol" || $key=="mri"){
-  	  continue;
-  }*/  
-  ?>
-
+  
   <div class="row top10">
     <div class="col-md-9">
        <?php echo CHtml::radioButton('payment_opt',false,
@@ -228,7 +234,7 @@ echo CHtml::hiddenField('cod_change_required',$cod_change_required);
     <?php echo CHtml::textField('order_change','',array(
       'placeholder'=>t("change? For how much?"),
       'style'=>"width:200px;",
-      'class'=>"grey-fields rounded"
+      'class'=>"grey-fields rounded numeric_only"
      ))?>
   </div>
   <?php endif;?>

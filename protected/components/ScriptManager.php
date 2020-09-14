@@ -4,13 +4,9 @@ class ScriptManager
 	public static function RegisterAllJSFile($config=array())
 	{				
 		$baseUrl = Yii::app()->baseUrl; 
-        $cs = Yii::app()->getClientScript();
-        //$cs->registerScriptFile('//code.jquery.com/jquery-1.10.2.min.js',CClientScript::POS_END);            
+        $cs = Yii::app()->getClientScript();        
         $cs->registerScriptFile($baseUrl."/assets/vendor/jquery-1.10.2.min.js",CClientScript::POS_END);            
-        
-        /*$cs->registerScriptFile("//code.jquery.com/ui/1.10.3/jquery-ui.js"
-		,CClientScript::POS_END); */
-        
+                
         $cs->registerScriptFile($baseUrl."/assets/vendor/jquery-ui-1.11.4/jquery-ui.min.js",CClientScript::POS_END);            
         
         $js_lang=Yii::app()->functions->jsLanguageAdmin();
@@ -30,12 +26,7 @@ class ScriptManager
 		  CClientScript::POS_HEAD
 		);
 
-		/*$cs->registerScript(
-		  'ajax_url',
-		  "var ajax_url ='".Yii::app()->request->baseUrl."/admin/ajax' ",
-		  CClientScript::POS_HEAD
-		);*/
-		
+	
 		$cs->registerScript(
 		  'ajax_url',
 		  "var ajax_url ='".Yii::app()->request->baseUrl."/ajax' ",
@@ -71,18 +62,7 @@ class ScriptManager
 		  "var upload_url ='".Yii::app()->request->baseUrl."/upload' ",
 		  CClientScript::POS_HEAD
 		);
-		
-		$cs->registerScript(
-		  'captcha_site_key',
-		  "var captcha_site_key ='".getOptionA('captcha_site_key')."' ",
-		  CClientScript::POS_HEAD
-		);
-		
-		$cs->registerScript(
-		  'map_marker',
-		  "var map_marker ='".FunctionsV3::getMapMarker()."' ",
-		  CClientScript::POS_HEAD
-		);		
+				
 		
 		$cs->registerScriptFile($baseUrl."/assets/vendor/DataTables/jquery.dataTables.min.js"
 		,CClientScript::POS_END); 
@@ -104,21 +84,7 @@ class ScriptManager
 		,CClientScript::POS_END); 
 		$cs->registerScriptFile($baseUrl."/assets/vendor/chosen/chosen.jquery.min.js"
 		,CClientScript::POS_END); 
-		
-		$cs->registerScriptFile($baseUrl."/assets/vendor/markercluster.js"
-		,CClientScript::POS_END); 
-									
-		if(!empty($config['google_key'])){
-			$cs->registerScriptFile("//maps.googleapis.com/maps/api/js?v=3.exp&libraries=places&key=".$config['google_key']
-			,CClientScript::POS_END); 
-		} else {
-			$cs->registerScriptFile("//maps.googleapis.com/maps/api/js?v=3.exp&libraries=places"
-		    ,CClientScript::POS_END); 
-		}
-		
-		$cs->registerScriptFile($baseUrl."/assets/vendor/jquery.geocomplete.min.js"
-		,CClientScript::POS_END); 
-		
+				
 		$cs->registerScriptFile($baseUrl."/assets/vendor/jquery.printelement.js"
 		,CClientScript::POS_END); 
 		$cs->registerScriptFile($baseUrl."/assets/vendor/fancybox/source/jquery.fancybox.js?ver=1"
@@ -136,10 +102,7 @@ class ScriptManager
 		$cs->registerScriptFile($baseUrl."/assets/vendor/intel/build/js/intlTelInput.js?ver=2.1.5"
 		,CClientScript::POS_END); 
 				
-						
-		/*$cs->registerScriptFile("//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"
-		,CClientScript::POS_END); */
-		
+								
 		$cs->registerScriptFile($baseUrl."/assets/vendor/bootstrap/js/bootstrap.min.js"
 		,CClientScript::POS_END); 
 		
@@ -158,8 +121,6 @@ class ScriptManager
 		$cs->registerScriptFile($baseUrl."/assets/vendor/waypoints/shortcuts/infinite.min.js"
 		,CClientScript::POS_END); 
 		
-		$cs->registerScriptFile($baseUrl."/assets/vendor/gmaps.js"
-		,CClientScript::POS_END); 
 		
 		$cs->registerScriptFile($baseUrl."/assets/vendor/noty-2.3.7/js/noty/packaged/jquery.noty.packaged.min.js"
 		,CClientScript::POS_END); 
@@ -183,18 +144,7 @@ class ScriptManager
 			$cs->registerScriptFile($baseUrl."/assets/vendor/timepicker.co/jquery.timepicker.js"
 			,CClientScript::POS_END);
 		}
-		
-		$cs->registerScriptFile($baseUrl."/assets/vendor/typehead/bootstrap3-typeahead.min.js"
-		,CClientScript::POS_END); 
-				
-		
-		/*LEAFLET*/				
-		if($config['map_provider']=="mapbox"){
-			$cs->registerScriptFile($baseUrl."/assets/vendor/leaflet/leaflet.js"
-			,CClientScript::POS_END); 					
-		}	
-		/*LEAFLET*/
-		
+							
 		$cs->registerScriptFile($baseUrl."/assets/vendor/jquery-cookie.js"
 		,CClientScript::POS_END); 
 		
@@ -203,9 +153,7 @@ class ScriptManager
 		
 		$cs->registerScriptFile($baseUrl."/assets/js/store-v3.js?ver=3"
 		,CClientScript::POS_END); 
-		
-		$cs->registerScriptFile($baseUrl."/assets/js/k_mapbox.js?ver=1.0"
-		,CClientScript::POS_END); 
+				
 	}
 	
 	public static function registerAllCSSFiles($config=array())
@@ -230,12 +178,10 @@ class ScriptManager
 		$cs->registerCssFile($baseUrl."/assets/vendor/intel/build/css/intlTelInput.css");
 		$cs->registerCssFile($baseUrl."/assets/vendor/rupee/rupyaINR.css");			
 		
-		//$cs->registerCssFile('//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css');	
 		$cs->registerCssFile($baseUrl."/assets/vendor/bootstrap/css/bootstrap.min.css");		
 				
 		$cs->registerCssFile($baseUrl."/assets/vendor/raty/jquery.raty.css");	
-		
-		//$cs->registerCssFile("//code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css");
+				
 		$cs->registerCssFile($baseUrl."/assets/vendor/ionicons-2.0.1/css/ionicons.min.css");	
 		
 		$cs->registerCssFile("//cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.9.4/css/bootstrap-select.min.css");	
@@ -246,14 +192,7 @@ class ScriptManager
 		
 		$cs->registerCssFile($baseUrl."/assets/vendor/EasyAutocomplete/easy-autocomplete.min.css");		
 		
-		/*LEAFLET*/
-		if($config['map_provider']=="mapbox"){
-			$cs->registerCssFile($baseUrl."/assets/vendor/leaflet/leaflet.css");			
-		}
-		/*LEAFLET*/
-				
-		//$website_use_time_picker = Yii::app()->functions->getOptionAdmin('website_use_time_picker');  		
-		//if (Yii::app()->functions->getOptionAdmin('theme_time_pick')==2 || $website_use_time_picker==2){
+								
 		if($config['theme_time_pick']==2 || $config['website_use_time_picker']==2){
 		   $cs->registerCssFile($baseUrl."/assets/vendor/timepicker.co/jquery.timepicker.min.css");
 		}
@@ -282,6 +221,93 @@ class ScriptManager
         }
         echo CHtml::hiddenField('disabled_cart_sticky',getOptionA('disabled_cart_sticky'));
 		echo "\n";
+	}
+	
+	public static function includeMappLibrary($include_geocoder=false)
+	{
+		$provider = FunctionsV3::getMapProvider();		
+		$api = isset($provider['token'])?$provider['token']:'';
+		$map_api = isset($provider['map_api'])?$provider['map_api']:'';		
+		$map_provider = isset($provider['provider'])?$provider['provider']:'';		
+		
+		$cs = Yii::app()->getClientScript();
+		$baseUrl = Yii::app()->baseUrl; 
+		
+		$cs->registerScript(
+		  'map_provider',
+		  "var map_provider = '$map_provider';",
+		  CClientScript::POS_HEAD
+		);
+		$cs->registerScript(
+		  'map_apikey',
+		  "var map_apikey = '$map_api';",
+		  CClientScript::POS_HEAD
+		);				
+		
+		$cs->registerScript(
+		  'map_marker',
+		  "var map_marker ='".FunctionsV3::getMapMarker()."'; ",
+		  CClientScript::POS_HEAD
+		);	
+				
+		switch ($provider['provider']) {
+			case "google.maps":
+				$cs->registerScriptFile($baseUrl."/assets/vendor/markercluster.js"
+		         ,CClientScript::POS_END  ); 
+		        $cs->registerScriptFile("https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places&key=".$map_api,CClientScript::POS_HEAD); 
+		        
+		        $cs->registerScriptFile($baseUrl."/assets/vendor/jquery.geocomplete.min.js"
+		        ,CClientScript::POS_END);
+		        
+		        $cs->registerScriptFile($baseUrl."/assets/vendor/gmaps.js"
+		        ,CClientScript::POS_END); 
+		        
+				break;
+				
+			case "mapbox":
+				$cs->registerScript(
+				  'mapbox_access_token',
+				  "var mapbox_access_token = '$map_api';",
+				  CClientScript::POS_HEAD
+				);		
+				
+				$mapbox_default_zoom = getOptionA('mapbox_default_zoom');
+				if($mapbox_default_zoom<=0 || empty($mapbox_default_zoom)){
+					$mapbox_default_zoom=13;
+				}
+				$cs->registerScript(
+				  'mapbox_default_zoom',
+				 "var mapbox_default_zoom='$mapbox_default_zoom';",
+				  CClientScript::POS_HEAD
+				);		
+				
+				$cs->registerCssFile($baseUrl."/assets/vendor/leaflet/leaflet.css");
+				$cs->registerScriptFile($baseUrl."/assets/vendor/leaflet/leaflet.js"
+			    ,CClientScript::POS_END); 					
+			    $cs->registerScriptFile($baseUrl."/assets/js/k_mapbox.js?ver=1.0"
+		        ,CClientScript::POS_END); 
+		        
+		        if($include_geocoder){
+		        	$cs->registerCssFile($baseUrl."/assets/vendor/leaflet/plugin/routing/leaflet-routing-machine.css");
+			        $cs->registerScriptFile($baseUrl."/assets/vendor/leaflet/plugin/routing/leaflet-routing-machine.min.js"
+			        ,CClientScript::POS_END); 	
+			        
+			        $cs->registerCssFile($baseUrl."/assets/vendor/leaflet/plugin/geocoder/mapbox-gl-geocoder.css");
+					$cs->registerScriptFile($baseUrl."/assets/vendor/leaflet/plugin/geocoder/mapbox-gl-geocoder.min.js"
+					,CClientScript::POS_END); 	
+		        }
+		        
+				break;
+		}		
+	}
+	
+	public static function includeTypeHead()
+	{
+		$cs = Yii::app()->getClientScript();
+		$baseUrl = Yii::app()->baseUrl; 
+		$cs->registerScriptFile($baseUrl."/assets/vendor/typeahead/jquery.typeahead.min.js"
+		         ,CClientScript::POS_END  ); 
+		$cs->registerCssFile($baseUrl."/assets/vendor/typeahead/jquery.typeahead.min.css");         
 	}
 	
 } /*END CLASS*/

@@ -488,10 +488,11 @@ text-align:center;
 text-decoration:line-through;
 color:#FF0000;
 }
-.sms_credit_wrap{
-position:absolute;
-right:100px;
-top:8px;
+.sms_credit_wrap,
+.fax_credit_wrap
+{
+display:inline-block;
+padding-right: 10px;
 }
 
 .user-access-list i{
@@ -753,11 +754,6 @@ max-width: 20px;
 display:block;
 }
 
-.fax_credit_wrap{
-position:absolute;
-right:220px;
-top:8px;
-}
 
 .receipt-wrap{
 position:relative;
@@ -1285,4 +1281,8 @@ padding-left: 54px;
 #forms_validate_card .format_as_card_number.valid.discover{
     background-position:2px -331px,295px -87px
 }
-
+.test_map{
+border:1px solid #999;
+height:300px;
+width:500px;
+}

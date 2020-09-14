@@ -12,6 +12,7 @@
 <input type="hidden" name="clear_tbl"  id="clear_tbl" value="clear_tbl">
 <input type="hidden" name="whereid"  id="whereid" value="merchant_id">
 <input type="hidden" name="slug" id="slug" value="sponsoredMerchantList">
+<input type="hidden" name="server_side" id="server_side" value="1">
 <table id="table_list" class="uk-table uk-table-hover uk-table-striped uk-table-condensed">
   <caption><?php echo Yii::t("default","Merchant List")?></caption>
    <thead>

@@ -275,8 +275,8 @@ class Widgets extends CApplicationComponent
 		$list=FunctionsV3::getEnabledLanguage();				
 		if ($show_language==""):
 		if (is_array($list) && count($list)>=1):
-		?>
-		<div data-uk-dropdown="{mode:'click'}" class="uk-button-dropdown language-wrapper">
+		?>		
+		<div data-uk-dropdown="{mode:'click'}" class="uk-button-dropdown">
 		  <button class="uk-button uk-button-success">		     
 		     <!--<i class="fa fa-globe" style="padding-right:5px;"></i>-->
 		     <span style="padding-right:5px;" ><?php echo Yii::app()->language?></span>
@@ -293,7 +293,7 @@ class Widgets extends CApplicationComponent
 		   <?php endforeach;?>  
 		   </ul>
 		  </div>
-		</div>
+		</div>		
 		<?php
 		endif;
 		endif;
@@ -1607,7 +1607,7 @@ class Widgets extends CApplicationComponent
 	public static function FaxBalance()
 	{
 		$enabled=Yii::app()->functions->getOptionAdmin("fax_enabled");
-		if ( $enabled==2):
+		if ( $enabled!=2):
 		?>
 		<div class="fax_credit_wrap">
 		<p><?php echo Yii::t("default","Fax Credits")?>: <?php echo Yii::app()->functions->getMerchantFaxCredit(Yii::app()->functions->getMerchantID());?></p>
@@ -1731,25 +1731,7 @@ class Widgets extends CApplicationComponent
 			$temporary_address=Yii::app()->functions->adminCountry();
 		}		
 		
-		$lat = ''; $lng ='';
-		/*if($res=Yii::app()->functions->geodecodeAddress($temporary_address)){
-			$lat = $res['lat'];
-			$lng = $res['long'];
-		}
-		
-		$cs = Yii::app()->getClientScript();
-		$cs->registerScript(
-		  'temporary_address_lat',
-		 "var temporary_address_lat='$lat';",
-		  CClientScript::POS_HEAD
-		);
-		$cs->registerScript(
-		  'temporary_address_lng',
-		 "var temporary_address_lng='$lng';",
-		  CClientScript::POS_HEAD
-		);
-		
-		*/
+		$lat = ''; $lng ='';		
 		echo CHtml::hiddenField('map_address_lat');
 		echo CHtml::hiddenField('map_address_lng');
 		?>							

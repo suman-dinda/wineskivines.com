@@ -35,7 +35,7 @@ class CronController extends CController
 			if(isset($_GET['debug'])){echo 'cron running';}
 			
 			$this->ProcessBroacast();
-			sleep(1); // Cron job code for demonstration
+			//sleep(1); // Cron job code for demonstration
 	
 			cronHelper::unlock();
 	    } else {	    	

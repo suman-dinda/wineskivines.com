@@ -1,7 +1,6 @@
 <?php
 $this->renderPartial('/front/banner-receipt',array(
-   'h1'=>t("Profile"),
-   //'h1'=>Yii::app()->functions->getClientFullName(),
+   'h1'=>t("Profile"),   
    'sub_text'=>t("Manage your profile,address book, credit card and more")
 ));
 echo CHtml::hiddenField('mobile_country_code',Yii::app()->functions->getAdminCountrySet(true));
@@ -27,9 +26,11 @@ echo CHtml::hiddenField('mobile_country_code',Yii::app()->functions->getAdminCou
        <span><?php echo t("Order History")?></span>
        </li>
        
+       <?php if($booking_disabled!=2):?>
        <li ><i class="ion-ios-bookmarks-outline <?php echo $tabs==3?"active":''?>"></i> 
        <span><?php echo t("Booking History")?></span>
        </li>
+       <?php endif;?>
        
        <li ><i class="ion-android-favorite-outline"></i> 
        <span><?php echo t("Favorites")?></span>
@@ -60,7 +61,7 @@ echo CHtml::hiddenField('mobile_country_code',Yii::app()->functions->getAdminCou
          	
          	$country_id=getOptionA('location_default_country');				
          	$citys='';$areas='';
-         	if ($datas = FunctionsV3::getAddressByLocation( isset($_GET['id'])?$_GET['id']:'' )){         		
+         	if ($datas = FunctionsV3::getAddressByLocation( isset($_GET['id'])?(integer)$_GET['id']:'' )){         		
          		$citys=FunctionsV3::ListCityList($datas['state_id']);
          		$areas=FunctionsV3::AreaList($datas['city_id']);
          		$country_id = $datas['country_id'];
@@ -76,9 +77,13 @@ echo CHtml::hiddenField('mobile_country_code',Yii::app()->functions->getAdminCou
 	           'areas'=>$areas
 	         ));
          } else {
+         	 $resp_address = Yii::app()->functions->getAddressBookByID( isset($_GET['id'])?(integer)$_GET['id']:'' );
+         	 if($resp_address){
+         	    $resp_address = Yii::app()->request->stripSlashes($resp_address);
+         	 }
 	         $this->renderPartial('/front/address-book',array(
 	           'client_id'=>Yii::app()->functions->getClientId(),
-	           'data'=>Yii::app()->functions->getAddressBookByID( isset($_GET['id'])?$_GET['id']:'' ),
+	           'data'=>$resp_address,
 	           'tabs'=>$tabs,	           
 	         ));
          }
@@ -102,11 +107,18 @@ echo CHtml::hiddenField('mobile_country_code',Yii::app()->functions->getAdminCou
                 
        </li>
        
+       
+       <?php if($booking_disabled!=2):?>
        <li>
         <?php $this->renderPartial('/front/booking-history',array(           
-           'data'=>FunctionsV3::getBooking( Yii::app()->functions->getClientId() )
+           'data'=>FunctionsV3::getBooking( Yii::app()->functions->getClientId() ),
+           'booking_cancel_days'=>getOptionA('booking_cancel_days'),
+           'booking_cancel_hours'=>getOptionA('booking_cancel_hours'),
+           'booking_cancel_minutes'=>getOptionA('booking_cancel_minutes'),
+           'booking_stats'=>bookingStatus()
          ));?>
        </li>
+       <?php endif;?>
        
        <li>
         <?php $this->renderPartial('/front/favorites-list',array(           

@@ -710,7 +710,7 @@
 	   	});
 	   	   	
 	   	$( document ).on( "change", ".supplier_id", function() {
-			supplier_id = parseInt($(this).val());
+			var supplier_id = parseInt($(this).val());
 			if(supplier_id>0){
 				$(".autofill_item").removeClass("disabled");
 			} else {

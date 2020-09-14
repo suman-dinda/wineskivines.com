@@ -1,15 +1,15 @@
 <?php
 unset($_SESSION['pts_earn']);
 unset($_SESSION['pts_redeem_amt']);
+unset($_SESSION['kr_delivery_options']['opt_contact_delivery']);
+unset($_SESSION['checkout_resp_geocode']);
 
 $this->renderPartial('/front/banner-receipt',array(
    'h1'=>t("Thank You"),
    'sub_text'=>t("Your order has been placed.")
 ));
 
-$ok=false;
-//$data='';
-//if ( $data=Yii::app()->functions->getOrder2($_GET['id'])){				
+$ok=false;			
 if (is_array($data) && count($data)>=1){
 	$merchant_id=$data['merchant_id'];
 	$json_details=!empty($data['json_details'])?json_decode($data['json_details'],true):false;
@@ -54,6 +54,7 @@ unset($_SESSION['kr_merchant_id']);
 unset($_SESSION['voucher_code']);
 unset($_SESSION['less_voucher']);
 unset($_SESSION['shipping_fee']);
+unset($_SESSION['shipping_distance']);
 
 $print=array();
 
@@ -479,7 +480,7 @@ $transaction_type=$data['trans_type'];
 		       <tr>
 		         <td><?php echo t("Table number")?></td>
 		         <td class="text-right">
-		         <?php echo $data['dinein_table_number']>0?$data['dinein_table_number']:''?>
+		         <?php echo isset($data['dinein_table_number'])?$data['dinein_table_number']:'';?>
 		         </td>
 		       </tr>  
 		       <tr>
@@ -495,7 +496,7 @@ $transaction_type=$data['trans_type'];
 				);
 				$print[]=array(
 				  'label'=>t("Table number"),
-				  'value'=>$data['dinein_table_number']>0?$data['dinein_table_number']:''
+				  'value'=>isset($data['dinein_table_number'])?$data['dinein_table_number']:''
 				);
 				$print[]=array(
 				  'label'=>t("Special instructions"),
@@ -505,6 +506,19 @@ $transaction_type=$data['trans_type'];
 			   <?php endif;?>
 		       
 	       
+	       <?php endif;?>
+	       
+	       <?php if($transaction_type=="delivery" && $data['opt_contact_delivery']==1):?>
+	       <tr>
+	        <td><?php echo t("Delivery options")?></td>
+	        <td class="text-right"><?php echo t("Leave order at the door or gate")?></td>
+	       </tr>
+	       <?php 
+	       $print[]=array(
+			  'label'=>t("Delivery options"),
+			  'value'=>t("Leave order at the door or gate")
+			);
+	       ?>
 	       <?php endif;?>
 	       
 	       <tr>
@@ -547,8 +561,6 @@ $to=isset($data['email_address'])?$data['email_address']:'';
 if (!isset($_SESSION['kr_receipt'])){
 	$_SESSION['kr_receipt']='';
 }
-
-/*dump($receipt);*/
 
 if (!in_array($data['order_id'],(array)$_SESSION['kr_receipt'])){
 	if ($order_ok==true){		

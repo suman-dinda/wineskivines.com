@@ -66,11 +66,6 @@ class ScriptManagerCompress
 		  CClientScript::POS_HEAD
 		);
 		
-		$cs->registerScript(
-		  'captcha_site_key',
-		  "var captcha_site_key ='".getOptionA('captcha_site_key')."' ",
-		  CClientScript::POS_HEAD
-		);
 		
 		$cs->registerScript(
 		  'map_marker',

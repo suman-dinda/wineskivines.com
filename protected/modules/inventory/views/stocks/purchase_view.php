@@ -43,7 +43,7 @@ $percent =  (float) ($received/$total_qty)*100;
 	<p class="mb-0"><?php echo $data[0]['supplier_name']?></p>
 	
 	<?php if(!empty($data[0]['notes'])):?>
-	<p class="mb-0 pt-4"><b><?php echo translate("Notes")?></b></p>
+	<p class="mb-0 pt-4"><b><?php echo "Purchase Receipt Number"?></b></p>
 	<p class="mb-0"><?php echo $data[0]['notes']?></p>
 	<?php endif;?>
 	

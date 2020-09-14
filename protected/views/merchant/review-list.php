@@ -10,8 +10,8 @@
 <input type="hidden" name="clear_tbl"  id="clear_tbl" value="clear_tbl">
 <input type="hidden" name="whereid"  id="whereid" value="id">
 <input type="hidden" name="slug" id="slug" value="review">
-<table id="table_list" class="uk-table uk-table-hover uk-table-striped uk-table-condensed">
-  <!--<caption>Merchant List</caption>-->
+<input type="hidden" name="server_side" id="server_side" value="1">	
+<table id="table_list" class="uk-table uk-table-hover uk-table-striped uk-table-condensed">  
    <thead>
         <tr>			
 			 <th width="5%"><?php echo Yii::t('default',"customer")?></th>

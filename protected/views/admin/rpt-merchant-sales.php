@@ -54,8 +54,8 @@ $order_stats=Yii::app()->functions->orderStatusList2(false);
 
 <input type="hidden" name="action" id="action" value="rptAdminSalesRpt">
 <input type="hidden" name="tbl" id="tbl" value="item">
-<table id="table_list" class="uk-table uk-table-hover uk-table-striped uk-table-condensed">
-  <!--<caption>Merchant List</caption>-->
+<input type="hidden" name="server_side" id="server_side" value="1">
+<table id="table_list" class="uk-table uk-table-hover uk-table-striped uk-table-condensed">  
    <thead>
         <tr> 
             <th width="2%"><?php echo Yii::t('default',"Ref#")?></th>
@@ -70,8 +70,7 @@ $order_stats=Yii::app()->functions->orderStatusList2(false);
             <th width="3%"><?php echo Yii::t('default',"Total W/Tax")?></th>
             <th width="3%"><?php echo Yii::t('default',"Status")?></th>
             <th width="3%"><?php echo Yii::t('default',"Platform")?></th>
-            <th width="3%"><?php echo Yii::t('default',"Date")?></th>
-            <!--<th width="3%"></th>-->
+            <th width="3%"><?php echo Yii::t('default',"Date")?></th>            
         </tr>
     </thead>
     <tbody>    

@@ -1,10 +1,4 @@
 <?php
-$min_fees=FunctionsV3::getMinOrderByTableRates($merchant_id,
-   $distance,
-   $distance_type_orig,
-   $val['minimum_order']
-);
-
 $show_delivery_info=false;
 if($val['service']==1 || $val['service']==2  || $val['service']==4  || $val['service']==5 ){
 	$show_delivery_info=true;
@@ -22,7 +16,7 @@ if($val['service']==1 || $val['service']==2  || $val['service']==4  || $val['ser
         <?php endif;?>
 
         <!--<a href="<?php echo Yii::app()->createUrl('store/menu/merchant/'.$val['restaurant_slug'])?>" >-->
-        <a href="<?php echo Yii::app()->createUrl("/menu-". trim($val['restaurant_slug']))?>">
+        <a href="<?php echo Yii::app()->createUrl("/menu/". trim($val['restaurant_slug']))?>">
         <img class="logo-medium"src="<?php echo FunctionsV3::getMerchantLogo($merchant_id);?>">
         </a>
         
@@ -32,7 +26,9 @@ if($val['service']==1 || $val['service']==2  || $val['service']==4  || $val['ser
         <div class="mytable">
           <div class="mycol a">
              <div class="rating-stars" data-score="<?php echo $ratings['ratings']?>"></div>   
+             <?php if(is_array($ratings) && count($ratings)>=1):?>
              <p><?php echo $ratings['votes']." ".t("Reviews")?></p>
+             <?php endif;?>
           </div>
           <?php if($show_delivery_info):?>
           <div class="mycol b">
@@ -64,24 +60,24 @@ if($val['service']==1 || $val['service']==2  || $val['service']==4  || $val['ser
         <p>
         <?php 
         if(!$search_by_location){
-	        if ($distance){
-	        	echo t("Distance").": ".number_format($distance,1)." $distance_type";
-	        } else echo  t("Distance").": ".t("not available");
+	        echo Yii::t("default","Distance : [distance]",array(
+	          '[distance]'=>$distance
+	        ));
         }
         ?>
         </p>
         
-        <?php  if($show_delivery_info):// if($val['service']!=3):?>
-        <p><?php echo t("Delivery Est")?>: <?php echo FunctionsV3::getDeliveryEstimation($merchant_id)?></p>
+        <?php  if($show_delivery_info):?>
+        <p><?php echo t("Delivery Est")?>: <?php echo !empty($val['delivery_estimation'])?$val['delivery_estimation']:t("not available")?></p>
         <?php endif;?>
         
         <p>
-        <?php 
-        //if($val['service']!=3){
+        <?php         
         if($show_delivery_info){
-	        if (!empty($merchant_delivery_distance)){
-	        	//echo t("Delivery Distance").": ".$merchant_delivery_distance." $distance_type_orig";
-	        	echo t("Delivery Distance").": ".$merchant_delivery_distance." ",t($distance_type_orig);
+	        if($distance_covered>0){
+	        	echo Yii::t("default","Delivery Distance : [distance]",array(
+	        	  '[distance]'=>MapsWrapper::prettyDistance($distance_covered,$unit_pretty)
+	        	));
 	        } else echo  t("Delivery Distance").": ".t("not available");
         }
         ?>
@@ -108,7 +104,7 @@ if($val['service']==1 || $val['service']==2  || $val['service']==4  || $val['ser
         
         <?php echo FunctionsV3::displayServicesList($val['service'])?>          
             
-        <a href="<?php echo Yii::app()->createUrl("/menu-". trim($val['restaurant_slug']))?>" 
+        <a href="<?php echo Yii::app()->createUrl("/menu/". trim($val['restaurant_slug']))?>" 
         class="orange-button rounded3 medium">
         <?php echo t("Order Now")?>
         </a>

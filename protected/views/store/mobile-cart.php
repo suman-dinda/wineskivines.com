@@ -120,6 +120,32 @@ if($data['service']==3 || $data['service']==6 || $data['service']==7 ){
   <p class="bold center"><?php echo t("Your Order")?></p>
   <div class="item-order-wrap"></div>
   
+  
+         <!--CONTACT LESS DELIVERY-->
+       <?php if($merchant_opt_contact_delivery==1):
+        $opt_contact_delivery = 0;
+        if(isset($_SESSION['kr_delivery_options']['opt_contact_delivery'])){
+        	$opt_contact_delivery = (integer)$_SESSION['kr_delivery_options']['opt_contact_delivery'];
+        }     
+        ?>
+        <div class="inner line-top relative center opt_contact_delivery_wrap">
+         <div class="box_green">           
+           <div class="row">
+             <div class="col-md-2 col-sm-2">
+                <?php echo CHtml::checkBox('opt_contact_delivery',$opt_contact_delivery==1?true:false,array(
+                 'class'=>"icheck",                 
+                ))?>
+             </div>
+             <div class="col-md-10 col-sm-10 text_left">
+              <p class="bold"><?php echo t("Opt in for no contact delivery")?></p>
+              <?php echo t("Our delivery executive will leave the order at your door/gate (not applicable for offline payment like COD)")?>
+             </div>
+           </div>
+         </div> <!--box_green-->   
+        </div>
+        <?php endif;?>
+        <!--CONTACT LESS DELIVERY-->
+  
         <!--DELIVERY OPTIONS-->
         <div class="inner line-top relative delivery-option center" style="padding-top:15px;">
            <i class="order-icon delivery-option-icon"></i>           
@@ -152,9 +178,9 @@ if($data['service']==3 || $data['service']==6 || $data['service']==7 ){
            <div class="delivery_asap_wrap">                       
              <?php                           
              echo CHtml::dropDownList('delivery_time',$now_time,
-             (array)FunctionsV3::timeList()
+             (array)FunctionsV3::getTimeList($merchant_id,$now)
              ,array(
-              'class'=>"grey-fields"
+              'class'=>"grey-fields time_list"
              ))
              ?>            
 	          <?php if ( $checkout['is_pre_order']==2):?>         

@@ -1254,10 +1254,8 @@ class FunctionsK extends DbExt
     	AND
     	merchant_id=".q($merchant_id)."
     	$and
-    	";    	    	
-    	//dump($stmt);
-    	if ( $res=$db->rst($stmt)){    		
-    		//dump($res);
+    	";    	    	    	
+    	if ( $res=$db->rst($stmt)){    		    		
     		if ( $res[0]['total']>$res[0]['total_review']){
     			$remaining = $res[0]['total'] - $res[0]['total_review'];
     			unset($db);

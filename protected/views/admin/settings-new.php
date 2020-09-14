@@ -123,6 +123,39 @@ FunctionsV3::addCsrfToken(false);
 	?>
 	</div>
 	
+	
+	<h3><?php echo t("Distance results")?></h3>
+	
+	<?php $map_distance_results = getOptionA('map_distance_results')?>
+	
+	<div class="mytable" style="width:50%;">
+	<div class="col">
+	  <?php echo CHtml::radioButton('map_distance_results',
+	  $map_distance_results==1?true:false
+	  ,array(
+	   'value'=>1,
+	   'class'=>"icheck"
+	  ))?>
+	  <?php echo t("Using straight line")?>
+	  <p class="uk-text-muted" style="width:200px;">
+	  <?php echo t("This options does not use any api like google and mapbox for faster results")?>
+	  </p>
+	</div>
+	
+	<div class="col">
+	  <?php echo CHtml::radioButton('map_distance_results',
+	  $map_distance_results==2?true:false
+	  ,array(
+	   'value'=>2,
+	   'class'=>"icheck"
+	  ))?>
+	  <?php echo t("Using map provider")?>
+	  <p class="uk-text-muted" style="width:200px;">
+	  <?php echo t("This options will use api like google and mapbox")?>
+	  </p>
+	</div>
+	</div>
+	
 	<hr/>
 	
     <h3><?php echo t("Google Maps")?></h3>
@@ -138,6 +171,24 @@ FunctionsV3::addCsrfToken(false);
 	</div>
 	
 	<p class="uk-text-small uk-text-muted">
+	<?php echo t("This api key wil be use to get the distance, don't restrict this api key")?>
+	</p>
+	
+	<div class="uk-form-row">
+	<label class="uk-form-label"><?php echo t("Google Maps JavaScript API")?></label>
+	<?php 
+	echo CHtml::textField('google_maps_api_key',
+	Yii::app()->functions->getOptionAdmin('google_maps_api_key'),array(
+	'class'=>"uk-form-width-large"    
+	));
+	?>
+	</div>
+	
+	<p class="uk-text-small uk-text-muted">
+	<?php echo t("This api key wil be using to plot the maps. you can restrict this api")?>
+	</p>
+	
+	<p class="uk-text-small uk-text-muted">
 	<span style="color:red;"><?php echo t("Note")?>:</span>
 	<?php echo t("these section is now mandatory in order for your search functions will work 100%")?><br/>
 	<?php echo t("enabled Google Maps Distance Matrix API, Google Maps Geocoding API and Google Maps JavaScript API in your google developer account")?></p>
@@ -145,18 +196,19 @@ FunctionsV3::addCsrfToken(false);
 	
 	
 	<div class="uk-form-row">
-	<label class="uk-form-label"><?php echo t("Method of distance calculation")?></label>
+	<label class="uk-form-label"><?php echo t("Method")?></label>
 	<?php 
-	echo CHtml::dropDownList('google_distance_method',getOptionA('google_distance_method'),array(
-	'straight_line'=>t("Straight line"),
+	echo CHtml::dropDownList('google_distance_method',getOptionA('google_distance_method'),array(	
 	'driving'=>t("Driving"),
-	'transit'=>t("Transit")
+	'transit'=>t("Transit"),
+	'walking'=>t("walking"),
+	'bicycling'=>t("bicycling"),
 	))
 	?>
 	</div>
 	
 		
-	<div class="uk-form-row">
+<!--	<div class="uk-form-row">
 	<label class="uk-form-label"><?php echo Yii::t("default","Use CURL")?>?</label>  
 	<?php 
 	echo CHtml::checkBox('google_use_curl',
@@ -166,11 +218,11 @@ FunctionsV3::addCsrfToken(false);
 	'value'=>2
 	))
 	?>    
-	</div>
+	</div>-->
 	
 	<div style="height:20px;"></div>
 	<a href="<?php echo Yii::app()->createUrl('admin/testmapapi')?>"
-	target="_blank" class="uk-button"><?php echo t("Click here to test API")?></a>
+	 class="uk-button"><?php echo t("Click here to test API")?></a>
 	
 	
 	<hr/>
@@ -199,9 +251,20 @@ FunctionsV3::addCsrfToken(false);
 	?>
 	</div>
 	
+	<div class="uk-form-row">
+	<label class="uk-form-label"><?php echo t("Method")?></label>
+	<?php 
+	echo CHtml::dropDownList('mapbox_method',getOptionA('mapbox_method'),array(	
+	  'driving'=>t("Driving"),
+	  'cycling'=>t("cycling"),
+	  'walking'=>t("walking"),
+	))
+	?>
+	</div>
+	
 	<div style="height:20px;"></div>
 	<a href="<?php echo Yii::app()->createUrl('admin/testmapapi')?>"
-	target="_blank" class="uk-button"><?php echo t("Click here to test API")?></a>
+	 class="uk-button"><?php echo t("Click here to test API")?></a>
 	
 	<hr/>
 	
@@ -791,9 +854,9 @@ Yii::app()->functions->getOptionAdmin("website_time_picker_format")
   <label class="uk-form-label"><?php echo t("Date Picker")?></label>
   <?php 
   echo CHtml::dropDownList('website_use_date_picker',
-  getOptionA('website_use_date_picker'),array(
-    1=>t("Jquery Date picker (default)"),
-    2=>t("List Date picker")
+  getOptionA('website_use_date_picker'),array(    
+    2=>t("List Date picker"),
+    1=>t("Jquery Date picker"),
   ))
   ?>
 </div>
@@ -803,9 +866,9 @@ Yii::app()->functions->getOptionAdmin("website_time_picker_format")
   <?php 
   echo CHtml::dropDownList('website_use_time_picker',
   getOptionA('website_use_time_picker'),array(
-    1=>t("Jquery time picker (default)"),
-    2=>t("Jquery time picker 2"),
     3=>t("List time picker"),
+    1=>t("Jquery time picker"),
+    2=>t("Jquery time picker 2"),    
   ))
   ?>
 </div>
@@ -897,6 +960,25 @@ Yii::app()->functions->getOptionAdmin("website_time_picker_format")
    'value'=>1
   ))
   ?>  
+</div>
+
+<?php
+unset($status_list[0]);	
+if(!empty($restrict_order_by_status)){
+	$restrict_order_by_status = json_decode($restrict_order_by_status,true);
+} else $restrict_order_by_status=array();
+?>
+
+<div class="uk-form-row">
+  <label class="uk-form-label"><?php echo t("Cannot do order again if previous order status is")?></label>  
+  <?php 
+	  echo CHtml::dropDownList('restrict_order_by_status',
+	  $restrict_order_by_status
+	  ,(array)$status_list,array(
+	   'class'=>"uk-form-width-large chosen",
+       "multiple"=>"multiple"
+	  ));
+	  ?>
 </div>
 
 <div class="uk-form-row">
@@ -1588,28 +1670,40 @@ Yii::app()->functions->getOptionAdmin("website_time_picker_format")
    'class'=>"icheck",
    'value'=>2
   ))
-  ?>  
+  ?>     
 </div>
 
+ <p><?php echo t("Cancelation of booking will only be applied on the following condition")?></p>
 
-<!--<div class="uk-form-row">
-  <label class="uk-form-label"><?php echo t("Earn Booking status")?></label>  
-  <?php 
-  $book_table_earn_status = getOptionA('book_table_earn_status');
-  if(!empty($book_table_earn_status)){
-  	  $book_table_earn_status = json_decode($book_table_earn_status,true);
-  }
-  unset($status_list[0]);
-  echo CHtml::dropDownList('book_table_earn_status',(array)$book_table_earn_status,
-  (array)bookingStatus(),array(
-     'class'=>"uk-form-width-large chosen",
-     "multiple"=>"multiple"
-  ));
-  ?>  
-  <p class="uk-text-muted indent" >
-    <?php echo t("customer will earn points based on this status ")?>
-  </p>
-</div>-->
+ <div class="uk-form-row">
+	<label class="uk-form-label"><?php echo t("after how many days after booking")?></label>  
+	<?php 
+	echo CHtml::textField('booking_cancel_days',
+	getOptionA('booking_cancel_days'),
+	array(
+	'class'=>"uk-form-medium numeric_only",
+	'placeholder'=>t("eg. 1 day")
+	))
+	?> 
+	</div>
+	
+	<div class="uk-form-row">
+	<label class="uk-form-label"><?php echo t("after how many hours")?></label>  
+	<?php 
+	echo CHtml::dropDownList('booking_cancel_hours',
+	getOptionA('booking_cancel_hours')
+	,FunctionsV3::generateHours(),array(
+	  
+	));
+	?> 
+	<?php 
+	echo CHtml::dropDownList('booking_cancel_minutes',
+	getOptionA('booking_cancel_minutes')
+	,FunctionsV3::generateMinutes(),array(
+	  
+	));
+	?> 
+	</div>
     
   </li>
   
@@ -1652,7 +1746,7 @@ Yii::app()->functions->getOptionAdmin("website_time_picker_format")
   ?>  
 </div>
 
-<div class="uk-form-row">
+<!--<div class="uk-form-row">
   <label class="uk-form-label"><?php echo Yii::t("default","Disabled Sticky Cart")?></label>  
   <?php 
   echo CHtml::checkBox('disabled_cart_sticky',
@@ -1662,10 +1756,10 @@ Yii::app()->functions->getOptionAdmin("website_time_picker_format")
    'value'=>2
   ))
   ?>  
-</div>
+</div>-->
 
 
-<div class="uk-form-row">
+<!--<div class="uk-form-row">
   <label class="uk-form-label"><?php echo Yii::t("default","Enabled Map Address")?></label>  
   <?php 
   echo CHtml::checkBox('website_enabled_map_address',
@@ -1677,7 +1771,7 @@ Yii::app()->functions->getOptionAdmin("website_time_picker_format")
   ?>  
 </div>
 <p class="uk-text-muted">
-<?php echo t("This options enabled the customer to select his/her address from the map during checkout")?></p>
+<?php echo t("This options enabled the customer to select his/her address from the map during checkout")?></p>-->
 
 
 <div class="uk-form-row">

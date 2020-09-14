@@ -1,7 +1,7 @@
 <?php
-$order_id=$this->data['id'];
-echo CHtml::hiddenField('printing_order_id',$order_id);
-if ( $data=Yii::app()->functions->getOrder2($order_id)){			
+$order_id=isset($this->data['id'])?$this->data['id']:0;
+echo CHtml::hiddenField('printing_order_id',$order_id);		
+if ( $data = FunctionsV3::getReceiptByID($order_id)){
     $merchant_id=$data['merchant_id'];
     $json_details=!empty($data['json_details'])?json_decode($data['json_details'],true):false;
     if ( $json_details !=false){
@@ -392,6 +392,14 @@ $full_merchant_address=$merchant_info['street']." ".$merchant_info['city']. " ".
 		       </div>		       
 		       <?php endif;?>
 	       
+	       <?php endif;?>
+	       
+	       <?php if ($transaction_type=="delivery" && $data['opt_contact_delivery']==1):?>
+	       <div class="input-block">
+	         <div class="label"><?php echo t("Delivery options")?> :</div>
+	         <div class="value"><?php echo t("Leave order at the door or gate")?></div>
+	         <div class="clear"></div>
+	       </div>		       
 	       <?php endif;?>
 	       
 	       <div class="spacer-small"></div>

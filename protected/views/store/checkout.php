@@ -11,6 +11,10 @@ $this->renderPartial('/front/order-progress-bar',array(
 ));
 
 echo CHtml::hiddenField('mobile_country_code',Yii::app()->functions->getAdminCountrySet(true));
+
+if($captcha_customer_login==2 || $captcha_customer_signup==2){
+	GoogleCaptchaV3::init();
+}
 ?>
 
 <div class="sections section-grey2 section-checkout">
@@ -80,9 +84,7 @@ echo CHtml::hiddenField('mobile_country_code',Yii::app()->functions->getAdminCou
 		  </div> <!--row-->	  
 		  
 		 <?php if ($captcha_customer_login==2):?>
-           <div class="top10">
-             <div id="kapcha-1"></div>
-           </div>
+           <div class="recaptcha_v3"></div> 
           <?php endif;?>  
 		  
 		  <div class="row top15">		   		   
@@ -100,9 +102,12 @@ echo CHtml::hiddenField('mobile_country_code',Yii::app()->functions->getAdminCou
 		  
 		</div> <!--box-grey-->  
 		
-		
+				
 		<form id="frm-modal-forgotpass" class="frm-modal-forgotpass" method="POST" onsubmit="return false;" >
-		<?php echo CHtml::hiddenField('action','forgotPassword')?>
+		<?php 
+		echo CHtml::hiddenField('action','forgotPassword');
+		echo CHtml::hiddenField('forgot_pass_action','email');
+		?>
 		<?php echo CHtml::hiddenField('do-action', isset($_GET['do-action'])?$_GET['do-action']:'' )?>     
 		<div class="section-forgotpass">
 		    <div class="box-grey rounded">      
@@ -115,26 +120,66 @@ echo CHtml::hiddenField('mobile_country_code',Yii::app()->functions->getAdminCou
 			    </a>     
 			  </div>    
 			  
+			  <?php if($customer_forgot_password_sms==1):?> 
+			  <p><?php echo t("how you would like to reset your password")?>?</p>
+			  <div class="row">
+			   <div class="col-md-3"><a href="javascript:;" class="forgot_selection btn btn-primary" data-id="email"><?php echo t("Via email")?></a></div>
+			   <div class="col-md-3"><a href="javascript:;" class="forgot_selection btn btn-success" data-id="sms"><?php echo t("Via sms")?></a></div>
+			  </div> 
+			  
+			 <div class="forgot_form_email hide_inputs">			   
 			   <div class="row top15">
 		        <div class="col-md-12 ">
 			     <?php echo CHtml::textField('username-email','',
 	                array('class'=>'grey-fields',
 	                'placeholder'=>t("Email address"),
-	               'required'=>true
+	               //'required'=>true
 	               ))?>
 			     </div>
-			  </div> <!--row-->	
+			    </div> <!--row-->	
+			    <input type="submit" value="<?php echo t("Retrieve Password")?>" class="top10 green-button medium full-width">
+			 </div> <!--forgot_form_email-->
+			 
+			 <div class="forgot_form_sms hide_inputs">
+			   <div class="row top15">
+		        <div class="col-md-12 ">
+			     <?php echo CHtml::textField('forgot_phone_number','',
+	                array('class'=>'grey-fields mobile_inputs',
+	                'placeholder'=>t("Mobile number"),
+	               //'required'=>true
+	               ))?>
+			     </div>
+			    </div> <!--row-->	
+			    <input type="submit" value="<?php echo t("Retrieve Password")?>" class="top10 green-button medium full-width">
+			 </div>
+			 
+			 <div class="top10">
+			   <a href="javascript:;" class="back-link  orange-text text-center">
+			   <?php echo t("Close");?>
+			   </a>   
+			   </div> 
+			 
+			 <!--forgot_form_sms-->
+			 <?php else :?>
+			  <div class="row top15">
+		        <div class="col-md-12 ">
+			     <?php echo CHtml::textField('username-email','',
+	                array('class'=>'grey-fields',
+	                'placeholder'=>t("Email address"),
+	               //'required'=>true
+	               ))?>
+			     </div>
+			    </div> <!--row-->	
+			    <input type="submit" value="<?php echo t("Retrieve Password")?>" class="top10 green-button medium full-width">
+			   
+			   <div class="top10">
+			   <a href="javascript:;" class="back-link  orange-text text-center">
+			   <?php echo t("Close");?>
+			   </a>   
+			   </div> 
+			 <?php endif;?>
 			  
-			   <div class="row top10">		   		   
-			   <div class="col-md-6 ">
-			     <a href="javascript:;" class="back-link block orange-text text-center">
-			     <?php echo t("Close");?>
-			     </a>      
-			   </div>
-			   <div class="col-md-6 ">
-			     <input type="submit" value="<?php echo t("Retrieve Password")?>" class="green-button medium full-width">
-			   </div>
-			  </div>  
+			  
 		  
 		  </div> <!--box-grey-->
 		</div> <!--section-forgotpass-->
@@ -235,7 +280,8 @@ echo CHtml::hiddenField('mobile_country_code',Yii::app()->functions->getAdminCou
 		     <?php echo CHtml::passwordField('password','',
                 array('class'=>'grey-fields',
                 'placeholder'=>t("Password"),
-               'required'=>true
+               'required'=>true,
+               'autocomplete'=>"new-password"
                ))?>
 		     </div>
 		  </div> <!--row-->	   
@@ -256,9 +302,7 @@ echo CHtml::hiddenField('mobile_country_code',Yii::app()->functions->getAdminCou
          ?>  
 		  
 		 <?php if ($captcha_customer_signup==2):?>
-           <div class="top10">
-             <div id="kapcha-2"></div>
-           </div>
+           <div class="recaptcha_v3"></div> 
          <?php endif;?> 
            
          <p class="text-muted">

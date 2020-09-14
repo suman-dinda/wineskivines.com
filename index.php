@@ -44,12 +44,15 @@
  *   Last Update : 01 May 2019 Version 5.1 
  *   Last Update : 12 May 2019 Version 5.2   
  *   Last Update : 30 May 2019 Version 5.3
+ *   Last Update : 25 May 2020 Version 5.4
+ *   Last Update : 01 June 2020 Version 5.4.1 
+ *   Last Update : 17 June 2020 Version 5.4.2 
  ***********************************************************/
 
 define('YII_ENABLE_ERROR_HANDLER', false);
 define('YII_ENABLE_EXCEPTION_HANDLER', false);
-ini_set("display_errors",true);
-error_reporting(E_ALL & ~E_NOTICE);
+ini_set("display_errors",false);
+//error_reporting(E_ALL & ~E_NOTICE);
 
 // include Yii bootstrap file
 require_once(dirname(__FILE__).'/yiiframework/yii.php');

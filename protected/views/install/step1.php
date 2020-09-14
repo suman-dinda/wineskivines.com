@@ -93,6 +93,12 @@ $current_dir_folder=str_replace("/index.php",'',$current_dir_folder);
 $windows_config='';
 $win_file=$path."/web.config";    
 
+if(file_exists($ht_file)){
+	/*REMOVE ANY EXISTING HTACCESS*/
+	@unlink($ht_file);
+	@unlink($win_file);	
+}
+
 if(!file_exists($ht_file)){
 	echo 'Creating .htaccess file<br/>';    
 	if ( $host=="htdocs" || $host=="public_html" || $host==""){

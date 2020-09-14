@@ -4,7 +4,7 @@ echo CHtml::hiddenField('action','themeSettings');
 FunctionsV3::addCsrfToken(false);
 ?>
 
-<h2><?php echo t("Website Compression")?></h2>
+<!--<h2><?php echo t("Website Compression")?></h2>
 
 <div class="uk-form-row">
   <label class="uk-form-label"><?php echo t("Enabled")?></label>  
@@ -18,6 +18,9 @@ FunctionsV3::addCsrfToken(false);
 <p class="uk-text-muted"><?php echo t("this options will compress all your js and css and html for website fast loading")?></p>
 
 <hr/>
+
+-->
+  
 <!--
 <h3><?php echo t("RTL")?></h3>
 

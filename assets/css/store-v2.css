@@ -563,7 +563,9 @@ background:url("../images/section1-bg.png") bottom center #ededed repeat-x;
 background:#eff2f5;
 }
 
-.section-feature-resto{
+.section-feature-resto,
+.white_bg
+{
 background:#fff;
 }
 
@@ -2666,7 +2668,7 @@ border-right:1px solid #f75d34;
 {
 border: none;
 font-size: 20px;
-padding: 5px 15px;
+padding: 7px 15px;
 width: 100%;
 font-weight:300;
 }
@@ -3355,3 +3357,41 @@ display:table-cell;
 padding:5px 10px;
 }
 
+.white_bg .search-input-wraps{
+border:1px solid #999;
+max-width:600px;
+}
+.white_bg.center{
+padding-top:30px;
+padding-bottom:60px;
+} 
+
+.result-merchant.infinite-container p{
+margin:0;
+}
+
+.map_addressbook{
+border:1px solid #c9c7c7;
+height:250px;
+width:100%;
+margin-bottom:5px;
+}
+
+.search-food-wrap .typeahead__list a{
+width:100%;
+}
+
+.box_green{
+border: 2px solid #3ecf8e;
+padding:10px;
+}
+.box_green .text_left{
+text-align:left;
+}
+.box_green p.bold{
+margin:0;
+margin-bottom:5px;
+}
+.box_green .col-md-2{
+padding-top:10px;
+}

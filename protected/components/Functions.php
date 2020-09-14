@@ -264,8 +264,7 @@ class Functions extends CApplicationComponent
 	}
 	
 	public function getMerchant($merchant_id='')
-	{
-		$DbExt=new DbExt;
+	{		
 		$stmt="SELECT a.*,
 		(
 		select title
@@ -280,8 +279,8 @@ class Functions extends CApplicationComponent
 		merchant_id=".FunctionsV3::q($merchant_id)."
 		LIMIT 0,1
 		";		
-		if ( $res=$DbExt->rst($stmt)){
-			return $res[0];
+		if($res = Yii::app()->db->createCommand($stmt)->queryRow()){
+			return $res;
 		}
 		return false;
 	}	
@@ -366,8 +365,7 @@ class Functions extends CApplicationComponent
     	  
     	  'Hour'=>Yii::t("default","Hour"),
     	  'Minute'=>Yii::t("default","Minute"),
-		  'processing'=>Yii::t("default","processing."),
-		  'create_account'=>Yii::t("default", "Create Account"),
+    	  'processing'=>Yii::t("default","processing."),
     	  'merchantStats'=>Yii::t("default","Your merchant membership is expired. Please renew your membership.").$link,
     	  "Status"=>Yii::t("default","Status"),
     	  
@@ -507,7 +505,8 @@ class Functions extends CApplicationComponent
     	  'geolocation_failed'=>t("Geolocation failed"),
     	  'browser_not_supported'=>t("Your browser does not support geolocation"),
     	  'select_from_map'=>t("select your location from map"),
-    	  'enter_full_name'=>t("please enter name on card eg. [first name][space][last name]")
+    	  'enter_full_name'=>t("please enter name on card eg. [first name][space][last name]"),
+    	  'not_rated_yet'=>t("Not rated yet!"),
     	);
     }   	
     
@@ -899,8 +898,8 @@ class Functions extends CApplicationComponent
                    array('visible'=>FunctionsV3::hasMerchantAccessToMenu($user_access,"ocr"),'tag'=>'ocr', 'label'=>'<i class="fa fa-paypal"></i>'.Yii::t("default","Offline Credit Card Payment"),                    
                    'url'=>array('merchant/offlineccsettings')),                                   
                    
-                   array('visible'=>FunctionsV3::hasMerchantAccessToMenu($user_access,"pyp"),'tag'=>'pyp', 'label'=>'<i class="fa fa-paypal"></i>'.Yii::t("default","Paypal"),                    
-                   'url'=>array('merchant/paypalSettings')),                
+                   /*array('visible'=>FunctionsV3::hasMerchantAccessToMenu($user_access,"pyp"),'tag'=>'pyp', 'label'=>'<i class="fa fa-paypal"></i>'.Yii::t("default","Paypal"),                    
+                   'url'=>array('merchant/paypalSettings')),                */
                    
                    array('visible'=>FunctionsV3::hasMerchantAccessToMenu($user_access,"paypal_v2"),'tag'=>'paypal_v2', 'label'=>'<i class="fa fa-paypal"></i>'.Yii::t("default","Paypal V2"),                    
                    'url'=>array('merchant/paypal_v2')),                
@@ -908,8 +907,8 @@ class Functions extends CApplicationComponent
                    array('visible'=>FunctionsV3::hasMerchantAccessToMenu($user_access,"stp"),'tag'=>'stp', 'label'=>'<i class="fa fa-paypal"></i>'.Yii::t("default","Stripe"),                    
                    'url'=>array('merchant/stripeSettings')),                
                    
-                   array('visible'=>FunctionsV3::hasMerchantAccessToMenu($user_access,"mcd"),'tag'=>'mcd', 'label'=>'<i class="fa fa-paypal"></i>'.Yii::t("default","Mercadopago"), 
-                   'url'=>array('merchant/mercadopagoSettings')),
+                   /*array('visible'=>FunctionsV3::hasMerchantAccessToMenu($user_access,"mcd"),'tag'=>'mcd', 'label'=>'<i class="fa fa-paypal"></i>'.Yii::t("default","Mercadopago"), 
+                   'url'=>array('merchant/mercadopagoSettings')),*/
                    
                    array('visible'=>FunctionsV3::hasMerchantAccessToMenu($user_access,"mercadopago"),'tag'=>'mercadopago', 'label'=>'<i class="fa fa-paypal"></i>'.Yii::t("default","mercadopago V2"), 
                    'url'=>array('merchant/mercadopago')),
@@ -1028,6 +1027,10 @@ class Functions extends CApplicationComponent
                 array('visible'=>FunctionsV3::hasMerchantAccessToMenu($user_access,"tablebooking"),'tag'=>"tablebooking",'label'=>'<i class="fa fa-list-alt"></i>'.Yii::t("default","Table Booking"),
                 'url'=>array('/merchant/tablebooking')),
                                                 
+                array('visible'=>FunctionsV3::hasMerchantAccessToMenu($user_access,"allorder"),'tag'=>"allorder",'label'=>'<i class="fa fa-list-alt"></i>'.Yii::t("default","All order"),
+                'url'=>array('/merchant/allorder')),
+                                                                               
+                
                 array('visible'=>FunctionsV3::hasMerchantAccessToMenu($user_access,"orderStatus"),'tag'=>"orderStatus",'label'=>'<i class="fa fa-list-alt"></i>'.Yii::t("default","Order Status"),
                 'url'=>array('/merchant/orderStatus')),
                                                                                
@@ -1079,14 +1082,10 @@ class Functions extends CApplicationComponent
                 
                 array('visible'=>FunctionsV3::hasMerchantAccessToMenu($user_access,"gallerysettings"),'tag'=>"gallerysettings",'label'=>'<i class="fa fa-list-alt"></i>'.Yii::t("default","Gallery Settings"),
                 'url'=>array('/merchant/gallerysettings')),
+                                
+				array('visible'=>FunctionsV3::hasMerchantAccessToMenu($user_access,"banner_settings"),'tag'=>"banner_settings",'label'=>'<i class="fa fa-list-alt"></i>'.Yii::t("default","Banner Settings"),
+				'url'=>array('/merchant/banner_settings')),
                 
-                /*array('visible'=>FunctionsV3::hasMerchantAccessToMenu($user_access,"receiptSettings"),'tag'=>"receiptSettings",'label'=>'<i class="fa fa-list-alt"></i>'.Yii::t("default","Receipt Settings"),
-                'url'=>array('/merchant/receiptSettings')),*/
-
-		array('visible'=>FunctionsV3::hasMerchantAccessToMenu($user_access,"banner_settings"),'tag'=>"banner_settings",'label'=>''.Yii::t("default","Banner Settings"),
-
-		'url'=>array('/merchant/banner_settings')),
-
                 array('visible'=>FunctionsV3::hasMerchantAccessToMenu($user_access,"manage_credit_cards"),'tag'=>"manage_credit_cards",'label'=>'<i class="fa fa-list-alt"></i>'.Yii::t("default","Manage Credit Card"),
                 'url'=>array('/merchant/manage_credit_cards')),
                 
@@ -1105,8 +1104,8 @@ class Functions extends CApplicationComponent
                    'url'=>array('/printer/merchant_panel?lang='.Yii::app()->language)),                
                    
                    
-                   /*array('visible'=>FunctionsV3::hasMerchantAccessToMenu($user_access,"singleapp"),'tag'=>'singleapp', 'label'=>'<i class="fa fa-paypal"></i>'.t("Single Merchant modules"),
-                   'url'=>array('/singlemerchant?lang='.Yii::app()->language)),    */
+                   array('visible'=>FunctionsV3::hasMerchantAccessToMenu($user_access,"singleapp"),'tag'=>'singleapp', 'label'=>'<i class="fa fa-paypal"></i>'.t("Single Merchant"),
+                   'url'=>array('/merchant/singlemerchant/banner')), 
                                                                            
                 )),   
                                 
@@ -1373,12 +1372,16 @@ class Functions extends CApplicationComponent
                 'tag'=>"OrderStatus",'label'=>'<i class="fa fa-list-alt"></i>'.Yii::t("default","Order Status"),
                 'url'=>array('/admin/OrderStatus')),
                 
+                array('visible'=>$this->AA('tags'),
+                'tag'=>"tags",'label'=>'<i class="fa fa-list-alt"></i>'.Yii::t("default","Tags"),
+                'url'=>array('/admin/tags')),
+                
                 array('visible'=>$this->AA('incomingorders'),'tag'=>"incomingorders",
-                'label'=>'<i class="fa fa-list-alt"></i>'.Yii::t("default","Incoming Orders"),
+                'label'=>'<i class="fa fa-list-alt"></i>'.Yii::t("default","All Orders"),
                 'url'=>array('/admin/incomingorders')),           
                 
                 array('visible'=>$this->AA('cancel_order'),'tag'=>"cancel_order",
-                'label'=>'<i class="fa fa-list-alt"></i>'.Yii::t("default","Cancel Orders"),
+                'label'=>'<i class="fa fa-list-alt"></i>'.Yii::t("default","New Cancel Orders"),
                 'url'=>array('/admin/cancel_order')),           
                 
                 
@@ -1554,9 +1557,9 @@ class Functions extends CApplicationComponent
                 'label'=>'<i class="fa fa-usd"></i>'.Yii::t("default",'Payment Gateway'),
                    'itemOptions'=>array('class'=>''), 'items'=>array(                   
                    
-                   array('visible'=>$this->AA('paypalSettings'),
+/*                   array('visible'=>$this->AA('paypalSettings'),
                    'tag'=>'paypalSettings','label'=>'<i class="fa fa-paypal"></i>'.Yii::t("default","Paypal"), 
-                   'url'=>array('admin/paypalSettings')),                
+                   'url'=>array('admin/paypalSettings')),                */
                    
                    array('visible'=>$this->AA('paypal_v2'),
                    'tag'=>'paypal_v2','label'=>'<i class="fa fa-paypal"></i>'.Yii::t("default","Paypal V2"), 
@@ -1570,9 +1573,9 @@ class Functions extends CApplicationComponent
                    'tag'=>'stripeSettings','label'=>'<i class="fa fa-paypal"></i>'.Yii::t("default","Stripe"), 
                    'url'=>array('admin/stripeSettings')),                
                    
-                   array('visible'=>$this->AA('mercadopagoSettings'),'tag'=>'mercadopagoSettings',
+                   /*array('visible'=>$this->AA('mercadopagoSettings'),'tag'=>'mercadopagoSettings',
                    'label'=>'<i class="fa fa-paypal"></i>'.Yii::t("default","Mercadopago"), 
-                   'url'=>array('admin/mercadopagoSettings')),                                   
+                   'url'=>array('admin/mercadopagoSettings')),                                   */
                    
                    array('visible'=>$this->AA('mercadopago'),'tag'=>'mercadopago',
                    'label'=>'<i class="fa fa-paypal"></i>'.Yii::t("default","mercadopago V2"), 
@@ -1736,13 +1739,13 @@ class Functions extends CApplicationComponent
 		    'items'=>array(
                 array('visible'=>$hide,'tag'=>"signup",'label'=>'<i class="fa fa-user"></i>'.Yii::t("default","Login & Signup"),
                 'url'=>$link_sigup,'itemOptions'=>array('class'=>$link_sigup_class)),            
-                array('visible'=>$enabled_reg,'tag'=>"home",'label'=>'<i class="fa fa-cutlery"></i>'.Yii::t("default","Store Signup"),
+                array('visible'=>$enabled_reg,'tag'=>"home",'label'=>'<i class="fa fa-cutlery"></i>'.Yii::t("default","Restaurant Signup"),
                 'url'=>array($signup_link)),
                                 
-                array('tag'=>"home",'label'=>'<i class="fa fa-search"></i>'.Yii::t("default","Browse Stores"),
+                array('tag'=>"home",'label'=>'<i class="fa fa-search"></i>'.Yii::t("default","Browse Restaurant"),
                 'url'=>array('/store/browse')),                                
                 
-                array('visible'=>$view_map, 'tag'=>"home",'label'=>'<i class="fa fa-map-marker"></i>'.Yii::t("default","View Store by map"),
+                array('visible'=>$view_map, 'tag'=>"home",'label'=>'<i class="fa fa-map-marker"></i>'.Yii::t("default","View Restaurant by map"),
                 'url'=>array('/store/map')),                                
              )   
           );
@@ -1947,6 +1950,21 @@ class Functions extends CApplicationComponent
 		{{currency}}
 		WHERE
 		currency_code=".FunctionsV3::q($currency_code)."
+		LIMIT 0,1
+		";
+		if ($res=$DbExt->rst($stmt)){
+			return $res[0];
+		}
+		return false;	
+	}
+	
+	public function getCurrencyDetailsByID($id='')
+	{
+		$DbExt=new DbExt;
+		$stmt="SELECT * FROM
+		{{currency}}
+		WHERE
+		id=".FunctionsV3::q($id)."
 		LIMIT 0,1
 		";
 		if ($res=$DbExt->rst($stmt)){
@@ -2717,100 +2735,12 @@ class Functions extends CApplicationComponent
 	
 	public function geodecodeAddress($address='')
 	{
-		
-		$map = FunctionsV3::getMapProvider();
-			    
-		if($map['provider']=="mapbox"){
-			Yii::app()->setImport(array(			
-			   'application.vendor.mapbox.*',
-			));	
-			
-			if(empty($address)){
-				return false;
-			}		
-					
-			try {
-			   require_once('mapbox/Mapbox.php');
-			   $mapbox = new Mapbox($map['token']);
-			   $res = $mapbox->geocode($address);			   
-			   $success = $res->success();		
-			   $count = $res->getCount();
-			   	   
-			   if($success && $count>0){
-			   	 $relevance=array();
-			   	 $data = array();
-			   	 
-			   	 foreach ($res as $key => $val) {			   	 	
-			   	 	//dump($val);
-			   	 	$data[$key]=$val;
-			   	 	$relevance[$key]=$val['relevance'];
-			   	 }
-			   	 			   	 
-			   	 $value = max($relevance);			   	 
-			   	 $key = array_search($value, $relevance);
-			   	 
-			   	 //dump("key =>$key");
-			   	 			   	 
-			   	 if($key>=0){
-			   	 	if(isset($data[$key]['geometry'])){
-			   	 		$long = $data[$key]['geometry']['coordinates'][0];
-			   	 		$lat = $data[$key]['geometry']['coordinates'][1];
-			   	 		return array(
-			   	 		  'lat'=>$lat,
-		                  'long'=>$long
-			   	 		);
-			   	 	}
-			   	 }			   			   	 
-			   }		
-			   
-			   return false;	
-			   
-			} catch(Exception $e) {	    			
-				//dump($e->getMessage());
-				return false;
-	    	}		    				
-		} else { 		
-			$protocol = isset($_SERVER["https"]) ? 'https' : 'http';
-			if ($protocol=="http"){
-				$api="http://maps.googleapis.com/maps/api/geocode/json?address=".urlencode($address);
-			} else $api="https://maps.googleapis.com/maps/api/geocode/json?address=".urlencode($address);
-			
-			/*check if has provide api key*/
-			$key=Yii::app()->functions->getOptionAdmin('google_geo_api_key');		
-			if ( !empty($key)){
-				$api="https://maps.googleapis.com/maps/api/geocode/json?address=".urlencode($address)."&key=".urlencode($key);
-			}	
-
-			$google_use_curl = getOptionA('google_use_curl');		
-			
-			if($google_use_curl==2){
-			   $json=$this->Curl($api,'');			   
-			} else $json=@file_get_contents($api);
-			
-			if (isset($_GET['debugx'])){
-				dump($api);
-			    dump($json);
-			}
-				
-			if (!empty($json)){
-				$json = json_decode($json);	
-				if (isset($json->error_message)){
-					return false;
-				} else {				
-					if($json->status=="OK"){					
-						$lat = $json->{'results'}[0]->{'geometry'}->{'location'}->{'lat'};
-			            $long = $json->{'results'}[0]->{'geometry'}->{'location'}->{'lng'};
-					} else {
-						$lat=''; $long='';
-					}
-		            return array(
-		              'lat'=>$lat,
-		              'long'=>$long
-		            );
-				}
-			}			
-			return false;
-		}
+		try {			
+			$resp = MapsWrapper::geoCodeAdress($address);			
+			return $resp;
+		} catch (Exception $e) {
+	        return false;
+	    }				
 	}
 	
 	public function updateMerchantSponsored()
@@ -2846,8 +2776,7 @@ class Functions extends CApplicationComponent
 	}
 	
 	public function getRatings($merchant_id='')
-	{
-		$DbExt=new DbExt;
+	{		
 		$stmt="SELECT SUM(rating) as ratings ,COUNT(*) AS count
 		FROM
 		{{review}}
@@ -2856,7 +2785,7 @@ class Functions extends CApplicationComponent
 		AND
 		status in ('publish','published')
 		 ";		
-		if ( $res=$DbExt->rst($stmt)){								
+		if($res = Yii::app()->db->createCommand($stmt)->queryAll()){
 			if ( $res[0]['ratings']>=1){
 				$ret=array(
 				  'ratings'=>number_format($res[0]['ratings']/$res[0]['count'],1),
@@ -3113,6 +3042,61 @@ class Functions extends CApplicationComponent
 		$and
 		ORDER BY sequence ASC
 		";		
+		//dump($stmt);
+		/*inventory*/
+		if (FunctionsV3::hasModuleAddon('inventory')){
+			if(FunctionsV3::checkIfTableExist('view_item_stocks_status')){	
+			   Yii::app()->setImport(array(			
+			       'application.modules.inventory.components.*',
+		       ));		
+		       
+		       $and_inv ='';
+		   	   if (!empty($merchant_id)){
+				 $and_inv=" AND merchant_id =".FunctionsV3::q($merchant_id)." ";
+			   }
+				  
+			   if(InventoryWrapper::hideItemOutStocks($merchant_id)){			   	  
+			   	   	  
+			   	  $stmt="SELECT a.* FROM
+					{{item}} a
+					WHERE
+					category like ".FunctionsV3::q('%"'.$category_id.'"%')."
+					AND
+					status IN ('publish','published')		
+					$and_inv	
+					AND item_id IN (
+					  select item_id from {{view_item_stocks_status}}
+					  where available ='1'
+					  and track_stock='1'
+					  and stock_status not in ('Out of stocks')		
+					  and item_id = a.item_id				  
+					)		
+					ORDER BY sequence ASC
+					";		
+			   } else {
+			   	   if($food_option_not_available==1):
+			   	   $stmt="SELECT a.* FROM
+					{{item}} a
+					WHERE
+					category like ".FunctionsV3::q('%"'.$category_id.'"%')."
+					AND
+					status IN ('publish','published')			
+					$and_inv
+					AND item_id IN (
+					   select item_id from {{item_relationship_size}}
+					   where available ='1'					
+					   and item_id = a.item_id		   
+					)		
+					ORDER BY sequence ASC
+					";		
+			   	   endif;
+			   }
+			}
+		}
+		/*end inventory*/
+		
+		//dump($stmt);
+		
 		if ( $res=$DbExt->rst($stmt)){			
 			foreach ($res as $val) {				
 												
@@ -3126,7 +3110,7 @@ class Functions extends CApplicationComponent
 				$single_item=1;
 				$single_details=array();
 				if (!is_array($addon_item) && count( (array) $addon_item)<=1){					
-					if ( count($price)<=1){
+					if ( count( (array) $price)<=1){
 					   $single_item=2;					   
 					   //$single_details['price']=$price[0]['price']-$val['discount'];
 					   $single_details['price']=$price[0]['price'];
@@ -3184,9 +3168,7 @@ class Functions extends CApplicationComponent
 	}
 	
 	public function getItemById($item_id='',$addon=true)
-	{
-		
-		$DbExt=new DbExt;
+	{				
 		$data=array();		
 		$stmt="SELECT * FROM
 		{{item}}
@@ -3194,7 +3176,7 @@ class Functions extends CApplicationComponent
 		item_id = ".FunctionsV3::q($item_id)."
 		LIMIT 0,1		
 		";				
-		if ( $res=$DbExt->rst($stmt)){						
+		if($res = Yii::app()->db->createCommand($stmt)->queryAll()){
 			foreach ($res as $val) {				
 												
 				$multi_option=$this->multiOptionToArray($val['multi_option']);
@@ -3376,12 +3358,13 @@ class Functions extends CApplicationComponent
     				
     				$val['notes']=isset($val['notes'])?$val['notes']:"";
     				
-    				$size_words='';
-    				$t=!empty($val['price'])?explode("|",$val['price']):'';
+    				$size_words=''; $_size_id=0;
+    				$t=!empty($val['price'])?explode("|",$val['price']):'';    				
     				if (is_array($t) && count($t)>=1){
     					$val['price']=$t[0];
     					if (isset($t[1])){
     					    $size_words=$t[1];
+    					    $_size_id=isset($t[2])?(integer)$t[2]:0;  // inventory new code
     					} else $size_words='';					
     				}
     				
@@ -3480,6 +3463,7 @@ class Functions extends CApplicationComponent
 			            'item_id'=>$val['item_id'],
 			            'item_name'=>isset($food_item[$val['item_id']])?$food_item[$val['item_id']]:'',
 			            'size_words'=>$size_words,
+			            'size_id'=>$_size_id, // inventory
 			            'qty'=>$val['qty'],
 			            //'normal_price'=>prettyFormat($val['price']),
 			            'normal_price'=>$val['price'],
@@ -3602,7 +3586,7 @@ class Functions extends CApplicationComponent
 			          	 		//dump($val_subs);
 			          	 		$addon_raw_price=prettyFormat($val_subs[1]);
 			          	 		$addon_item_price= unPrettyPrice($val_subs[1]);
-			          	 		$addon_item_price=$addon_qty*$addon_item_price;
+			          	 		$addon_item_price=(integer)$addon_qty*$addon_item_price;
 			          	 		
 			          	 		/** two flavor */
 			          	 		if (!isset($val['two_flavors'])){
@@ -3628,7 +3612,9 @@ class Functions extends CApplicationComponent
 			          	 		  'addon_category'=>$subcat_list[$cat_id],
 			          	 		  'addon_qty'=>$addon_qty,
 			          	 		  //'addon_price'=>$addon_item_price
-			          	 		  'addon_price'=>unPrettyPrice($val_subs[1])
+			          	 		  'addon_price'=>unPrettyPrice($val_subs[1]),
+			          	 		  'sub_item_id'=>unPrettyPrice($val_subs[0]), // inventory new code,
+			          	 		  'subcat_id'=>$cat_id // inventory new code,
 			          	 		);
 			          	 					          	 		
 			          	 		/**translation */
@@ -4015,7 +4001,7 @@ $htm.='<div class="b uk-text-muted">'."$addon_raw_price ".qTranslate($val_subs[2
 				    	
 				    } else {
 					    if ($receipt==TRUE){			    	
-					    	if (isset($data['points_discount']) && $data['points_discount']>0.01){
+					    	if (isset($data['points_discount']) && $data['points_discount']>0){
 					    	   $pts_redeem_amt=unPrettyPrice($data['points_discount']);
 					    	   //if ($order_infos['calculation_method']==2){
 					    	   if($calculation_method==2){
@@ -4051,11 +4037,15 @@ $htm.='<div class="b uk-text-muted">'."$addon_raw_price ".qTranslate($val_subs[2
     				
     				//$htm.="=>$subtotal - $subtotal_non <br/>";
     				
+    				/*FIXED TAX ISSUE*/
     				if ($subtotal_non>=0.0001){    					
-    					$temp_subtotal=$subtotal-$subtotal_non;       					
-    					//$htm.="temp_subtotal=>$temp_subtotal <br/>";		    					
-    					if($temp_subtotal>=0.0001){
+    					$temp_subtotal=$subtotal-$subtotal_non;          					
+    					if($temp_subtotal>0){
     					   $taxable_subtotal=($temp_subtotal+$temp_delivery_charges+$merchant_packaging_charge)*$tax;
+    					} else {    				
+    					   if($merchant_packaging_charge>0 && $merchant_packaging_charge>0){
+    					      $taxable_subtotal=($temp_delivery_charges+$merchant_packaging_charge)*$tax;    					   
+    					   }
     					}
     				} else {    					
     					$taxable_subtotal=( (float)$subtotal+ (float)$temp_delivery_charges + (float)$merchant_packaging_charge)*$tax;    
@@ -4769,7 +4759,7 @@ $htm.='<div class="b uk-text-muted">'."$addon_raw_price ".qTranslate($val_subs[2
 		WHERE
 		order_id= ".FunctionsV3::q($order_id)."
 		LIMIT 0,1
-		";
+		";		
 		$connection=Yii::app()->db;
 		$rows=$connection->createCommand($stmt)->queryAll(); 		
 		if (is_array($rows) && count($rows)>=1){
@@ -5278,6 +5268,7 @@ $htm.='<div class="b uk-text-muted">'."$addon_raw_price ".qTranslate($val_subs[2
     	      AND status NOT IN ('".initialStatus()."')
     	      AND request_cancel='2'
     	      ORDER BY date_created DESC
+    	      LIMIT 0,50
     	";    	
     	//dump($stmt);
     	if ($res=$db_ext->rst($stmt)){    		
@@ -5866,15 +5857,16 @@ EOF;
     
     public function getLostPassToken($token='')
     {
-    	$DbExt=new DbExt;
-    	$stmt="SELECT * FROM
-    	{{client}}
-    	WHERE
-    	lost_password_token= ".FunctionsV3::q($token)."
-    	LIMIT 0,1
-    	";
-    	if ($res=$DbExt->rst($stmt)){
-    		return $res[0];
+    	if(!empty($token)){	    	
+	    	$stmt="SELECT * FROM
+	    	{{client}}
+	    	WHERE
+	    	lost_password_token= ".FunctionsV3::q($token)."
+	    	LIMIT 0,1
+	    	";	    	
+	    	if($res = Yii::app()->db->createCommand($stmt)->queryRow()){
+	    		return $res;
+	    	}
     	}
     	return false;  
     }
@@ -6673,9 +6665,7 @@ $menu_html.="</li>";
     	    	//echo "change start date";
     	    	$m1=$membership_purchase_date;
     	    }
-    	}
-    	
-    	$db_ext=new DbExt;
+    	}    	    	
     	$stmt="
     	SELECT a.merchant_id,a.package_id,
     	(
@@ -6701,13 +6691,10 @@ $menu_html.="</li>";
     	WHERE
     	merchant_id=".Yii::app()->db->quoteValue($merchant_id)."
     	LIMIT 0,1
-    	";    	
-    	//dump($stmt);
-    	if ($res=$db_ext->rst($stmt)){
-    		$res=$res[0];    
-    		//dump($res);
+    	";    	    	
+    	if($res = Yii::app()->db->createCommand($stmt)->queryRow()){       		
     		if ($res['sell_limit']>=1){
-    			if ($res['total_sell']>=$res['sell_limit']){    				
+    			if ($res['total_sell']>=$res['sell_limit']){       				
     				return false;			
     			}
     		}
@@ -7142,24 +7129,23 @@ $menu_html.="</li>";
     		   break;
     			    
     		case "twilio":
-    		
-		    	require_once "Twilio.php";		
-				$sms_sender_id=Yii::app()->functions->getOptionAdmin('sms_sender_id');
-				$sms_account_id=Yii::app()->functions->getOptionAdmin('sms_account_id');
-				$sms_token=Yii::app()->functions->getOptionAdmin('sms_token');
-				
-				$twilio=new Twilio;
-				$twilio->_debug=false;
-				$twilio->sid=$sms_account_id;
-				$twilio->auth=$sms_token;
-				$twilio->data['From']=$sms_sender_id;
-				$twilio->data['To']=$to;
-				$twilio->data['Body']=$message;
-				if ($resp=$twilio->sendSMS()){
-					$raw=$twilio->getSuccessXML();				
+    				    	
+    			require_once "TwilioWrapper.php";	
+    			$sms_sender_id=getOptionA('sms_sender_id');
+				$sms_account_id=getOptionA('sms_account_id');
+				$sms_token=getOptionA('sms_token');
+				try {					
+					TwilioWrapper::setCredentials($sms_account_id,$sms_token);
+					$resp = TwilioWrapper::sendSMS(array(
+					  'To'=>$to,
+					  'From'=>$sms_sender_id,
+					  'Body'=>$message
+					));
 					$msg="process";
-				} else $msg=$twilio->getError();			
-			
+					$raw = $resp;
+				} catch (Exception $e){
+    				$msg  = $e->getMessage();    				
+    			}		    	
 			    break;		
 			    
     		case "spothit":
@@ -7491,7 +7477,7 @@ $menu_html.="</li>";
     	$sortby
     	LIMIT $start,$limit    	
     	";     	    	
-    	//dump($stmt);
+    	
     	if ($res=$db_ext->rst($stmt)){
     		$stmt_rows="SELECT FOUND_ROWS()";
 			$total_found=0;
@@ -7915,6 +7901,7 @@ $menu_html.="</li>";
     	      AND
     	      viewed='1'
     	      ORDER BY date_created DESC
+    	      LIMIT 0,50
     	";    	
     	if ($res=$db_ext->rst($stmt)){    		
     		return $res;
@@ -8713,39 +8700,56 @@ $menu_html.="</li>";
     
     public function getTotalCommission()
     {
-    	$total_commission_status=Yii::app()->functions->getOptionAdmin('total_commission_status');
-		if (!empty($total_commission_status)){
-			$total_commission_status=json_decode($total_commission_status);
-		} else {
-			$total_commission_status=array('paid');
-		}    	
-    	$status='';
-    	if (is_array($total_commission_status) && count($total_commission_status)>=1){
-    		foreach ($total_commission_status as $val) {    			
-    			$status.="'$val',";
-    		}
-    		$status=substr($status,0,-1);
-    	} else $status="'paid'";
-
-    	$and='';
-    	if ( Yii::app()->functions->getOptionAdmin('admin_exclude_cod_balance')==2){
-    		$and=" AND payment_type NOT IN ('cod','pyr','ccr')";    
-    	}
+    	$and = ''; $balance = 0;
+    	$status_based = array('paid'); $used_status=''; $and='';
+		$status = getOptionA('total_commission_status');
+		$include_all_offline_payment = getOptionA('admin_include_all_offline_payment'); 
+		
+		if($json=json_decode($status,true)){    			
+			$status_based = $json;
+		}    		
+		foreach ($status_based as $val) {
+			$used_status.= q($val).",";
+		}
+		$used_status = substr($used_status,0,-1);
+    		
+		$offline = "'cod','ocr','pyr','obd'";
+		$and = " AND payment_type NOT IN ($offline) ";
+		if($include_all_offline_payment==1){
+			$and='';
+		}
+		
+    	$range1  = date("Y-m-d");    	
+    	$range2 = date('Y-m-d', strtotime($range1 . ' -30 day'));
+		$and_today =" AND DATE_FORMAT(date_created,'%Y-%m-%d')  BETWEEN ".FunctionsV3::q($range1)." AND ".FunctionsV3::q($range1)."  ";
+		$and_last =" AND DATE_FORMAT(date_created,'%Y-%m-%d')  BETWEEN ".FunctionsV3::q($range2)." AND ".FunctionsV3::q($range1)."  ";
+		
+    	$stmt="SELECT 
+    	IFNULL(sum(total_commission),0) as total_commission,
     	
-    	$stmt="SELECT sum(total_commission) as total_commission
+    	IFNULL((
+    	  select sum(total_commission)
+    	  from {{order}}
+    	  where status IN ($used_status)    
+    	  $and $and_today	  
+    	),0) as total_today,
+    	
+    	IFNULL((
+    	  select sum(total_commission)
+    	  from {{order}}
+    	  where status IN ($used_status)    
+    	  $and $and_last	  
+    	),0) as total_last
+    	
     	FROM
     	{{order}}
-    	WHERE status IN ($status)
+    	WHERE status IN ($used_status)
     	$and
-    	";    	
-    	//dump($stmt);
-    	if ( $res=$this->db_ext->rst($stmt)){
-    		if ( $res[0]['total_commission']==""){
-    			return 0;
-    		} 
-    		return $res[0]['total_commission'];    			
-    	}	
-    	return false;    	
+    	";      	    	
+    	if($res = Yii::app()->db->createCommand($stmt)->queryRow()){    		
+    		return $res;
+    	}
+    	return $balance;
     }
     
    public function getTotalCommissionToday()
@@ -8847,114 +8851,145 @@ $menu_html.="</li>";
 
     public function getMerchantBalance($merchant_id='')
     {
-    	$total_commission_status=Yii::app()->functions->getOptionAdmin('total_commission_status');
-		if (!empty($total_commission_status)){
-			$total_commission_status=json_decode($total_commission_status);
-		} else {
-			$total_commission_status=array('paid');
-		}    	
-    	$status='';
-    	if (is_array($total_commission_status) && count($total_commission_status)>=1){
-    		foreach ($total_commission_status as $val) {    			
-    			//$status.="'$val',";
-    			$status.= FunctionsV3::q($val).",";
+    	$merchant_id = (integer)$merchant_id;
+    	if($merchant_id>0){
+    		$status_based = array('paid'); $used_status=''; $and='';
+    		$status = getOptionA('total_commission_status');
+    		if($json=json_decode($status,true)){    			
+    			$status_based = $json;
+    		}    		
+    		foreach ($status_based as $val) {
+    			$used_status.= q($val).",";
     		}
-    		$status=substr($status,0,-1);
-    	} else $status="'paid'";
-    	    	        
-    	$include_merchant_cod=Yii::app()->functions->getOptionAdmin('admin_include_merchant_cod');
-    	//dump($include_merchant_cod);
-    	
-    	$and_cash='';
-    	if ( $include_merchant_cod !="yes"){
-    	    $and_cash=" AND payment_type NOT IN ('cod','pyr','ccr','ocr') ";
+    		$used_status = substr($used_status,0,-1);
+    		
+    		$offline = "'cod','ocr','pyr','obd'";
+    		$include_all_offline_payment = getOptionA('admin_include_all_offline_payment');    		
+    		
+    		$and = " AND payment_type NOT IN ($offline) ";
+    		    		
+    		$stmt="SELECT
+	    	IFNULL(sum(a.merchant_earnings),'0') as merchant_earnings,
+	    	
+	    	IFNULL((
+	    	select sum(amount) from
+	    	{{withdrawal}}
+	    	where
+	    	merchant_id=a.merchant_id
+	    	and status IN ('pending','paid','processing','approved')
+	    	),0) as total_payout,
+	    	
+	    	IFNULL((
+	    	  select sum(merchant_earnings)
+	    	  from {{order}}
+	    	  WHERE merchant_id=".q($merchant_id)."	    
+	    	  and status IN ($used_status)	  
+	    	  and payment_type IN ($offline)
+	    	),0) as offline_balance
+	    	
+	    	FROM
+	    	{{order}} a
+	    	WHERE merchant_id=".q($merchant_id)."	    
+	    	and status IN ($used_status)	 
+	    	$and   		    	
+	    	";    		    		
+    		if($res = Yii::app()->db->createCommand($stmt)->queryRow()){       			
+    			$merchant_earnings = (float)$res['merchant_earnings'];
+    			$total_payout = (float)$res['total_payout'];
+    			$offline_balance = (float)$res['offline_balance'];
+    			if($include_all_offline_payment==1){
+    				$balance = $merchant_earnings+$offline_balance - ($total_payout);
+    			} else $balance = $merchant_earnings - ($total_payout+$offline_balance);    			
+    			return $balance;
+    		}    		   		
     	}
-    	
-    	$stmt="SELECT
-    	sum(a.merchant_earnings) as merchant_earnings,
-    	(
-    	select sum(amount) from
-    	{{withdrawal}}
-    	where
-    	merchant_id=a.merchant_id
-    	and status IN ('pending','paid','processing','approved')
-    	) as total_payout
-    	FROM
-    	{{order}} a
-    	WHERE status IN ($status)
-    	AND merchant_id=".Yii::app()->functions->q($merchant_id)."
-    	$and_cash
-    	";
-    	//dump($stmt);    	
-    	if ( $res=$this->db_ext->rst($stmt)){    		
-    		if ( $res[0]['merchant_earnings']==""){
-    			return 0;
-    		}    		    		
-    		return $res[0]['merchant_earnings']-$res[0]['total_payout'];
-    	}	
-    	return false;    	
+    	return 0;
     }	
     
    public function getMerchantBalanceThisMonth($merchant_id='')
    {
-    
-   	    $include_merchant_cod=Yii::app()->functions->getOptionAdmin('admin_include_merchant_cod');	
-   	    $and_cash='';
-    	if ( $include_merchant_cod !="yes"){
-    	    $and_cash=" AND payment_type NOT IN ('cod','pyr','ccr','ocr') ";
-    	}
-   	
-    	$status=$this->getCommissionOrderStats();
-    	
-    	$query_date = date("Y-m-d");
-		$start_date=date('Y-m-01', strtotime($query_date));
-		$end_date=date('Y-m-t', strtotime($query_date));
-		$and =" AND date_created BETWEEN  ".FunctionsV3::q("$start_date 00:00:00")." AND 
-    		        ".FunctionsV3::q("$end_date 23:59:00")."
-    		 ";	    		
-    	
-    	$stmt="SELECT sum(total_commission) as total_commission,
+       	$and=''; 
+       	$merchant_id = (integer)$merchant_id;
+       	
+       	$status_based = array('paid'); $used_status=''; $and='';
+       	$offline = "'cod','ocr','pyr','obd'";
+		$status = getOptionA('total_commission_status');
+		$include_all_offline_payment = getOptionA('admin_include_all_offline_payment');    		
+		
+		if($json=json_decode($status,true)){    			
+			$status_based = $json;
+		}    		
+		foreach ($status_based as $val) {
+			$used_status.= q($val).",";
+		}
+		$used_status = substr($used_status,0,-1);
+       	
+		if($include_all_offline_payment!=1){
+			$and.= " AND payment_type NOT IN ($offline) ";
+		}
+		
+		$query_date = date("Y-m-d");
+		$range1=date('Y-m-01', strtotime($query_date));
+		$range2=date('Y-m-t', strtotime($query_date));
+		$and.=" AND DATE_FORMAT(date_created,'%Y-%m-%d')  BETWEEN ".FunctionsV3::q($range1)." AND ".FunctionsV3::q($range2)."  ";
+		
+    	$stmt="SELECT 
+    	sum(total_commission) as total_commission,
     	sum(total_w_tax) as total_w_tax,
     	count(*) as total_order
     	FROM
     	{{order}}
-    	WHERE status IN ($status)
-    	AND merchant_id=".Yii::app()->functions->q($merchant_id)."
-    	$and
-    	$and_cash
-    	";    	       	
-    	//dump($stmt);
-    	if ( $res=$this->db_ext->rst($stmt)){    		    		
-    		return $res[0];
-    	}	
-    	return false;    	
+    	WHERE merchant_id=".q($merchant_id)."
+    	AND status IN ($used_status)
+    	$and    	
+    	";    	       	    	    	
+    	if($res = Yii::app()->db->createCommand($stmt)->queryRow()){     		
+    		return array(
+    		  'balance'=>$res['total_w_tax']-$res['total_commission'],
+    		  'count'=>$res['total_order']
+    		);
+    	}
+    	return false;    	    	   
     }	
     
-   public function getMerchantTotalSales($merchant_id='')
-   {    	
-   	
-   	    $include_merchant_cod=Yii::app()->functions->getOptionAdmin('admin_include_merchant_cod');
-   	    $and_cash='';
-    	if ( $include_merchant_cod !="yes"){
-    	    $and_cash=" AND payment_type NOT IN ('cod','pyr','ccr','ocr') ";
-    	}
-   	
-   	    $status=$this->getCommissionOrderStats();
-    	$stmt="SELECT 
+    public function getMerchantTotalSales($merchant_id='')
+    {    	
+   	   	$and=''; 
+       	$merchant_id = (integer)$merchant_id;
+       	
+       	$status_based = array('paid'); $used_status=''; $and='';
+       	$offline = "'cod','ocr','pyr','obd'";
+		$status = getOptionA('total_commission_status');
+		$include_all_offline_payment = getOptionA('admin_include_all_offline_payment');    		
+		
+		if($json=json_decode($status,true)){    			
+			$status_based = $json;
+		}    		
+		foreach ($status_based as $val) {
+			$used_status.= q($val).",";
+		}
+		$used_status = substr($used_status,0,-1);
+       	
+		if($include_all_offline_payment!=1){
+			$and.= " AND payment_type NOT IN ($offline) ";
+		}
+		
+		$stmt="SELECT 
     	sum(total_w_tax) as total_w_tax,
     	count(*) as total_order
     	FROM
     	{{order}}
-    	WHERE status IN ($status)
-    	AND merchant_id=".Yii::app()->functions->q($merchant_id)."    	
-    	$and_cash
-    	";       
-    	//dump($stmt);	
-    	if ( $res=$this->db_ext->rst($stmt)){    		    		
-    		//dump($res);
-    		return $res[0];
-    	}	
-    	return false;    	
+    	WHERE status IN ($used_status)
+    	AND merchant_id=".q($merchant_id)."    	
+    	$and
+    	";      		
+		if($res = Yii::app()->db->createCommand($stmt)->queryRow()){
+			return array(
+    		  'balance'=>$res['total_w_tax'],
+    		  'count'=>$res['total_order']
+    		);
+		}
+		return false;
     }	    
         
     public function getCommissionOrderStats()
@@ -10001,18 +10036,20 @@ $menu_html.="</li>";
     
     public function getAddressBookByClient($client_id='')
     {
-    	$db_ext=new DbExt;    	
-    	$stmt="SELECT  
-    	       concat(street,' ',city,' ',state,' ',zipcode) as address,
-    	       id,location_name,country_code
-    	       FROM
-    	       {{address_book}}
-    	       WHERE
-    	       client_id =".$this->q($client_id)."
-    	       ORDER BY street ASC    	       
-    	";    	    	
-    	if ($res=$db_ext->rst($stmt)){    		
-    		return $res;
+    	if($client_id>0){
+	    	$db_ext=new DbExt;    	
+	    	$stmt="SELECT  
+	    	       concat(street,' ',city,' ',state,' ',zipcode) as address,
+	    	       id,location_name,country_code,latitude,longitude
+	    	       FROM
+	    	       {{address_book}}
+	    	       WHERE
+	    	       client_id =".$this->q($client_id)."
+	    	       ORDER BY street ASC    	       
+	    	";    	    	
+	    	if ($res=$db_ext->rst($stmt)){    		
+	    		return $res;
+	    	}
     	}
     	return false;
     } 	        
@@ -10459,13 +10496,21 @@ function bookingStatus()
 	return array(
 	  'pending'=>Yii::t("default",'pending'),
 	  'approved'=>Yii::t('default','approved'),
-	  'denied'=>Yii::t('default','denied')
+	  'denied'=>Yii::t('default','denied'),
+	  'request_cancel_booking'=>Yii::t('default','request cancel booking'),
+	  'cancel_booking_approved'=>Yii::t('default','cancel booking approved'),
 	);
 }
 
 function t($message='')
 {
 	return Yii::t("default",$message);
+}
+
+
+function tt($words='', $params=array())
+{
+	return Yii::t("default",$words,$params);
 }
 
 function uploadURL()

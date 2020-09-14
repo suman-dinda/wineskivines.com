@@ -365,7 +365,11 @@ jQuery(document).ready(function() {
     });  
 
 
-    if ($("#contact-map").exists()){
+    if ($("#contact-map").exists()){    	
+    	dump("contact_disabled_map=>"+contact_disabled_map);
+    	if(contact_disabled_map==1){
+    		return;
+    	}
     	dump(website_location);    	
     	
     	if(useMapbox()){
@@ -400,8 +404,6 @@ jQuery(document).ready(function() {
 		window.location.href=$("#change_package_url").val()+package_id;
 	});	
 	
-	/*CAPCHA*/
-	setTimeout('onloadMyCallback()', 2100);
 			
 	if ( $(".section-address-book").exists() ){
 		if ( $("#table_list_info").exists() ){
@@ -428,15 +430,15 @@ jQuery(document).ready(function() {
        createUploader('uploadavatar','uploadAvatar');
     }    
       
-    
-    if ( $(".search_resto_name").exists() ){    	
-    	iniRestoSearch('search_resto_name','AutoResto');  
-    	iniRestoSearch('street_name','AutoStreetName');  
-    	iniRestoSearch('cuisine','AutoCategory');  
-    	iniRestoSearch('foodname','AutoFoodName'); 
+
+    if ( $(".typhead_restaurant_name").exists() ){
+    	loadTypeHead(1,'.typhead_restaurant_name','RestaurantName');
+    	loadTypeHead(2,'.typhead_street_name','AutoStreetName');
+    	loadTypeHead(3,'.typhead_cuisine','AutoCuisine');
+    	loadTypeHead(4,'.typhead_foodname','AutoFoodName');
     }
-    if ( $(".search-by-postcode").exists() ){
-    	dump('d2x');
+    
+    if ( $(".search-by-postcode").exists() ){    
     	iniRestoSearch('zipcode','AutoZipcode'); 
     }
     
@@ -856,6 +858,10 @@ function callAjax(action,params,buttons)
     			  window.location.reload();
     			break;
 
+    			case "LoadState":
+    			 $("#state_id").html(data.details);
+    			break;
+    			
     			case "LoadCityList":
     			 $("#city_id").html(data.details);
     			break;
@@ -940,13 +946,19 @@ function callAjax(action,params,buttons)
     			case "deleteClientCC":
     			 OtableReload();
     			break;
-    			    						    		
+    			
+    			case "requestCancelBooking":
+    			  $(".booking_id_" +  data.details.booking_id ).after("<p class=\"text-muted\">"+ data.msg+"</p>");
+    			  $(".booking_id_" +  data.details.booking_id ).remove();
+    			break;
+    			    			    						    	
     			default:
     			   uk_msg_sucess(data.msg);
     			   if (!empty(data.details)){
     			   	   if (!empty(data.details.redirect)){
-    			   	   	   dump(data.details.redirect);
-    			   	   	   window.location.href=data.details.redirect;
+    			   	   	   setTimeout( function(){ 
+    			   	   	      window.location.href=data.details.redirect;
+    			   	   	   }, 2501);		
     			   	   	   return;
     			   	   }
     			   }    			   
@@ -999,21 +1011,6 @@ function callAjax(action,params,buttons)
     	}
     }		
     });   	     	  
-}
-
-function onloadMyCallback()
-{				
-	//dump('init kapcha');
-	if ( $("#kapcha-1").exists()){
-	   if ( $("#kapcha-1").html()=="" ){
-	        recaptcha1=grecaptcha.render(document.getElementById('kapcha-1'), {'sitekey' : captcha_site_key});    
-	   } 
-	}
-	if ( $("#kapcha-2").exists()){
-		if ( $("#kapcha-2").html()=="" ){
-	        recaptcha1=grecaptcha.render(document.getElementById('kapcha-2'), {'sitekey' : captcha_site_key});    
-		}
-	}
 }
 
 function initOtable()
@@ -1299,26 +1296,26 @@ jQuery(document).ready(function() {
 	 	 load_item_cart();
 	 });
 	 
-	 if ( $(".search_foodname").exists() ){    	
-    	iniRestoSearch('search_foodname','autoFoodItem');  
+	 if ( $(".search_foodname").exists() ){    	    	
+    	loadTypeHead(1,'.search_foodname','autoFoodItem');
 	 }	
 	 
 	 if ( $("#location_search_type").exists()){	 	 
 	 	 switch ($("#location_search_type").val()){
 	 	 	case "2":	
 	 	 	case 2:
-	 	 	locationLoadState();
-	 	 	locationLoadArea( $(".typhead_city"), $("#city_id") , $("#state_id") ,'state_id' , 'CityList' );
+	 	 	  loadTypeHead(1,'.typhead_state','StateList');
+	 	 	  loadTypeHead(2,'.typhead_city','CityList');
 	 	 	break
 	 	 	
 	 	 	case "3":
 	 	 	case 3:
-	 	 	locationLoadPostalCode();
+	 	 	  loadTypeHead(4,'.typhead_postalcode','PostalCodeList');
 	 	 	break
 	 	 		 	 	
-	 	 	default:
-	 	 	locationLoadCity();
-	 	 	locationLoadArea( $(".typhead_area"), $("#area_id") , $("#city_id") ,'city_id' , 'AreaList' );
+	 	 	default:	 	 	
+	 	 	  loadTypeHead(2,'.typhead_city','CityList');
+	 	 	  loadTypeHead(3,'.typhead_area','AreaList');
 	 	 	break
 	 	 }
 	 }
@@ -1344,7 +1341,19 @@ jQuery(document).ready(function() {
 	$( document ).on( "click", ".change-location", function() {
 		fancyBoxFront("ShowLocationFee", "merchant_id="+$("#merchant_id").val() );
 	});
-		
+
+	$("#location_country_id").change(function() {
+		if (!empty($(this).val())){
+			clearFields(['#state_id','#city_id','#area_id']);	
+			
+			$("#state_id").html('');
+		    $("#city_id").html('');
+		    $("#area_id").html('');
+		  		
+		    callAjax("LoadState","country_id="+$(this).val());
+		} 
+	});
+	
 	$("#state_id").change(function() {		
 		if (!empty($(this).val())){
 		   $("#state").val( $("#state_id option:selected").text()  );
@@ -1413,34 +1422,118 @@ function showPreloader(busy)
 	}
 }
 
-function locationLoadCity()
-{	
-	$.get( front_ajax + "/CityList" + "/?"+ addValidationRequest() + "&post_type=get" , function(data){		
-	   $(".typhead_city").typeahead({ 
-	    	source:data,
-	    	autoSelect: true,	  
-	        showHintOnFocus:true
-	   });
-	},'json');
+var my_typehead = [];
+
+function loadTypeHead(id, target, action)
+{			
+	city_id = 0; state_id = 0; auto_merchant_id = 0;
 	
-	$(".typhead_city").change(function() {
-	  var current = $(".typhead_city").typeahead("getActive");  
-	  if(current){	     
-	     $("#city_id").val( current.id );  
-	     $("#city_name").val( current.name );  
-	     
-	     $("#area_id").val( "" );  
-	     $("#location_area").val( "" );  
-	  }
-	});
-	
-	$( document ).on( "click", ".typhead_city", function() {	 
-	 	 $(this).val("");
-	});
-	$( document ).on( "focusout", ".typhead_city", function() {	 
-		 var city_name=$("#city_name").val();
-	 	 $(this).val( city_name );
-	}); 
+	my_typehead[id] = $.typeahead({
+		    input: target,
+		    minLength: 0,
+		    maxItem: 10,
+		    order: "asc",
+		    dynamic: true,
+		    delay: 500,
+		    hint: true,
+			accent: true,
+			searchOnFocus: true,	    
+			cancelButton: false,
+		    template: function (query, item) { 	 
+		    	return '<span>{{name}}</span>';
+		    },
+		    emptyTemplate: ("no result for")+ " {{query}}",
+		    source: {
+		        user: {
+		            display: "name",                        
+		            ajax: function (query) {
+		            	
+		            	dump("before send "+ action);
+		            	switch(action){
+		            		case "StateList":		            		 
+		            	     clearFields(['#state_id','#state_name','#city_id','#city_name','.typhead_city']);
+		            		break;
+		            		
+		            		case "CityList":		            		
+		            		clearFields( ['#area_id','.typhead_area'] );
+		            		state_id = $("#state_id").val();
+		            		break;
+		            		
+						    case "AreaList":						
+						    city_id = $("#city_id").val();						
+						    break;
+						    
+						    case "PostalCodeList":
+						    clearFields( ['#postal_code'] );
+						    break;
+						    
+						    case "autoFoodItem":
+						      if (typeof merchant_information === "undefined" || merchant_information==null ) {						          
+						      } else {
+						      	 auto_merchant_id = merchant_information.merchant_id;
+						      }
+						    break;
+						    
+					    }			         
+						            	   	
+		                return {
+		                    type: "POST",
+		                    url: front_ajax+"/"+action,
+		                    path: "data.item",
+		                    data: {
+		                        q: "{{query}}",
+		                        YII_CSRF_TOKEN : YII_CSRF_TOKEN,
+		                        'yii_session_token': yii_session_token,
+		                        'city_id' : city_id,
+		                        'state_id' : state_id,
+		                        'auto_merchant_id' : auto_merchant_id
+		                    },
+		                    callback: {
+		                        done: function (data) {	        	                        	
+		                            return data;
+		                        }
+		                    }
+		                }
+		            }
+		 
+		        },       
+		    },
+		    callback: {
+		        onClick: function (node, a, item, event) {             			        				        				        	
+		            dump(item);
+		            dump("onClick=>"+action);
+		            switch(action){
+		            	case "StateList":
+		            	  $("#state_id").val( item.state_id);
+		            	  $("#state_name").val( item.name);		            	  
+		            	  $('.typhead_city').trigger('input.typeahead');
+		            	  break;
+		            	  
+		            	case "CityList":		            	  
+		            	  $("#city_id").val(item.id);
+		            	  $("#city_name").val(item.name);
+		            	  $('.typhead_area').trigger('input.typeahead');
+		            	  break;
+		            	
+		            	case "AreaList":
+		            	  $("#area_id").val(item.area_id);  
+		            	  break;
+		            	  
+		            	case "PostalCodeList":  
+		            	  $("#postal_code").val(item.name);  
+		            	break;
+		            }
+		        },
+		        onSendRequest: function (node, query) {
+		            console.log('request is sent');
+		        },
+		        onReceiveRequest: function (node, query) {
+		            console.log('request is received');
+		        }
+		    },
+		    debug: true
+		 });	
+		
 }
 
 function locationLoadArea( type_head, text_field , text_field2 , variable_1 , action )
@@ -2080,6 +2173,24 @@ googleMapsDeliveryLocation = function(){
 	    $("#map_accurate_address_lng").val( event.latLng.lng() );
 	});
 	
+	
+	if (typeof address_list === "undefined" || address_list==null ) {
+		//
+	} else {
+		try {
+			address_book_id =  $("#address_book_id").val();
+			lat = address_list[address_book_id].lat;
+			lng = address_list[address_book_id].lng;		
+			dl_map.setCenter(lat,lng);	    
+		    dl_marker.setPosition( new google.maps.LatLng( lat,lng ) );	    
+		    $("#map_accurate_address_lat").val( lat );
+		    $("#map_accurate_address_lng").val( lng );	    
+			return;		
+		} catch(err) {
+		  //
+		}
+	}
+	
 	GMaps.geolocate({
 	  success: function(position) {	  	
 	    dl_map.setCenter(position.coords.latitude, position.coords.longitude);	    
@@ -2218,7 +2329,7 @@ getRemainingReview = function(){
     });
     
     ajax_remaining_review.done(function( data ) {    	
-    	if(data.code==1){    	
+    	if(data.code==1 && data.details.remaining>0){    	    		
     		$(".badge_review_count").html( data.details.remaining  );
     		$(".review_notification").html( data.details.count_msg  );
     		$(".write-review-new").show();
@@ -2252,5 +2363,76 @@ jQuery(document).ready(function() {
 		    uk_msg(result.error.message);
 		});		
 	});
+	
+	$( document ).on( "click", ".request_cancel_booking", function() {
+		booking_id = $(this).data("id");
+		ans = confirm(js_lang.trans_4);
+		if(ans){
+			callAjax("requestCancelBooking",'id='+booking_id,'','');
+		}
+	});
+	
+	$( document ).on( "change", "#address_book_id", function() {
+		if (typeof address_list === "undefined" || address_list==null ) {
+			//
+		} else {
+			try {
+				address_book_id = $(this).val();
+				lat = address_list[address_book_id].lat;
+			    lng = address_list[address_book_id].lng;
+				if(map_provider=="mapbox"){
+					mapbox_delivery_accuracy_marker.setLatLng([lat, lng]).update();
+					mapbox_delivery_accuracy.setView([lat, lng], 14);
+				} else {					
+			        dl_map.setCenter(lat,lng);	    
+				    dl_marker.setPosition( new google.maps.LatLng( lat,lng ) );	    
+				}
+			    $("#map_accurate_address_lat").val( lat );
+			    $("#map_accurate_address_lng").val( lng );	    
+		    } catch(err) {
+		    	//
+		    }
+		}
+	});
+		
+	$( document ).on( "click", ".forgot_selection", function() {
+		$(".forgot_form_email").hide(); $(".forgot_form_sms").hide();
+		var selection = $(this).data("id");
+		$(".forgot_form_"+selection).show();
+		$("#forgot_pass_action").val(selection);
+		switch(selection){
+			case "email":
+			  $("#username-email").attr("required",true);
+			  $("#forgot_phone_number").removeAttr("required");
+			break;
+			
+			case "sms":
+			  $("#forgot_phone_number").attr("required",true);
+			  $("#username-email").removeAttr("required");
+			break;
+		}
+	});
+	
+	
+	$.validate({ 	
+		language : jsLanguageValidator,
+	    form : '#frm_ajax',    
+	    onError : function() {      
+	    },
+	    onSuccess : function() {     
+	      var params=$("#frm_ajax").serialize();	      
+	      callAjax(ajax_action,params, $("#frm_ajax button") );
+	      return false;
+	    }  
+	});
+		
+	
 });
 /*end ready*/
+
+function clearFields(data)
+{
+	$.each(data, function( index, fields ) {
+		$(fields).val('');
+	});
+}

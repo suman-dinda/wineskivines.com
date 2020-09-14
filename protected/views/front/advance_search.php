@@ -80,11 +80,20 @@ id="find_restaurant_by_address" value="<?php echo t($home_search_text)?>" >
   <div class="search-input-wraps rounded30">
      <div class="row">
         <div class="col-sm-11 col-xs-10">
+        
+        <div class="typeahead__container">
+         <div class="typeahead__field">
+         <div class="typeahead__query">                
         <?php echo CHtml::textField('restaurant-name','',array(
          'placeholder'=>t("Restaurant name"),
          'required'=>true,
-         'class'=>"search-field search_resto_name"
+         'class'=>"search-field typhead_restaurant_name",
+         'autocomplete'=>"off",
         ))?>        
+        </div>
+         </div>
+         </div>
+        
         </div>        
         <div class="col-sm-1 col-xs-2 relative">
           <button type="submit"><i class="ion-ios-search"></i></button>         
@@ -98,11 +107,21 @@ id="find_restaurant_by_address" value="<?php echo t($home_search_text)?>" >
   <div class="search-input-wraps rounded30">
      <div class="row">
         <div class="col-sm-11 col-xs-10">
+        
+        <div class="typeahead__container">
+         <div class="typeahead__field">
+         <div class="typeahead__query">                 
         <?php echo CHtml::textField('street-name','',array(
          'placeholder'=>t("Street name"),
          'required'=>true,
-         'class'=>"search-field street_name"
+         'class'=>"search-field typhead_street_name",
+         'autocomplete'=>"off",
         ))?>        
+         </div>
+         </div>
+         </div>
+        
+        
         </div>        
         <div class="col-sm-1 col-xs-2 relative">
           <button type="submit"><i class="ion-ios-search"></i></button>         
@@ -116,11 +135,20 @@ id="find_restaurant_by_address" value="<?php echo t($home_search_text)?>" >
   <div class="search-input-wraps rounded30">
      <div class="row">
         <div class="col-sm-11 col-xs-10">
+        
+        <div class="typeahead__container">
+         <div class="typeahead__field">
+         <div class="typeahead__query">                 
         <?php echo CHtml::textField('category','',array(
          'placeholder'=>t("Enter Cuisine"),
          'required'=>true,
-         'class'=>"search-field cuisine"
+         'class'=>"search-field typhead_cuisine",
+         'autocomplete'=>"off",
         ))?>        
+          </div>
+         </div>
+         </div>
+        
         </div>        
         <div class="col-sm-1 col-xs-2 relative">
           <button type="submit"><i class="ion-ios-search"></i></button>         
@@ -134,11 +162,20 @@ id="find_restaurant_by_address" value="<?php echo t($home_search_text)?>" >
   <div class="search-input-wraps rounded30">
      <div class="row">
         <div class="col-sm-11 col-xs-10">
+        
+        <div class="typeahead__container">
+         <div class="typeahead__field">
+         <div class="typeahead__query">                 
         <?php echo CHtml::textField('foodname','',array(
          'placeholder'=>t("Enter Food Name"),
          'required'=>true,
-         'class'=>"search-field foodname"
+         'class'=>"search-field typhead_foodname",
+         'autocomplete'=>"off",
         ))?>        
+           </div>
+         </div>
+         </div>
+        
         </div>        
         <div class="col-sm-1 col-xs-2 relative">
           <button type="submit"><i class="ion-ios-search"></i></button>         

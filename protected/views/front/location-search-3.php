@@ -13,12 +13,20 @@
          echo CHtml::hiddenField('postal_code');         
          echo CHtml::hiddenField('location_search_type',$location_search_type);
          ?>
+         
+         <div class="typeahead__container">
+         <div class="typeahead__field">
+         <div class="typeahead__query">        
          <?php echo CHtml::textField('location_postalcode','',array(
           'placeholder'=>t("Postal Code/Zip Code"),
           'class'=>"typhead_postalcode rounded-corner",
           'autocomplete'=>"off",
           'required'=>true
          ))?>
+         </div>
+         </div>
+         </div>
+         
        </div>       
        <div class="col-sm-6 right-border rounded-end">
          <button type="submit" class="location-search-submit"><?php echo t("SHOW RESTAURANTS")?></button>

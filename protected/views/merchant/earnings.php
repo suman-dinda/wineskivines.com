@@ -1,20 +1,3 @@
-<?php 
-$mtid=Yii::app()->functions->getMerchantID();
-$sale_month=0;
-$sale_month_count=0;
-$sale_total=0;
-$total_sale_count=0;
-if ($earning=Yii::app()->functions->getMerchantBalanceThisMonth($mtid)){	
-	$sale_month=$earning['total_w_tax']-$earning['total_commission'];
-	$sale_month_count=$earning['total_order'];	
-}
-
-if ($total=Yii::app()->functions->getMerchantTotalSales($mtid)){	    
-    $sale_total=$total['total_w_tax'];    
-    $total_sale_count=$total['total_order'];
-}
-?>
-
 <div class="earnings-wrap">
 
 <div class="table">
@@ -42,8 +25,7 @@ if ($total=Yii::app()->functions->getMerchantTotalSales($mtid)){
   <li>
    <div class="rounded-box rounded">
      <p><?php echo t("Total value of your item sales")?>:</p>
-     <h3><?php echo FunctionsV3::prettyPrice($sale_total);?></h3>
-     <!--<P class="small"><?php echo t("based on list price of each item")?></P>-->
+     <h3><?php echo FunctionsV3::prettyPrice($sale_total);?></h3>     
      <P class="small"><?php echo t("From")?>:<?php echo $total_sale_count?> <?php echo t("orders")?></P>
    </div>
   </li>

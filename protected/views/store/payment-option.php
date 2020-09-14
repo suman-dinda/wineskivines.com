@@ -14,11 +14,14 @@ $this->renderPartial('/front/order-progress-bar',array(
 $s=$_SESSION;
 $continue=false;
 
-$merchant_address='';		
-if ($merchant_info=Yii::app()->functions->getMerchant($s['kr_merchant_id'])){	
+$merchant_address=''; $restaurant_slug='';		
+$merchant_id = isset($s['kr_merchant_id'])?(integer)$s['kr_merchant_id']:0;
+if ($merchant_info=Yii::app()->functions->getMerchant($merchant_id)){	
 	$merchant_address=$merchant_info['street']." ".$merchant_info['city']." ".$merchant_info['state'];
 	$merchant_address.=" "	. $merchant_info['post_code'];
+	$restaurant_slug = $merchant_info['restaurant_slug'];
 }
+ 
 
 $client_info='';
 
@@ -68,8 +71,7 @@ Yii::app()->functions->getOptionAdmin("admin_currency_position"));
    <div class="container">
            
      <?php if ( $continue==TRUE):?>
-     <?php 
-     $merchant_id=$s['kr_merchant_id'];
+     <?php      
      echo CHtml::hiddenField('merchant_id',$merchant_id);
      ?>
      <div class="col-md-7 border">
@@ -84,7 +86,8 @@ Yii::app()->functions->getOptionAdmin("admin_currency_position"));
      	echo CHtml::hiddenField('action','placeOrder');
      } else echo CHtml::hiddenField('action','InitPlaceOrder');  
      
-     echo CHtml::hiddenField('country_code',$merchant_info['country_code']);
+     $merchant_country_code = $merchant_info['country_code']; 
+        
      echo CHtml::hiddenField('currentController','store');
      echo CHtml::hiddenField('delivery_type',$s['kr_delivery_options']['delivery_type']);
      echo CHtml::hiddenField('cart_tip_percentage','');
@@ -102,7 +105,20 @@ Yii::app()->functions->getOptionAdmin("admin_currency_position"));
      }          
      
      $transaction_type=$s['kr_delivery_options']['delivery_type'];     
+     
+     /*CONTACT LESS DELIVERY*/
+     $merchant_opt_contact_delivery = getOption($merchant_id,'merchant_opt_contact_delivery');        
+     if($transaction_type=="delivery" && $merchant_opt_contact_delivery==1){     	
+     	$opt_contact_delivery = $s['kr_delivery_options']['opt_contact_delivery'];
+     	if($opt_contact_delivery==1){     		
+     		echo CHtml::hiddenField('opt_contact_delivery',$opt_contact_delivery);
+     	}
+     }
      ?>
+     
+     <?php if ( getOptionA('captcha_order')==2):?>             
+       <div class="recaptcha_v3"><?php GoogleCaptchaV3::init();?></div>      
+     <?php endif;?>          			 
      
      <?php if ( $transaction_type=="pickup" ||  $transaction_type=="dinein"):?> 
                
@@ -116,10 +132,7 @@ Yii::app()->functions->getOptionAdmin("admin_currency_position"));
           <p class="uk-text-bold"><?php echo $merchant_address;?></p>
                    
           <?php if (!isset($is_guest_checkout)):?> 
-          <?php //if ( getOptionA('mechant_sms_enabled')==""):?>
-          <?php //if ( getOption($merchant_id,'order_verification')==2):?>
-          <?php //$sms_balance=Yii::app()->functions->getMerchantSMSCredit($merchant_id);?>
-          <?php //if ( $sms_balance>=1):?>
+          
                     
             <div class="row top10">
                 <div class="col-md-10">
@@ -134,9 +147,7 @@ Yii::app()->functions->getOptionAdmin("admin_currency_position"));
              </div>             
             </div>  
           
-		  <?php //endif;?>
-          <?php //endif;?>
-          <?php //endif;?>
+		  
           <?php endif;?>
           
           
@@ -192,20 +203,33 @@ Yii::app()->functions->getOptionAdmin("admin_currency_position"));
 	        <?php endif;?> <!--$is_guest_checkout-->
 	        
 	        <?php if (!$search_by_location):?>
-		        <?php if ( $website_enabled_map_address==2 && $enabled_map_selection_delivery!=1 ):?>	        
-		        <div class="top10">
-	            <?php Widgets::AddressByMap()?>
+		        <?php if ( $enabled_map_selection_delivery!=1 ):?>	        
+		        <div class="top10">		        
+	            <?php //Widgets::AddressByMap()?>
 	            </div>
 	            <?php endif;?>
                         
-            <?php $address_list=Yii::app()->functions->addressBook(Yii::app()->functions->getClientId());?>
+            <?php $address_list=Yii::app()->functions->getAddressBookByClient(Yii::app()->functions->getClientId());?>
 	            <?php if(is_array($address_list) && count($address_list)>=1):?>
+	            <?php 	            
+	            $new_address = array(); $json_address = array();
+	            foreach ($address_list as $address_list_val) {
+	            	$new_address[ $address_list_val['id'] ] = $address_list_val['address'];
+	            	$json_address[ $address_list_val['id'] ] = array(
+	            	  'lat'=>$address_list_val['latitude'],
+	            	  'lng'=>$address_list_val['longitude'],
+	            	);
+	            }	            	            
+	            FunctionsV3::registerScript(array(
+	             'var address_list = '.json_encode($json_address).';',
+	            ));
+	            ?>
 	            <div class="address_book_wrap">
 	            <div class="row top10">
 	                <div class="col-md-10">
 	               <?php                
 	               echo CHtml::dropDownList('address_book_id',$address_book['id'],
-	               (array)$address_list,array(
+	               (array)$new_address,array(
 	                  'class'=>"grey-fields full-width"
 	               ));
 	               ?>
@@ -296,14 +320,27 @@ Yii::app()->functions->getOptionAdmin("admin_currency_position"));
 	              ))?>
 	             </div> 
               </div> 
+              
+              <div class="row top10">
+                <div class="col-md-10">
+                  <?php 
+                   echo CHtml::dropDownList('country_code',
+			      $merchant_country_code
+			      ,(array)Yii::app()->functions->CountryListMerchant(),array(
+			        'class'=>'grey-fields full-width',
+			        'data-validation'=>"required"  
+			      ));
+                  ?>
+	             </div> 
+              </div> 
            
            <?php else :?>      
             <!--ADDRESS BY LOCATION -->                        	        
             <?php             
-            
-            
+                        
              $country_id=getOptionA('location_default_country'); $state_ids='';
              $location_search_data=FunctionsV3::getSearchByLocationData();
+             $country_list = FunctionsV3::countryList();            
                                                  
              echo CHtml::hiddenField('is_search_by_location',1);
              echo CHtml::hiddenField('state');    
@@ -312,10 +349,19 @@ Yii::app()->functions->getOptionAdmin("admin_currency_position"));
              
              $states = FunctionsV3::ListLocationState($country_id); 
              $citys = array(); $areas= array();
-                          
+             
+             $state_id = isset($location_search_data['state_id'])?(integer)$location_search_data['state_id']:0;            
+             $city_id = isset($location_search_data['city_id'])?(integer)$location_search_data['city_id']:0;            
+             $area_id = isset($location_search_data['area_id'])?(integer)$location_search_data['area_id']:0;            
+             
              if(is_array($location_search_data) && count($location_search_data)>=1){
-             	$citys=FunctionsV3::ListCityList( isset($location_search_data['state_id'])?$location_search_data['state_id']:'' );
-             	$areas=FunctionsV3::AreaList( isset($location_search_data['city_id'])?$location_search_data['city_id']:'' );
+             	if($state_id<=0 && $city_id>0){
+             		if ($resp_state = FunctionsV3::getLocationStateIdByCity($city_id)){
+             			$state_id = $resp_state['state_id'];
+             		}
+             	}
+             	$citys=FunctionsV3::ListCityList( $state_id);
+             	$areas=FunctionsV3::AreaList( $city_id );             	
              } else {
              	$citys=array(
              	  ''=>t("Select City")
@@ -328,8 +374,21 @@ Yii::app()->functions->getOptionAdmin("admin_currency_position"));
              <div class="row top10">
                 <div class="col-md-10">
                  <?php
+                 echo CHtml::dropDownList('location_country_id',$country_id,
+                 (array)$country_list                                  
+                 ,array(
+                   'class'=>'grey-fields full-width',
+                   'data-validation'=>"required"
+                 ));
+                 ?>
+	             </div> 
+              </div>  
+              
+             <div class="row top10">
+                <div class="col-md-10">
+                 <?php
                  echo CHtml::dropDownList('state_id',
-                 isset($location_search_data['state_id'])?$location_search_data['state_id']:'',
+                 $state_id,
                  (array)$states
                  ,array(
                    'class'=>'grey-fields full-width',
@@ -491,21 +550,26 @@ Yii::app()->functions->getOptionAdmin("admin_currency_position"));
      
      <?php endif;?>
      
-     
-     <?php if($enabled_map_selection_delivery==1 && $transaction_type=="delivery"):?>
+          
+     <?php if($transaction_type=="delivery" && $enabled_map_selection_delivery==1):?>
      <div class="top25">
        <?php FunctionsV3::sectionHeader('Point your address in the map')?>		  
-     </div>
-     
+       <?php if(!$search_by_location):?>
+	       <p><?php echo t("The marker you set in the map, it will use to get the distance between you and merchant address, so please put the map pin correctly")?>.</p>
+	       <?php else :?>
+	       <p><?php echo t("set the marker on the map for accurate delivery location")?>.</p>
+       <?php endif;?>
+     </div>     
      <div id="delivery_map_accuracy" class="delivery_map_accuracy"></div>
      <?php endif;?>
      
      <div class="top25">
-     <?php 
+     <?php      
 	 $this->renderPartial('/front/payment-list',array(
 	   'merchant_id'=>$merchant_id,
 	   'payment_list'=>FunctionsV3::getMerchantPaymentListNew($merchant_id),
-	   'transaction_type'=>$s['kr_delivery_options']['delivery_type']	   
+	   'transaction_type'=>$s['kr_delivery_options']['delivery_type'],	   
+	   'opt_contact_delivery'=>isset($s['kr_delivery_options']['opt_contact_delivery'])?(integer)$s['kr_delivery_options']['opt_contact_delivery']:0,
 	 ));
 	 ?>
 	 </div>
@@ -565,6 +629,10 @@ Yii::app()->functions->getOptionAdmin("admin_currency_position"));
      
      </div> <!--box rounded-->
      
+     <a href="<?php echo Yii::app()->createUrl("menu-$restaurant_slug")?>">
+       <i class="ion-ios-arrow-thin-left"></i> <?php echo t("Back")?>
+      </a>
+     
      </div> <!--left content-->
      
      <div class="col-md-5 border sticky-div"><!-- RIGHT CONTENT STARTS HERE-->
@@ -619,15 +687,7 @@ Yii::app()->functions->getOptionAdmin("admin_currency_position"));
 	         	echo CHtml::hiddenField('maximum_order_pretty',baseCurrency().prettyFormat($maximum_order));
 	         }
 	         ?>
-	         
-	         <?php //if ( getOptionA('captcha_order')==2 || getOptionA('captcha_customer_signup')==2):?>             
-	         <?php if ( getOptionA('captcha_order')==2):?>             
-             <div class="top10 capcha-wrapper">
-             <?php //GoogleCaptcha::displayCaptcha()?>
-             <div id="kapcha-1"></div>
-             </div>
-             <?php endif;?>          
-             
+	         	         
               <!--SMS Order verification-->
 	          <?php if ( getOptionA('mechant_sms_enabled')==""):?>
 	          <?php if ( getOption($merchant_id,'order_verification')==2):?>

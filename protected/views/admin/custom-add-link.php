@@ -21,12 +21,59 @@ if (isset($_GET['id'])){
 
 <div class="spacer"></div>
 
-<form class="uk-form uk-form-horizontal forms" id="forms">
-<?php echo CHtml::hiddenField('action','addCustomPageLink')?>
-<?php echo CHtml::hiddenField('id',isset($_GET['id'])?$_GET['id']:"");?>
-<?php if (!isset($_GET['id'])):?>
-<?php echo CHtml::hiddenField("redirect",Yii::app()->request->baseUrl."/admin/customPage/Do/AddCustom")?>
-<?php endif;?>
+<?php
+echo CHtml::beginForm('','post',array(
+  'id'=>"forms",
+  'class'=>"uk-form uk-form-horizontal forms",
+  'onsubmit'=>"return false;"	  
+)); 
+echo CHtml::hiddenField('action','addCustomPageLink');
+echo CHtml::hiddenField('id',isset($_GET['id'])?$_GET['id']:"");
+if (!isset($_GET['id'])){
+	echo CHtml::hiddenField("redirect",Yii::app()->request->baseUrl."/admin/customPage/Do/AddCustom");
+}
+?>
+
+<?php if ( Yii::app()->functions->multipleField()==2):?>
+<ul data-uk-tab="{connect:'#tab-content'}" class="uk-tab uk-active">
+    <li class="uk-active" ><a href="#"><?php echo t("default")?></a></li>    
+    <?php if ( $fields=FunctionsV3::getLanguageList(false)):?>  
+    <?php foreach ($fields as $f_val): ?>
+    <li class="" ><a href="#"><?php echo $f_val;?></a></li>
+    <?php endforeach;?>
+    <?php endif;?>
+</ul>
+
+<ul class="uk-switcher" id="tab-content">
+<li class="uk-active">
+
+<div class="uk-form-row">
+  <label class="uk-form-label"><?php echo Yii::t("default","Link Name")?></label>
+  <?php 
+  echo CHtml::textField('page_name',
+  isset($data['page_name'])?$data['page_name']:""
+  ,array('class'=>"uk-form-width-large",'data-validation'=>"required"))
+  ?>
+</div>
+
+</li>
+
+<?php foreach ($fields as $key_f => $f_val): ?>
+<li>
+<div class="uk-form-row">
+  <label class="uk-form-label"><?php echo Yii::t("default","Link Name")?></label>
+  <?php 
+  echo CHtml::textField("page_name_trans[$key_f]",
+  isset($page_name_trans[$key_f])?$page_name_trans[$key_f]:''
+  ,array('class'=>"uk-form-width-large"))
+  ?>
+</div>
+</li>
+<?php endforeach;?>
+
+</ul>
+
+<?php else :?>
 
 
 <div class="uk-form-row">
@@ -38,6 +85,11 @@ if (isset($_GET['id'])){
   ?>
 </div>
 
+<?php endif;?>
+
+<div class="spacer"></div>
+
+
 <div class="uk-form-row">
   <label class="uk-form-label"><?php echo Yii::t("default","Link")?></label>
   <?php 
@@ -46,7 +98,6 @@ if (isset($_GET['id'])){
   ,array('class'=>"uk-form-width-large",'data-validation'=>"required"))
   ?>
 </div>
-
 
 <div class="uk-form-row">
   <label class="uk-form-label"><?php echo Yii::t("default","Open in new window")?>?</label>
@@ -74,4 +125,3 @@ array(
 <input type="submit" value="<?php echo Yii::t("default","Save")?>" class="uk-button uk-form-width-medium uk-button-success">
 </div>
 
-</form>

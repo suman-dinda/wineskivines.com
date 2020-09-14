@@ -221,7 +221,8 @@ Yii::app()->functions->getOption("merchant_information",Yii::app()->functions->g
   ""
   ,array(
   'class'=>'uk-form-width-large',
-  'autocomplete'=>"off"
+  'autocomplete'=>"off",
+  'autocomplete'=>"new-password"
   ))?>
 </div>
 </li>

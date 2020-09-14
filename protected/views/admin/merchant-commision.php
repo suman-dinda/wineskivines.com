@@ -99,8 +99,8 @@ if (isset($_GET['merchant_id'])){
   isset($_GET['payment_type'])?$_GET['payment_type']:1
   ,array(
     1=>t("All payment type"),
-    2=>t("Cash"),
-    3=>t("Card")
+    2=>t("All offline payment"),
+    3=>t("All Online payment")
   ),
   array(
     'class'=>"uk-form-width-large"

@@ -42,7 +42,6 @@
   <?php echo $content;?>
 </div> <!--END CONTENT-->
 
-</body>
 
 <!--<script src="//code.jquery.com/jquery-1.10.2.min.js" type="text/javascript"></script>  -->
 <script src="<?php echo Yii::app()->request->baseUrl;?>/assets/vendor/jquery-1.10.2.min.js" type="text/javascript"></script>  
@@ -79,5 +78,7 @@ var jsLanguageValidator=<?php echo json_encode($js_lang_validator)?>;
 <!--ICHECK-->
 
 <script src="<?php echo Yii::app()->request->baseUrl; ?>/assets/js/admin.js?ver=1" type="text/javascript"></script>  
+
+</body>
 
 </html>

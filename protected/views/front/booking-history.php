@@ -1,6 +1,7 @@
 
 <div class="box-grey rounded section-order-history" style="margin-top:0;">
 
+
 <div class="bottom10">
 <?php echo FunctionsV3::sectionHeader('Your Recent Booking');?>
 </div>
@@ -37,8 +38,29 @@
         
         <td>
           <a href="javascript:;" class="view-order-history" data-id="<?php echo $val['booking_id'];?>">
-          <p class="green-text top10 "><?php echo t($val['status'])?></p>
+          <p class="green-text top10 "><?php echo isset($booking_stats[$val['status']])? $booking_stats[$val['status']] : t($val['status']) ?></p>
           </a>
+          
+          <?php if (FunctionsV3::canCancel($val['date_created'],$booking_cancel_days,$booking_cancel_hours,$booking_cancel_minutes)):?>
+	          <?php if($val['request_cancel']<=0):?>
+
+	          <?php if($val['status']=='pending'):?>          
+	          <div style="margin-top:10px;">
+	          <a href="javascript:;" class="orange-button request_cancel_booking booking_id_<?php echo $val['booking_id']?> " data-id="<?php echo $val['booking_id']?>" >
+	          <?php echo t("Cancel booking")?>
+	          </a>
+	          </div>
+	          <?php endif;?>
+	          
+	          <?php else :?>
+	           <p class="text-muted"><?php echo t("Cancel booking request sent")?></p>
+	          <?php endif;?>
+	      <?php else :?>    
+	         <?php if($val['request_cancel']>0):?>
+	            <p class="text-muted"><?php echo t("Cancel booking request sent")?></p>
+	         <?php endif;?>
+          <?php endif;?>
+          
         </td>
       </tr>      
             

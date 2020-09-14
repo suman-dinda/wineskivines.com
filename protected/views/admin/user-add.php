@@ -66,7 +66,10 @@ FunctionsV3::addCsrfToken();
   <label class="uk-form-label"><?php echo Yii::t("default","New Password")?></label>
   <?php 
   echo CHtml::passwordField('password',
-  '',array('class'=>"uk-form-width-large"))
+  '',array(
+     'class'=>"uk-form-width-large",
+     'autocomplete'=>"new-password"     
+   ))
   ?>
 </div>
 

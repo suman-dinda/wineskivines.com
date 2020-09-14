@@ -10,26 +10,8 @@ if ( !file_exists(FunctionsV3::uploadPath()."/$merchant_photo_bg")){
 	$merchant_photo_bg='';
 } 
 
-/*RENDER MENU HEADER FILE*/
-
-/*GET MINIMUM ORDER*/
-
-/*dump($distance);
-dump($distance_type_raw);
-dump($data['minimum_order']);*/
-
-$min_fees=FunctionsV3::getMinOrderByTableRates($merchant_id,
-   $distance,
-   $distance_type_raw,
-   $data['minimum_order']
-);
-
-//dump($min_fees);
-
-$ratings=Yii::app()->functions->getRatings($merchant_id);   
 $merchant_info=array(   
-  'merchant_id'=>$merchant_id ,
-  //'minimum_order'=>$data['minimum_order'],
+  'merchant_id'=>$merchant_id ,  
   'minimum_order'=>$min_fees,
   'ratings'=>$ratings,
   'merchant_address'=>$data['merchant_address'],
@@ -67,10 +49,7 @@ $todays_day = date("l");
 
 $checkout=FunctionsV3::isMerchantcanCheckout($merchant_id); 
 $menu=Yii::app()->functions->getMerchantMenu($merchant_id , isset($_GET['sname'])?$_GET['sname']:'' , $todays_day ); 
-//dump($menu);
-//die();
 
-//dump($checkout);
 
 echo CHtml::hiddenField('is_merchant_open',isset($checkout['code'])?$checkout['code']:'' );
 
@@ -110,8 +89,6 @@ if (!empty($merchant_maximum_order_pickup)){
          displayPrice(baseCurrency(),prettyFormat($merchant_maximum_order_pickup)));
 }  
 
-/*add minimum and max for delivery*/
-//$minimum_order=Yii::app()->functions->getOption('merchant_minimum_order',$merchant_id);
 $minimum_order=$min_fees;
 if (!empty($minimum_order)){
 	echo CHtml::hiddenField('minimum_order',unPrettyPrice($minimum_order));
@@ -126,27 +103,18 @@ $merchant_maximum_order=Yii::app()->functions->getOption("merchant_maximum_order
  }
 
 $is_ok_delivered=1;
-if (is_numeric($merchant_delivery_distance)){
+if($merchant_delivery_distance>0){
 	if ( $distance>$merchant_delivery_distance){
-		$is_ok_delivered=2;
-		/*check if distance type is feet and meters*/
-		//if($distance_type=="ft" || $distance_type=="mm" || $distance_type=="mt"){
-		if($distance_type=="ft" || $distance_type=="mm" || $distance_type=="mt" || $distance_type=="meter"){
-			$is_ok_delivered=1;
-		}
+		$is_ok_delivered=2;				
 	}
 } 
 
 echo CHtml::hiddenField('is_ok_delivered',$is_ok_delivered);
 echo CHtml::hiddenField('merchant_delivery_miles',$merchant_delivery_distance);
-echo CHtml::hiddenField('unit_distance',$distance_type);
+echo CHtml::hiddenField('unit_distance',$unit_pretty);
 echo CHtml::hiddenField('from_address', FunctionsV3::getSessionAddress() );
 
 echo CHtml::hiddenField('merchant_close_store',getOption($merchant_id,'merchant_close_store'));
-/*$close_msg=getOption($merchant_id,'merchant_close_msg');
-if(empty($close_msg)){
-	$close_msg=t("This restaurant is closed now. Please check the opening times.");
-}*/
 echo CHtml::hiddenField('merchant_close_msg',
 isset($checkout['msg'])?$checkout['msg']:t("Sorry merchant is closed."));
 
@@ -293,14 +261,21 @@ if ($food_viewing_private==2){
 			 }
 			 ?>
 			 
-			 <div class="search-food-wrap">						   
+			 <div class="search-food-wrap">			
+			 			   
+			  <div class="typeahead__container">
+              <div class="typeahead__field">
+              <div class="typeahead__query">   
 			   <?php echo CHtml::textField('sname',
 			   isset($_GET['sname'])?$_GET['sname']:''
 			   ,array(
 			     'placeholder'=>t("Search"),
 			     'class'=>"form-control search_foodname required"
 			   ))?>
-			   <button type="submit"><i class="ion-ios-search"></i></button>
+			   </div>
+			   </div>
+			   </div>
+			   			   
 			 </div>
 			 <?php if (isset($_GET['sname'])):?> 
 			     <a href="<?php echo Yii::app()->createUrl('store/menu-'.$data['restaurant_slug'])?>">
@@ -466,10 +441,10 @@ if ($food_viewing_private==2){
 	        
 	        <p>
 	        <?php 
-	        if(!$search_by_location){
-		        if ($distance){
-		        	echo t("Distance").": ".number_format($distance,1)." $distance_type";
-		        } else echo  t("Distance").": ".t("not available");
+	        if(!$search_by_location){		    
+	        	if(!empty($distance_pretty)){
+		           echo t("Distance")." $distance_pretty";
+	        	} else echo  t("Distance").": ".t("not available");
 	        }
 	        ?>
 	        </p>
@@ -480,8 +455,8 @@ if ($food_viewing_private==2){
 	        <p class="delivery-fee-wrap">
 	        <?php 
 	        if(!$search_by_location){
-		        if (!empty($merchant_delivery_distance)){
-		        	echo t("Delivery Distance Covered").": ".$merchant_delivery_distance." $distance_type_orig";
+		        if($merchant_delivery_distance>0){
+		        	echo t("Delivery Distance Covered").": ".$merchant_delivery_distance." $unit_pretty";
 		        } else echo  t("Delivery Distance Covered").": ".t("not available");
 	        }
 	        ?>
@@ -489,20 +464,21 @@ if ($food_viewing_private==2){
 	        
 	        <p class="delivery-fee-wrap">
 	        <?php 
-	        if ($delivery_fee){
+	        if ($delivery_fee>0){
 	             echo t("Delivery Fee").": ".FunctionsV3::prettyPrice($delivery_fee);
 	        } else echo  t("Delivery Fee").": ".t("Free Delivery");
 	        ?>
 	        </p>
 	        
-	        
-	        <?php if(FunctionsV3::enabledExtraCharges()):?>
-	        <?php $extra_charge_notification  = getOption($merchant_id,'extra_charge_notification')?>
-	        <?php if(!empty($extra_charge_notification)):?>
-	          <p class="extra_charge_notification"><?php echo $extra_charge_notification;?></p>
+	        <?php if($min_fees>0):?>
+	         <p>	    
+	         <p><?php echo tt("Minimum Order : [fee]",array(
+	          '[fee]'=>FunctionsV3::prettyPrice($min_fees)
+	         ))?></p>    
+	        </p>
 	        <?php endif;?>
-	        <?php endif;?>
 	        
+	        	        
 	        <?php if($search_by_location):?>
 	        <a href="javascript:;" class="top10 green-color change-location block text-center">
 	        [<?php echo t("Change Location here")?>]
@@ -559,6 +535,31 @@ if ($food_viewing_private==2){
            
         </div> <!--inner-->
         <!--END CART-->
+                
+        <!--CONTACT LESS DELIVERY-->
+        <?php if($merchant_opt_contact_delivery==1):
+        $opt_contact_delivery = 0;
+        if(isset($_SESSION['kr_delivery_options']['opt_contact_delivery'])){
+        	$opt_contact_delivery = (integer)$_SESSION['kr_delivery_options']['opt_contact_delivery'];
+        }     
+        ?>
+        <div class="inner line-top relative center opt_contact_delivery_wrap">
+         <div class="box_green">           
+           <div class="row">
+             <div class="col-md-2">
+                <?php echo CHtml::checkBox('opt_contact_delivery',$opt_contact_delivery==1?true:false,array(
+                 'class'=>"icheck",                 
+                ))?>
+             </div>
+             <div class="col-md-10 text_left">
+              <p class="bold"><?php echo t("Opt in for no contact delivery")?></p>
+              <?php echo t("Our delivery executive will leave the order at your door/gate (not applicable for offline payment like COD)")?>
+             </div>
+           </div>
+         </div> <!--box_green-->   
+        </div>
+        <?php endif;?>
+        <!--CONTACT LESS DELIVERY-->
         
         <!--DELIVERY OPTIONS-->
         <div class="inner line-top relative delivery-option center">

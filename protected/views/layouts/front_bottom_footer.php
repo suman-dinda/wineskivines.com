@@ -73,11 +73,14 @@
            <h3><?php echo t("Menu")?></h3>
           
            <?php if (is_array($menu) && count($menu)>=1):?>
-           <?php foreach ($menu as $val):?>
+           <?php foreach ($menu as $val):
+           $page_name_trans['page_name_trans'] =  isset($val['page_name_trans'])? json_decode($val['page_name_trans'],true) : '';	        	
+	       $page_name = qTranslate($val['page_name'],'page_name',(array)$page_name_trans);
+           ?>
            <li>
              <a 
                href="<?php echo FunctionsV3::customPageUrl($val)?>" <?php FunctionsV3::openAsNewTab($val)?> >
-              <?php echo $val['page_name']?></a>
+              <?php echo $page_name;?></a>
            </li>
            <?php endforeach;?>
            <?php endif;?>
@@ -90,11 +93,14 @@
          <h3><?php echo t("Others")?></h3>
          
            <?php if (is_array($others_menu) && count($others_menu)>=1):?>
-           <?php foreach ($others_menu as $val):?>
+           <?php foreach ($others_menu as $val):         
+           $page_name_trans['page_name_trans'] =  isset($val['page_name_trans'])? json_decode($val['page_name_trans'],true) : '';	        	
+	       $page_name = qTranslate($val['page_name'],'page_name',(array)$page_name_trans);
+           ?>
            <li>
              <a 
                href="<?php echo FunctionsV3::customPageUrl($val)?>" <?php FunctionsV3::openAsNewTab($val)?> >
-              <?php echo $val['page_name']?></a>
+              <?php echo $page_name;?></a>
            </li>
            <?php endforeach;?>
            <?php endif;?>

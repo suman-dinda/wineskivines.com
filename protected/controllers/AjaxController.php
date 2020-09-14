@@ -316,6 +316,8 @@ class AjaxController extends CController
     public function actionViewReceipt()
     {
     	FunctionsV3::isUserLogin();
+    	$client_id = Yii::app()->functions->getClientId();
+    	$order_id = isset($this->data['order_id'])?$this->data['order_id']:0;    	
     	
     	$map_provider = Yii::app()->functions->getOptionAdmin('map_provider');
 		$google_key=getOptionA('google_geo_api_key');
@@ -331,8 +333,8 @@ class AjaxController extends CController
 			
     	/** Register all scripts here*/
     	ScriptManager::registerAllCSSFiles($config);
-		$this->render('/store/receipt-front',array(
-		  'data'=>Yii::app()->functions->getOrder2( isset($this->data['order_id'])?$this->data['order_id']:'' )
+		$this->render('/store/receipt-front',array(		  
+		  'data'=>FunctionsV3::getReceiptByID($order_id,$client_id)
 		));
     }
     
@@ -349,44 +351,58 @@ class AjaxController extends CController
     
     public function actionCityList()
     {    	
-    	$data=FunctionsV3::getCityList();    	
+    	$post = $_POST; $status = true;
+    	$state_id = isset($post['state_id'])?(integer)$post['state_id']:0;
+    	$data=FunctionsV3::getCityList($state_id);    	
+    	if(!$data){
+    		$status=false;
+    	}
+    	$data = Yii::app()->request->stripSlashes($data);
     	header('Content-Type: application/json');
-    	echo json_encode($data);
+		echo json_encode(array(
+		    "status" => $status,
+		    "error"  => null,
+		    "data"   => array(
+		        "item" => $data,	        
+		    )
+		));
     	Yii::app()->end();
     }
     
     public function actionAreaList()
     {    
-    	$DbExt=new DbExt; 
-    	$and='';
-    	$data=array(); $this->data=$_GET;    	
-    	if (!empty($this->data['q'])){
-    		$q=stripslashes($this->data['q']);
-    		$and.=" AND name LIKE '$q%' ";
+    	$data = array(); $post = $_POST; $status = true; $and='';
+    	
+    	$id  = isset($post['city_id'])?(integer)$post['city_id']:0;
+    	$q  = isset($post['q'])?(integer)$post['q']:'';
+    	
+    	if($id>0){
+    		$and.= " AND city_id =".q($id)." ";
     	}
-    	if (!empty($this->data['city_id'])){
-    		$and.=" AND city_id=".FunctionsV3::q($this->data['city_id'])." ";
+    	if(!empty($q)){
+    		$and.= " AND name LIKE =".q("$q%")." ";
     	}
-    	$stmt="
-    	SELECT * FROM
-    	{{location_area}}
-    	WHERE 1
-    	$and
-    	ORDER BY name ASC
-    	";
-    	if(isset($_GET['debug'])){
-    	   dump($stmt);
-    	}    	    
-    	if ($res=$DbExt->rst($stmt)){
-    		foreach ($res as $val) {
-    			$data[]=array(
-    			 'id'=>$val['area_id'],
-    			 'name'=>stripslashes($val['name'])
-    			);
-    		}
+    	
+    	$stmt = "
+    	 SELECT area_id,name,city_id FROM
+    	 {{location_area}}		 
+		 WHERE 1	
+		 $and
+		 ORDER BY name ASC
+		 LIMIT 0,10
+		";		       	
+    	if($resp = Yii::app()->db->createCommand($stmt)->queryAll()){    	   
+    	   $status = true;
+    	   $data = Yii::app()->request->stripSlashes($resp);
     	}
     	header('Content-Type: application/json');
-    	echo json_encode($data);
+		echo json_encode(array(
+		    "status" => $status,
+		    "error"  => null,
+		    "data"   => array(
+		        "item" => $data,	        
+		    )
+		));
     	Yii::app()->end();
     }
     
@@ -442,6 +458,22 @@ class AjaxController extends CController
     	$this->jsonResponse();
     }
     
+    public function actionLoadState()
+    {
+    	$country_id = isset($this->data['country_id'])?(integer)$this->data['country_id']:0;
+    	if ( $data=FunctionsV3::locationStateList($country_id)){
+    	   $data = Yii::app()->request->stripSlashes($data);
+		   $html="<option value=\"\">".t("Select state")."</option>";		   
+		   foreach ($data as $key=>$val) {		   	  
+		   	  $html.="<option value=\"".$val['state_id']."\">".$val['name']."</option>";
+		   }		   
+		   $this->code=1;
+		   $this->msg="OK";
+		   $this->details=$html;
+		} else $this->msg= t("No results");
+		$this->jsonResponse();
+    }
+    
     public function actionLoadCityList()
 	{
 		if ( $data=FunctionsV3::ListCityList($this->data['state_id'])){
@@ -495,53 +527,61 @@ class AjaxController extends CController
 	
     public function actionStateList()
     {    	
-    	$data=array();
-    	$country_id=FunctionsV3::getLocationDefaultCountry();
-    	if ( $res=FunctionsV3::locationStateList($country_id)){
-    		foreach ($res as $val) {
-    			$data[]=array(
-   	    		  'id'=>$val['state_id'],
-   	    		  'name'=>stripslashes($val['name'])
-   	    		);
-    		}
-    	}    	    	
+    	$data=array();$status = false;
+    	$country_id = (integer) FunctionsV3::getLocationDefaultCountry();
+    	$stmt="
+   	    SELECT state_id,name,country_id
+   	     FROM
+   	    {{location_states}}
+   	    WHERE
+   	    country_id=".q($country_id)."
+   	    ORDER BY name ASC   	   
+   	   ";    	
+    	if($resp = Yii::app()->db->createCommand($stmt)->queryAll()){
+    		$data = Yii::app()->request->stripSlashes($resp);
+    	}    		    
     	header('Content-Type: application/json');
-    	echo json_encode($data);
-    	Yii::app()->end();
+		echo json_encode(array(
+		    "status" => $status,
+		    "error"  => null,
+		    "data"   => array(
+		        "item" => $data,	        
+		    )
+		));
+    	Yii::app()->end();	
     }	
     
     public function actionPostalCodeList()
     {
-    	$data=array(); $state_ids='';
+    	$data=array(); $state_ids='';  $status = false;
     	$country_id=FunctionsV3::getLocationDefaultCountry();
     	if ( $res=FunctionsV3::locationStateList($country_id)){
     		foreach ($res as $val) {
     			$state_ids.="'$val[state_id]',";
     		}
-    		$state_ids=substr($state_ids,0,-1);
-    		//dump($state_ids);
-    		$DbExt=new DbExt;
+    		$state_ids=substr($state_ids,0,-1);       		
     		$stmt="
-    		SELECT rate_id,postal_code
+    		SELECT rate_id ,postal_code as name
     		FROM
     		{{view_location_rate}}
     		WHERE
     		state_id IN ($state_ids)
     		GROUP BY postal_code
-    		";
-    		//dump($stmt);
-    		if($resp=$DbExt->rst($stmt)){
-    			foreach ($resp as $valp) {
-    				$data[]=array(
-	   	    		  'id'=>$valp['rate_id'],
-	   	    		  'name'=>stripslashes($valp['postal_code'])
-	   	    		);
-    			}
+    		";    		
+    		if($resp = Yii::app()->db->createCommand($stmt)->queryAll()){   
+    			$data = Yii::app()->request->stripSlashes($resp);		
+    			$status = true;	
     		}
     	}    	    	
     	header('Content-Type: application/json');
-    	echo json_encode($data);
-    	Yii::app()->end();
+		echo json_encode(array(
+		    "status" => $status,
+		    "error"  => null,
+		    "data"   => array(
+		        "item" => $data,	        
+		    )
+		));
+    	Yii::app()->end();			
     }
     
     public function actionAgeRestriction()
@@ -928,7 +968,17 @@ class AjaxController extends CController
 				  'remaining'=>$res,
 				  'count_msg'=>$html
 				);
-			} else $this->msg = t("no remaining review");
+			} else {
+				$website_review_type = getOptionA('website_review_type');
+				if($website_review_type==1 && $client_id>0){
+					$this->code = 1;
+					$this->msg = '';
+					$this->details = array(
+					  'remaining'=>0,
+					  'count_msg'=>''
+					);
+				}  else $this->msg = t("no remaining review");				
+			}
 			
 		} else $this->msg = t("not login");
 		$this->jsonResponse();
@@ -1093,5 +1143,314 @@ class AjaxController extends CController
  	    } else $this->msg = t("invalid id");
  	    $this->jsonResponse();
     }
+    
+    public function actionrequestCancelBooking()
+    {
+    	$pattern = 'booking_id,restaurant_name,number_guest,date_booking,time,booking_name,email,mobile,instruction,status,merchant_remarks,sitename,siteurl';
+    	$pattern = explode(",",$pattern);
+    	    	
+    	$lang = Yii::app()->language;
+    	$client_id = Yii::app()->functions->getClientId();
+    	if(!is_numeric($client_id)){
+    		$this->msg = t("ERROR: Your session has expired.");
+    		$this->jsonResponse();
+    	}
+    	$booking_id = isset($this->data['id'])?(integer)$this->data['id']:'';
+    	if ($res = FunctionsV3::getBookingByIDWithDetails($booking_id)){    		
+    		
+    		if($res['request_cancel']>=1){
+    			$this->msg = t("You have already request to cancel this booking");
+    		    $this->jsonResponse();
+    		}
+    		
+    		$res['sitename'] = getOptionA('website_title');
+    		$res['siteurl'] = websiteUrl();
+    		$res = Yii::app()->request->stripSlashes($res);
+    		
+    		$merchant_id = $res['merchant_id'];
+    		$merchant_email = getOption($merchant_id,'merchant_notify_email');
+    		$sender = getOptionA('global_admin_sender_email');
+    		$email_provider  = getOptionA('email_provider');
+    		    	
+    		/*SEND EMAIL TO MERCHANT*/
+    		if(!empty($merchant_email)){
+	    		$email = getOptionA('booking_request_cancel_email');    		
+	    		$subject = getOptionA('booking_request_cancel_tpl_subject_'.$lang);
+	    		$content = getOptionA('booking_request_cancel_tpl_content_'.$lang);
+	    		foreach ($pattern as $val) {    			
+	    			$content = FunctionsV3::smarty($val, isset($res[$val])?$res[$val]:'' ,$content);
+	    			$subject = FunctionsV3::smarty($val, isset($res[$val])?$res[$val]:'' ,$subject);
+	    		}
+	    		$merchant_email = explode(",",$merchant_email);
+	    		if(is_array($merchant_email) && count($merchant_email)>=1){
+	    			foreach ($merchant_email as $_mail) {
+	    				$params = array(
+	    				  'email_address'=>$_mail,
+	    				  'sender'=>$sender,
+	    				  'subject'=>$subject,
+	    				  'content'=>$content,
+	    				  'date_created'=>FunctionsV3::dateNow(),
+	    				  'ip_address'=>$_SERVER['REMOTE_ADDR'],
+	    				  'email_provider'=>$email_provider,	    				  
+	    				);
+	    				Yii::app()->db->createCommand()->insert("{{email_logs}}",$params);
+	    			}
+	    		}	    			    			    	
+    		}
+    		
+    		/*SMS*/	    		
+    		$balance=Yii::app()->functions->getMerchantSMSCredit($merchant_id);	
+    		$phone = getOption($merchant_id,'merchant_cancel_order_phone');	    		
+    		if(!empty($phone) && $balance>0){	    			
+    		    $sms_content = getOptionA('booking_request_cancel_sms_content_'.$lang);
+    		    foreach ($pattern as $val) {    			
+    			   $sms_content = FunctionsV3::smarty($val, isset($res[$val])?$res[$val]:'' ,$sms_content);	    			   
+    		    }
+    		    $params = array(
+    		      'merchant_id'=>$merchant_id,
+    		      'contact_phone'=>$phone,
+    		      'sms_message'=>$sms_content,
+    		      'date_created'=>FunctionsV3::dateNow(),
+    		      'ip_address'=>$_SERVER['REMOTE_ADDR']
+    		    );
+    		    Yii::app()->db->createCommand()->insert("{{sms_broadcast_details}}",$params);    		    
+    		}    		
+    		
+    		/*PUSH*/	    		
+    		if(Yii::app()->db->schema->getTable("{{mobile_device_merchant}}")){
+    			
+    			$push_enabled=getOptionA('booking_request_cancel_sms');
+    			$push_title=getOptionA('booking_request_cancel_push_title_'.$lang);
+    			$push_message=getOptionA('booking_request_cancel_push_content_'.$lang);
+    			
+    			$resp = Yii::app()->db->createCommand()
+		          ->select()
+		          ->from('{{mobile_device_merchant}}')   
+		          ->where("merchant_id=:merchant_id AND enabled_push=:enabled_push AND status=:status",array(
+		             ':merchant_id'=>$merchant_id,			             
+		             ':enabled_push'=>1,
+		             ':status'=>'active'
+		          )) 
+		          ->limit(1)
+		          ->queryAll();	
+		        if($resp && $push_enabled==1){
+		        	
+		        	foreach ($pattern as $val) {    			
+    			       $push_title = FunctionsV3::smarty($val, isset($res[$val])?$res[$val]:'' ,$push_title);
+    			       $push_message = FunctionsV3::smarty($val, isset($res[$val])?$res[$val]:'' ,$push_message);
+    		        }
+		        	
+		        	foreach ($merchant_resp as $merchant_device_id) {
+		        		$params_merchant = array(
+		        		  'merchant_id'=>(integer)$merchant_id,
+		        		  'user_type'=>$merchant_device_id['user_type'],
+		        		  'merchant_user_id'=>(integer)$merchant_device_id['merchant_user_id'],
+		        		  'device_platform'=>$merchant_device_id['device_platform'],
+		        		  'device_id'=>$merchant_device_id['device_id'],
+		        		  'push_title'=>$push_title,
+		        		  'push_message'=>$push_message,
+		        		  'date_created'=>FunctionsV3::dateNow(),
+		        		  'ip_address'=>$_SERVER['REMOTE_ADDR'],
+		        		  'booking_id'=>(integer)$booking_id
+		        		);
+		        		Yii::app()->db->createCommand()->insert("{{mobile_merchant_pushlogs}}",$params_merchant);
+		        	}
+		        }
+    		}
+    		
+	
+    		Yii::app()->db->createCommand()->update("{{bookingtable}}",
+    		 array(
+    		   'request_cancel'=>1,
+    		   'status'=>'request_cancel_booking'
+    		 )
+    		,
+      	     'booking_id=:booking_id',
+      	     array(
+      	       ':booking_id'=>$booking_id
+      	     )
+      	   );
+    		
+    		$this->code = 1;
+    		$this->msg = t("Your request has been sent to merchant");
+    		$this->details = array(
+    		  'booking_id'=>$booking_id
+    		);
+    		
+    	} else $this->msg = t("Booking id not found");
+    	$this->jsonResponse();
+    }
+    
+    public function actionverify_change_password_code()
+    {
+    	$token = isset($this->data['token'])?trim($this->data['token']):'';
+    	$sms_code = isset($this->data['sms_code'])?trim($this->data['sms_code']):'';
+    	if($res = Yii::app()->functions->getLostPassToken($token)){    		
+    		if($res['mobile_verification_code']==$sms_code){    			
+    			$new_password = isset($this->data['new_password'])?$this->data['new_password']:'';
+    			$confirm_new_password = isset($this->data['confirm_new_password'])?$this->data['confirm_new_password']:'';
+    			if(!empty($new_password) && $new_password==$confirm_new_password){
+    				
+    			    Yii::app()->db->createCommand()->update("{{client}}",
+		    		 array(
+		    		   'password'=>md5($new_password),
+		    		   'ip_address'=>$_SERVER['REMOTE_ADDR'],
+		    		   'date_modified'=>FunctionsV3::dateNow()
+		    		 )
+		    		,
+		      	     'client_id=:client_id',
+		      	     array(
+		      	       ':client_id'=>$res['client_id']
+		      	     )
+		      	   );   			
+    			   $this->code = 1; $this->msg = t("You have successfully change your password");
+    			   $this->details = array(
+    			    'redirect'=>Yii::app()->createUrl("store/changepassword_successful",array(
+    			     'token'=>$token
+    			    ))
+    			   );
+    				
+    			} else $this->msg = t("Password is not valid");
+    		} else $this->msg = t("Invalid verification code");
+    	} else $this->msg = t("Invalid token");
+    	$this->jsonResponse();
+    }
+    
+    
+    public function actionRestaurantName()
+    {    	    	
+    	$name = isset($_POST['q'])?$_POST['q']:'';
+    	$data=array();$status = false;    	
+    	$stmt="
+   	    SELECT restaurant_name as name
+   	    FROM {{merchant}}
+   	    WHERE restaurant_name LIKE ".q("$name%")."
+   	    ORDER BY restaurant_name ASC 
+   	    LIMIT 0,10
+   	   ";    	    	
+    	if($resp = Yii::app()->db->createCommand($stmt)->queryAll()){    		
+    		$data = Yii::app()->request->stripSlashes($resp);
+    	}    		    
+    	header('Content-Type: application/json');
+		echo json_encode(array(
+		    "status" => $status,
+		    "error"  => null,
+		    "data"   => array(
+		        "item" => $data,	        
+		    )
+		));
+    	Yii::app()->end();	
+    }	    
+    
+    public function actionAutoStreetName()
+    {
+    	$name = isset($_POST['q'])?$_POST['q']:'';
+    	$data=array();$status = false;    	
+    	$stmt="
+   	    SELECT street as name
+   	    FROM {{merchant}}
+   	    WHERE street LIKE ".q("$name%")."
+   	    AND
+		status ='active'
+		AND
+		is_ready='2'
+		GROUP BY street		
+		ORDER BY street ASC 
+   	    LIMIT 0,10
+   	   ";    	    	
+    	if($resp = Yii::app()->db->createCommand($stmt)->queryAll()){    		
+    		$data = Yii::app()->request->stripSlashes($resp);
+    	}    		    
+    	header('Content-Type: application/json');
+		echo json_encode(array(
+		    "status" => $status,
+		    "error"  => null,
+		    "data"   => array(
+		        "item" => $data,	        
+		    )
+		));
+    	Yii::app()->end();	
+    }
+    
+    public function actionAutoCuisine()
+    {
+    	$name = isset($_POST['q'])?$_POST['q']:'';
+    	$data=array();$status = false;    	
+    	$stmt="
+   	    SELECT cuisine_name as name
+   	    FROM {{cuisine}}
+   	    WHERE cuisine_name LIKE ".FunctionsV3::q("$name%")."
+   	    AND status ='publish'
+   	    ORDER BY cuisine_name ASC   	    
+   	    LIMIT 0,10
+   	   ";    	    	
+    	if($resp = Yii::app()->db->createCommand($stmt)->queryAll()){    		
+    		$data = Yii::app()->request->stripSlashes($resp);
+    	}    		    
+    	header('Content-Type: application/json');
+		echo json_encode(array(
+		    "status" => $status,
+		    "error"  => null,
+		    "data"   => array(
+		        "item" => $data,	        
+		    )
+		));
+    	Yii::app()->end();	
+    }
+    
+    public function actionAutoFoodName()
+    {
+    	$name = isset($_POST['q'])?$_POST['q']:'';
+    	$data=array();$status = false;    	
+    	$stmt="
+   	    SELECT item_name as name
+   	    FROM {{item}}
+   	    WHERE item_name LIKE ".FunctionsV3::q("$name%")."
+   	    AND status ='publish'
+   	    ORDER BY item_name ASC   	    
+   	    LIMIT 0,10
+   	   ";    	    	
+    	//dump($stmt);
+    	if($resp = Yii::app()->db->createCommand($stmt)->queryAll()){    		
+    		$data = Yii::app()->request->stripSlashes($resp);
+    	}    		    
+    	header('Content-Type: application/json');
+		echo json_encode(array(
+		    "status" => $status,
+		    "error"  => null,
+		    "data"   => array(
+		        "item" => $data,	        
+		    )
+		));
+    	Yii::app()->end();	
+    }    
+    
+    public function actionautoFoodItem()
+    {    	
+    	$name = isset($_POST['q'])?$_POST['q']:'';
+    	$merchant_id = isset($_POST['auto_merchant_id'])?(integer)$_POST['auto_merchant_id']:'';
+    	$data=array();$status = false;    	
+    	$stmt="
+   	    SELECT item_name as name
+   	    FROM {{item}}
+   	    WHERE item_name LIKE ".FunctionsV3::q("$name%")."
+   	    AND merchant_id=".q($merchant_id)."
+   	    AND status ='publish'
+   	    ORDER BY item_name ASC   	    
+   	    LIMIT 0,10
+   	   ";    	    	    	
+    	if($resp = Yii::app()->db->createCommand($stmt)->queryAll()){    		
+    		$data = Yii::app()->request->stripSlashes($resp);
+    	}    		    
+    	header('Content-Type: application/json');
+		echo json_encode(array(
+		    "status" => $status,
+		    "error"  => null,
+		    "data"   => array(
+		        "item" => $data,	        
+		    )
+		));
+    	Yii::app()->end();	
+    }        
 
 } /*end class*/    

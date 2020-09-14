@@ -57,10 +57,11 @@ if ( $enabled_advance_search=="yes"){
 data-parallax="scroll" data-position="top" data-bleed="10" 
 data-image-src="<?php echo assetsURL()."/images/b6.jpg"?>">
 
-  <?php 
+  <?php   
   $location_type=getOptionA("admin_zipcode_searchtype");  
   $this->renderPartial('/front/location-search-'.$location_type,array(
-   'location_search_type'=>$location_type
+   'location_search_type'=>$location_type,
+   'location_data'=>FunctionsV3::getSearchByLocationData()
   ));
   ?>
 
@@ -134,7 +135,7 @@ data-image-src="<?php echo assetsURL()."/images/b6.jpg"?>">
     <div class="col-md-5 border-light ">
     
         <div class="col-md-3 col-sm-3">
-           <a href="<?php echo Yii::app()->createUrl("/menu-". trim($val['restaurant_slug']))?>">
+           <a href="<?php echo Yii::app()->createUrl("/menu/". trim($val['restaurant_slug']))?>">
            <img class="logo-small" src="<?php echo FunctionsV3::getMerchantLogo($val['merchant_id'],$val['logo']);?>">
            </a>
         </div> <!--col-->
@@ -155,12 +156,11 @@ data-image-src="<?php echo assetsURL()."/images/b6.jpg"?>">
 	          
           </div>
           
-          <a href="<?php echo Yii::app()->createUrl("/menu-". trim($val['restaurant_slug']))?>">
+          <a href="<?php echo Yii::app()->createUrl("/menu/". trim($val['restaurant_slug']))?>">
           <h4 class="concat-text"><?php echo clearString($val['restaurant_name'])?></h4>
           </a>
           
-          <p class="concat-text">
-          <?php //echo wordwrap(FunctionsV3::displayCuisine($val['cuisine']),50,"<br />\n");?>
+          <p class="concat-text">          
           <?php echo FunctionsV3::displayCuisine($val['cuisine'],$cuisine_list);?>
           </p>
           <p class="concat-text"><?php echo $address?></p>                             
@@ -200,9 +200,11 @@ data-image-src="<?php echo assetsURL()."/images/b6.jpg"?>">
   
   <div class="row">
     <?php $x=1;?>
-    <?php foreach ($list as $val): ?>
+    <?php foreach ($list as $val): 
+    $slug = isset($val['slug'])?$val['slug']:'';
+    ?>
     <div class="col-md-4 col-sm-4 indent-5percent nopad">
-      <a href="<?php echo Yii::app()->createUrl('/store/cuisine',array("category"=>$val['cuisine_id']))?>" 
+      <a href="<?php echo Yii::app()->createUrl('/cuisine/'.$slug)?>" 
      class="<?php echo ($x%2)?"even":'odd'?>">
       <?php 
       $cuisine_json['cuisine_name_trans']=!empty($val['cuisine_name_trans'])?json_decode($val['cuisine_name_trans'],true):'';	 

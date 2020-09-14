@@ -12,16 +12,19 @@ $admin_commision_ontop=Yii::app()->functions->getOptionAdmin('admin_commision_on
 <h3><?php echo t("Admin Commission Settings")?></h3>
 
 <div class="uk-form-row">
-  <label class="uk-form-label"><?php echo Yii::t("default","Exclude All Offline Payment from admin balance")?></label>
+  <label class="uk-form-label"><?php echo t("Balance include all offline payment")?></label>
   <?php 
-  echo CHtml::checkBox('admin_exclude_cod_balance',
-  Yii::app()->functions->getOptionAdmin('admin_exclude_cod_balance')==2?true:false
+  echo CHtml::checkBox('admin_include_all_offline_payment',
+  Yii::app()->functions->getOptionAdmin('admin_include_all_offline_payment')==1?true:false
   ,array(
-    'value'=>2,
+    'value'=>1,
     'class'=>"icheck"
   ))
-  ?> 
+  ?>   
 </div>
+<p class="uk-text-muted">
+   <?php echo t("this will include all offline payment in merchant balance and total commission")?>
+  </p>
 
 <h3><?php echo t("Merchant Signup Settings")?></h3>
 
@@ -63,7 +66,7 @@ $admin_commision_ontop=Yii::app()->functions->getOptionAdmin('admin_commision_on
 </div>-->
   
   
-<div class="uk-form-row">
+<!--<div class="uk-form-row">
   <label class="uk-form-label"><?php echo Yii::t("default","Include Cash Payment on merchant balance")?>?</label>
   <?php 
   echo CHtml::checkBox('admin_include_merchant_cod',
@@ -73,7 +76,7 @@ $admin_commision_ontop=Yii::app()->functions->getOptionAdmin('admin_commision_on
     'class'=>"icheck"
   ))
   ?> 
-</div>
+</div>-->
 
 <div class="uk-form-row">
   <label class="uk-form-label"><?php echo Yii::t("default","commission on orders")?></label>

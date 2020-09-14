@@ -131,9 +131,11 @@ if (!isset($s['kr_delivery_options'])){
 if (!isset($data['is_guest_checkout'])){
 	$data['is_guest_checkout']='';
 }
-
-//dump($data);
 ?>
+<?php if ( getOptionA('captcha_order')==2):?>             
+   <div class="recaptcha_v3"><?php GoogleCaptchaV3::init();?></div>      
+<?php endif;?>     
+
 <div class="sections section-grey2 section-confirmorder">
    <div class="container">
      <div class="row">
@@ -184,6 +186,16 @@ if (!isset($data['is_guest_checkout'])){
             </tr>
             <?php endif;?>
             <?php endif;?>
+            
+            <?php if(isset($s['kr_delivery_options']['opt_contact_delivery'])):?>
+             <?php if($s['kr_delivery_options']['opt_contact_delivery']==1):?>
+             <tr>
+              <td class="a"><?php echo t("Delivery options")?></td>
+              <td class="b">: <?php echo t("Leave order at the door or gate")?></td>
+             </tr>
+             <?php endif;?>
+            <?php endif;?>
+            
             <?php endif;?>
                         
             <?php if($transaction_type=="dinein"):?>

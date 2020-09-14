@@ -91,7 +91,7 @@ class InstallHelper
 	
 	public static function UserAccessString()
 	{
-		return '["autologin","dashboard","merchant","sponsoredMerchantList","packages","Cuisine","dishes","OrderStatus","incomingorders","cancel_order","settings","themesettings","managelocation","commisionsettings","voucher","invoice","merchantcommission","withdrawal","incomingwithdrawal","withdrawalsettings","emailsettings","emailtpl","notisettings","emailogs","cronjobs","customPage","Ratings","ContactSettings","SocialSettings","ManageCurrency","ManageLanguage","Seo","addons","addonexport","mobileapp","pointsprogram","merchantapp","analytics","customerlist","subscriberlist","reviews","bankdeposit","paymentgatewaysettings","paymentgateway","paypalSettings","cardpaymentsettings","stripeSettings","mercadopagoSettings","sisowsettings","payumonenysettings","obdsettings","payserasettings","payondelivery","barclay","epaybg","authorize","braintree","razor","mollie","ipay88","moneris","sms","smsSettings","smsPackage","smstransaction","smslogs","fax","faxtransaction","faxpackage","faxlogs","faxsettings","reports","rptMerchantReg","rptMerchantPayment","rptMerchanteSales","rptmerchantsalesummary","rptbookingsummary","userList","voguepay","printermodule","paypal_v2","mercadopago","singlemerchant"]';
+		return '["autologin","dashboard","merchant","sponsoredMerchantList","packages","Cuisine","dishes","OrderStatus","incomingorders","cancel_order","settings","themesettings","managelocation","commisionsettings","voucher","invoice","merchantcommission","withdrawal","incomingwithdrawal","withdrawalsettings","emailsettings","emailtpl","notisettings","emailogs","cronjobs","customPage","Ratings","ContactSettings","SocialSettings","ManageCurrency","ManageLanguage","Seo","addons","addonexport","mobileapp","pointsprogram","merchantapp","analytics","customerlist","subscriberlist","reviews","bankdeposit","paymentgatewaysettings","paymentgateway","paypalSettings","cardpaymentsettings","stripeSettings","mercadopagoSettings","sisowsettings","payumonenysettings","obdsettings","payserasettings","payondelivery","barclay","epaybg","authorize","braintree","razor","mollie","ipay88","moneris","sms","smsSettings","smsPackage","smstransaction","smslogs","fax","faxtransaction","faxpackage","faxlogs","faxsettings","reports","rptMerchantReg","rptMerchantPayment","rptMerchanteSales","rptmerchantsalesummary","rptbookingsummary","userList","voguepay","printermodule","paypal_v2","mercadopago","singlemerchant","mobileappv2","tags"]';
 	}
 	
 	public static function CurrencyList()
@@ -113,84 +113,103 @@ class InstallHelper
 	{
 		$cuisine[]=array(
 		  'cuisine_name'=>'American',		  
-		  'ip_address'=>$_SERVER['REMOTE_ADDR']
+		  'ip_address'=>$_SERVER['REMOTE_ADDR'],
+		  'slug'=>"american"
 		);
 		$cuisine[]=array(
 		  'cuisine_name'=>'Deli',		  
-		  'ip_address'=>$_SERVER['REMOTE_ADDR']
+		  'ip_address'=>$_SERVER['REMOTE_ADDR'],
+		  'slug'=>"deli"
 		);
 		$cuisine[]=array(
 		  'cuisine_name'=>'Indian',		  
-		  'ip_address'=>$_SERVER['REMOTE_ADDR']
+		  'ip_address'=>$_SERVER['REMOTE_ADDR'],
+		  'slug'=>"indian"
 		);
 		$cuisine[]=array(
 		  'cuisine_name'=>'Mediterranean',		  
-		  'ip_address'=>$_SERVER['REMOTE_ADDR']
+		  'ip_address'=>$_SERVER['REMOTE_ADDR'],
+		  'slug'=>strtolower("Mediterranean")
 		);
 		$cuisine[]=array(
 		  'cuisine_name'=>'Sandwiches',		  
-		  'ip_address'=>$_SERVER['REMOTE_ADDR']
+		  'ip_address'=>$_SERVER['REMOTE_ADDR'],
+		  'slug'=>strtolower("Sandwiches")
 		);
 		$cuisine[]=array(
 		  'cuisine_name'=>'Barbeque',		  
-		  'ip_address'=>$_SERVER['REMOTE_ADDR']
+		  'ip_address'=>$_SERVER['REMOTE_ADDR'],
+		  'slug'=>strtolower("Barbeque")
 		);
 		$cuisine[]=array(
 		  'cuisine_name'=>'Diner',		  
-		  'ip_address'=>$_SERVER['REMOTE_ADDR']
+		  'ip_address'=>$_SERVER['REMOTE_ADDR'],
+		  'slug'=>strtolower("Diner")
 		);
 		$cuisine[]=array(
 		  'cuisine_name'=>'Italian',		  
-		  'ip_address'=>$_SERVER['REMOTE_ADDR']
+		  'ip_address'=>$_SERVER['REMOTE_ADDR'],
+		  'slug'=>strtolower("Italian")
 		);
 		$cuisine[]=array(
 		  'cuisine_name'=>'Mexican',		  
-		  'ip_address'=>$_SERVER['REMOTE_ADDR']
+		  'ip_address'=>$_SERVER['REMOTE_ADDR'],
+		  'slug'=>strtolower("Mexican")
 		);
 		$cuisine[]=array(
 		  'cuisine_name'=>'Sushi',		  
-		  'ip_address'=>$_SERVER['REMOTE_ADDR']
+		  'ip_address'=>$_SERVER['REMOTE_ADDR'],
+		  'slug'=>strtolower("Sushi")
 		);
 		$cuisine[]=array(
 		  'cuisine_name'=>'Burgers',		  
-		  'ip_address'=>$_SERVER['REMOTE_ADDR']
+		  'ip_address'=>$_SERVER['REMOTE_ADDR'],
+		  'slug'=>strtolower("Burgers")
 		);
 		$cuisine[]=array(
 		  'cuisine_name'=>'Greek',		  
-		  'ip_address'=>$_SERVER['REMOTE_ADDR']
+		  'ip_address'=>$_SERVER['REMOTE_ADDR'],
+		  'slug'=>strtolower("Greek")
 		);
 		$cuisine[]=array(
 		  'cuisine_name'=>'Japanese',		  
-		  'ip_address'=>$_SERVER['REMOTE_ADDR']
+		  'ip_address'=>$_SERVER['REMOTE_ADDR'],
+		  'slug'=>strtolower("Japanese")
 		);
 		$cuisine[]=array(
 		  'cuisine_name'=>'Middle Eastern',		  
-		  'ip_address'=>$_SERVER['REMOTE_ADDR']
+		  'ip_address'=>$_SERVER['REMOTE_ADDR'],
+		  'slug'=>strtolower("Middle-Eastern")
 		);
 		$cuisine[]=array(
 		  'cuisine_name'=>'Thai',		  
-		  'ip_address'=>$_SERVER['REMOTE_ADDR']
+		  'ip_address'=>$_SERVER['REMOTE_ADDR'],
+		  'slug'=>strtolower("Thai")
 		);
 		$cuisine[]=array(
 		  'cuisine_name'=>'Chinese',		  
-		  'ip_address'=>$_SERVER['REMOTE_ADDR']
+		  'ip_address'=>$_SERVER['REMOTE_ADDR'],
+		  'slug'=>strtolower("Chinese")
 		);
 		$cuisine[]=array(
 		  'cuisine_name'=>'Healthy',		  
-		  'ip_address'=>$_SERVER['REMOTE_ADDR']
+		  'ip_address'=>$_SERVER['REMOTE_ADDR'],
+		  'slug'=>strtolower("Healthy")
 		);
 		$cuisine[]=array(
-		  'cuisine_name'=>'Korean',
-		  
-		  'ip_address'=>$_SERVER['REMOTE_ADDR']
+		  'cuisine_name'=>'Korean',		  
+		  'ip_address'=>$_SERVER['REMOTE_ADDR'],
+		  'slug'=>strtolower("Korean")
 		);
 		$cuisine[]=array(
 		  'cuisine_name'=>'Pizza',
-		  'ip_address'=>$_SERVER['REMOTE_ADDR']
+		  'ip_address'=>$_SERVER['REMOTE_ADDR'],
+		  'slug'=>strtolower("Pizza")
 		);
 		$cuisine[]=array(
 		  'cuisine_name'=>'Vegetarian',
-		  'ip_address'=>$_SERVER['REMOTE_ADDR']
+		  'ip_address'=>$_SERVER['REMOTE_ADDR'],
+		  'slug'=>strtolower("Vegetarian")
 		);
 		
 		return $cuisine;
@@ -284,6 +303,11 @@ class InstallHelper
 		);
 		$order_stats[]=array(
 		  'description'=>"successful",		 
+		  'ip_address'=>$_SERVER['REMOTE_ADDR']
+		);
+		
+		$order_stats[]=array(
+		  'description'=>"unassigned",		 
 		  'ip_address'=>$_SERVER['REMOTE_ADDR']
 		);
 		
@@ -1209,6 +1233,31 @@ Regards
 		  'option_name'=>'admin_decimal_place',
 		  'option_value'=>'2'
 		);		
+		
+		$option[]=array(
+		  'option_name'=>'website_use_date_picker',
+		  'option_value'=>2
+		);		
+		
+		$option[]=array(
+		  'option_name'=>'website_use_time_picker',
+		  'option_value'=>3
+		);	
+		
+		$option[]=array(
+		  'option_name'=>'map_provider',
+		  'option_value'=>'google.maps'
+		);	
+		
+		$option[]=array(
+		  'option_name'=>'map_distance_results',
+		  'option_value'=>1
+		);	
+		
+		$option[]=array(
+		  'option_name'=>'website_review_type',
+		  'option_value'=>2
+		);	
 		
 		return $option;
 	}	

@@ -765,6 +765,20 @@ Yii::app()->functions->getOption("merchant_tax_charges",$merchant_id)==2?true:fa
 ?>
 </div>
 
+
+<div class="uk-form-row">
+  <label class="uk-form-label"><?php echo t("Enabled Opt in for no contact delivery")?></label>
+  <?php 
+  echo CHtml::checkBox('merchant_opt_contact_delivery',
+  Yii::app()->functions->getOption("merchant_opt_contact_delivery",$merchant_id)==1?true:false
+  ,array(
+  'class'=>"icheck",
+  'value'=>1
+  ))
+  ?>  
+</div>
+
+
 <div class="uk-form-row">
 <label class="uk-form-label"><?php echo Yii::t("default","Delivery Estimation")?></label>
 <?php 
@@ -829,6 +843,18 @@ Yii::app()->functions->getOption("merchant_tax_charges",$merchant_id)==2?true:fa
 echo CHtml::dropDownList('merchant_timezone',
 Yii::app()->functions->getOption("merchant_timezone",$merchant_id)
 ,Yii::app()->functions->timezoneList())
+?>
+</div>
+
+
+<div class="uk-form-row">
+<label class="uk-form-label"><?php echo t("Time picker list interval")?></label>
+<?php 
+echo CHtml::telField('website_merchant_time_picker_interval',
+getOption($merchant_id,'website_merchant_time_picker_interval') ,array(
+ 'class'=>"numeric_only",
+ 'placeholder'=>t("default is 15mins")
+));
 ?>
 </div>
 

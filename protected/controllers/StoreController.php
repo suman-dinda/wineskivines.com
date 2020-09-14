@@ -13,30 +13,29 @@ class StoreController extends CController
 		//$cs->registerCssFile($baseUrl.'/css/yourcss.css'); 		
 		if( parent::beforeAction($action) ) {			
 			
-			
-			$map_provider = Yii::app()->functions->getOptionAdmin('map_provider');
+						
 			$google_key=getOptionA('google_geo_api_key');
 			$website_use_time_picker = Yii::app()->functions->getOptionAdmin('website_use_time_picker');
 			$theme_time_pick = Yii::app()->functions->getOptionAdmin('theme_time_pick');
 			
-			$config = array(
-			  'map_provider'=>$map_provider,
-			  'google_key'=>$google_key,
+			$config = array(			  			  
 			  'website_use_time_picker'=>$website_use_time_picker,
 			  'theme_time_pick'=>$theme_time_pick
 			);
 			
 			/** Register all scripts here*/
 			if ($this->theme_compression==2){
-				ScriptManagerCompress::RegisterAllJSFile($config);
+				/*ScriptManagerCompress::RegisterAllJSFile($config);
 			    ScriptManagerCompress::registerAllCSSFiles($config);
 			   
 				$compress_css = require_once 'assets/css/css.php';
 			    $cs = Yii::app()->getClientScript();
-			    Yii::app()->clientScript->registerCss('compress-css',$compress_css);
+			    Yii::app()->clientScript->registerCss('compress-css',$compress_css);*/
+				ScriptManager::RegisterAllJSFile($config);
+			    ScriptManager::registerAllCSSFiles($config);
 			} else {
-			   ScriptManager::RegisterAllJSFile($config);
-			   ScriptManager::registerAllCSSFiles($config);
+			    ScriptManager::RegisterAllJSFile($config);
+			    ScriptManager::registerAllCSSFiles($config);
 			}
 			
 			$action_name = $action->id ;
@@ -84,34 +83,7 @@ class StoreController extends CController
 			 "var image_limit_size='$image_limit_size';",
 			  CClientScript::POS_HEAD
 			);	
-			
-			$map_provider = getOptionA('map_provider');
-			if(empty($map_provider)){
-				$map_provider='google.maps';
-			}
-			$cs->registerScript(
-			  'map_provider',
-			 "var map_provider='$map_provider';",
-			  CClientScript::POS_HEAD
-			);	
-			
-			$mapbox_access_token = getOptionA('mapbox_access_token');
-			$cs->registerScript(
-			  'mapbox_access_token',
-			 "var mapbox_access_token='$mapbox_access_token';",
-			  CClientScript::POS_HEAD
-			);	
-			
-			$mapbox_default_zoom = getOptionA('mapbox_default_zoom');
-			if($mapbox_default_zoom<=0 || empty($mapbox_default_zoom)){
-				$mapbox_default_zoom=13;
-			}
-			$cs->registerScript(
-			  'mapbox_default_zoom',
-			 "var mapbox_default_zoom='$mapbox_default_zoom';",
-			  CClientScript::POS_HEAD
-			);	
-			
+						
 			$act_menu=FunctionsV3::getTopMenuActivated();			
 			if(in_array('driver_signup',(array)$act_menu)){
 				Yii::app()->clientScript->registerCss('menu_css', '
@@ -234,7 +206,7 @@ class StoreController extends CController
 			if(!empty($search_address)){
 				$cs->registerScript(
 				  'mapbox_search_address',
-				  "var mapbox_search_address ='".$search_address."' ",
+				  "var mapbox_search_address ='".$search_address."'; ",
 				  CClientScript::POS_HEAD
 				);
 			}
@@ -257,37 +229,82 @@ class StoreController extends CController
 	}
 				  
 	public function actionIndex()
-	{							
-		/*$this->redirect(Yii::app()->request->baseUrl."/menu-mcdo");
-		Yii::app()->end();*/
+	{								
+		if(!FunctionsV3::isSearchByLocation()){
+		    ScriptManager::includeMappLibrary();
+		    $enabled_advance_search  = getOptionA('enabled_advance_search');
+		    if($enabled_advance_search=="yes"){
+		        ScriptManager::includeTypeHead();
+		    }
+		} else {
+			ScriptManager::includeTypeHead();
+		}	
 		$this->actionHome();
 	}	
 	
 	public function actionCuisine()
 	{
+		
+		ScriptManager::includeMappLibrary(true);
+		$search_by_location = FunctionsV3::isSearchByLocation();
+				
+		$slug=isset($_GET['slug'])?$_GET['slug']:'';	
+		
+		$cuisine_id=0;
+		if($resp = FunctionsV3::getCuisineBySlug($slug)){			
+			$cuisine_id = $resp['cuisine_id'];			
+		}	
+					
+		if($search_by_location){
+			if(isset($_GET['city_id']) || isset($_GET['postal_code']) ){
+				$data = $_GET;
+				Cookie::setCookie('kr_location_search',json_encode($data));	
+				$this->redirect(Yii::app()->createUrl("store/cuisine?category=$cuisine_id")); 	
+				Yii::app()->end();
+			}
+						
+			if (!$location_data = FunctionsV3::getSearchByLocationData()){
+				ScriptManager::includeTypeHead();
+				$this->render('enter_location',array(				 
+				 'form_action'=>"store/cuisine?category=$cuisine_id",
+				 'search_type'=>getOptionA('admin_zipcode_searchtype')
+				));
+				Yii::app()->end();
+			}		
+		} else {
+			
+			if(isset($_GET['s'])){
+				if(!isset($_SESSION['kr_search_address']) || !isset($_SESSION['client_location']['lat']) ){			
+					$_SESSION['kr_search_address'] = FunctionsV3::purify($_GET['s']);
+					try {
+						$resp = MapsWrapper::geoCodeAdress($_SESSION['kr_search_address']);					
+						$_SESSION['client_location']['lat'] = $resp['lat'];
+						$_SESSION['client_location']['long'] = $resp['long'];
+					} catch (Exception $e) {					
+					}				
+				}
+			}
+		
+			if(!isset($_SESSION['kr_search_address']) || !isset($_SESSION['client_location']['lat']) ){				
+				$provider = FunctionsV3::getMapProvider();
+				$this->render('enter_address',array(
+				 'map_provider'=>$provider,
+				 'form_action'=>"cuisine/$slug"				 
+				));
+				Yii::app()->end();
+			}
+		}	
+		
 		/*update merchant if expired and sponsored*/
 		Yii::app()->functions->updateMerchantSponsored();
-		Yii::app()->functions->updateMerchantExpired();
-		
-		/*$category='';
-		$getdata=isset($_GET)?$_GET:'';
-		if(is_array($getdata) && count($getdata)>=1){
-			$category=$getdata['category'];
-			$category=str_replace("-"," ",$category);
-		}
-		
-		if ( $cat_res=Yii::app()->functions->GetCuisineByName($category)){
-			$cuisine_id=$cat_res['cuisine_id'];
-		 } else $cuisine_id="-1";
-		 $filter_cuisine[]=$cuisine_id;*/
-		
-		$cuisine_id=isset($_GET['category'])?$_GET['category']:'';
+		Yii::app()->functions->updateMerchantExpired();						
 		 
 		 if (!isset($_GET['filter_cuisine'])){
 		 	$_GET['filter_cuisine']='';
 		 }
+
 		 
-		$_GET['filter_cuisine']=$_GET['filter_cuisine'].",$cuisine_id";
+		$_GET['filter_cuisine']=$_GET['filter_cuisine'].",$cuisine_id";		
 		 			 
 	    $res=FunctionsV3::searchByMerchant(
 		   'kr_search_category',
@@ -295,34 +312,16 @@ class StoreController extends CController
 		   isset($_GET['page'])?$_GET['page']:0,
 		   FunctionsV3::getPerPage(),
 		   $_GET			  
-		);
+		);		
 		
-		$country_list=Yii::app()->functions->CountryList();
-		$country=getOptionA('merchant_default_country');  
-		if (array_key_exists($country,(array)$country_list)){
-			$country_name = $country_list[$country];
-		} else $country_name="United states";
-				
-		if ($lat_res=Yii::app()->functions->geodecodeAddress($country_name)){    		
-    		$lat_res=array(
-    		  'lat'=>$lat_res['lat'],
-    		  'lng'=>$lat_res['long'],
-    		);
-    	} else {
-    		$lat_res=array();
-    	} 
-    	
-    	$cs = Yii::app()->getClientScript();
-    	$cs->registerScript(
-		  'country_coordinates',
-		  'var country_coordinates = '.json_encode($lat_res).'
-		  ',
-		  CClientScript::POS_HEAD
-		);
+		if(empty($slug)){
+			$res = false;
+		}	
 		
 		$this->render('merchant-list-cuisine',array(
 		  'list'=>$res,
-		  'category'=>isset($category)?$category:''
+		  'category'=>isset($category)?$category:'',
+		  'search_by_location'=>$search_by_location
 		));
 	}
 	
@@ -357,7 +356,8 @@ class StoreController extends CController
 		   'fb_flag'=>$fb,
 		   'google_login_enabled'=>getOptionA('google_login_enabled'),
 		   'captcha_customer_login'=>getOptionA('captcha_customer_login'),
-		   'captcha_customer_signup'=>getOptionA('captcha_customer_signup')
+		   'captcha_customer_signup'=>getOptionA('captcha_customer_signup'),
+		   'customer_forgot_password_sms'=>getOptionA('customer_forgot_password_sms')
 		));
 	}
 	
@@ -530,6 +530,8 @@ class StoreController extends CController
 	public function actionContact()
 	{
 		
+		ScriptManager::includeMappLibrary();
+		
 		$act_menu=FunctionsV3::getTopMenuActivated();
 		if (!in_array('contact',(array)$act_menu)){
 			$this->render('404-page',array('header'=>true));
@@ -567,6 +569,14 @@ class StoreController extends CController
 		  ',
 		  CClientScript::POS_HEAD
 		);
+		
+		$disabled_map = getOptionA('contact_map');						
+		$cs->registerScript(
+		  'contact_disabled_map',
+		  "var contact_disabled_map ='".$disabled_map."'; ",
+		  CClientScript::POS_HEAD
+		);
+		
 			
 		$this->render('contact',array(
 		  'address'=>$address,
@@ -581,6 +591,8 @@ class StoreController extends CController
 	public function actionSearchArea()
 	{
 
+		ScriptManager::includeMappLibrary();
+		
 		$res = '';
 		
 		unset($_SESSION['confirm_order_data']);
@@ -595,6 +607,10 @@ class StoreController extends CController
 			$seo_title=smarty('website_title',getWebsiteName(),$seo_title);
 		    $this->pageTitle=$seo_title;
 		    Yii::app()->functions->setSEO($seo_title,$seo_meta,$seo_key);
+		}
+		
+		if(isset($_GET)){
+			$_GET = FunctionsV3::purifyData($_GET);		
 		}
 		
 		$_SESSION['search_type']='';
@@ -653,8 +669,7 @@ class StoreController extends CController
 		Yii::app()->functions->updateMerchantSponsored();
 		Yii::app()->functions->updateMerchantExpired();
 		
-		/*  switch between search type */				
-		//dump($_SESSION['search_type']);
+		/*  switch between search type */						
 		switch ($_SESSION['search_type']) {
 			case "kr_search_address":
 				if (isset($_GET['s'])){
@@ -742,7 +757,7 @@ class StoreController extends CController
 				));													 			 					 
 			     break;
 				
-			case "kr_postcode":     
+			case "kr_postcode":     			   
 			    $res=FunctionsV3::searchByMerchant(
 				   $_SESSION['search_type'],
 				   isset($_GET['st'])?$_GET['st']:'',
@@ -801,7 +816,8 @@ class StoreController extends CController
 			  'current_page_link'=>$current_page_link,
 			  'current_page_url'=>$current_page_url,
 			  'fc'=>getOptionA('theme_filter_colapse'),
-			  'enabled_search_map'=>getOptionA('enabled_search_map')
+			  'enabled_search_map'=>getOptionA('enabled_search_map'),
+			  'search_by_location'=>FunctionsV3::isSearchByLocation()
 			));
 			$_SESSION['kmrs_search_stmt']=$res['sql'];			
 		} else {
@@ -828,58 +844,44 @@ class StoreController extends CController
 	
 	public function actionMenu()
 	{		
-				
-		$map = FunctionsV3::getMapProvider();
-		if($map['provider']=="mapbox"){
-			$baseUrl = Yii::app()->baseUrl; 
-			$cs = Yii::app()->getClientScript();
-									
-			$cs->registerCssFile($baseUrl."/assets/vendor/leaflet/plugin/routing/leaflet-routing-machine.css");
-			$cs->registerScriptFile($baseUrl."/assets/vendor/leaflet/plugin/routing/leaflet-routing-machine.min.js"
-			,CClientScript::POS_END); 	
-			
-			
-			/*$cs->registerCssFile("https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v2.3.0/mapbox-gl-geocoder.css");
-			$cs->registerScriptFile("https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v2.3.0/mapbox-gl-geocoder.min.js"
-			,CClientScript::POS_END);*/ 	
-			
-			$cs->registerCssFile($baseUrl."/assets/vendor/leaflet/plugin/geocoder/mapbox-gl-geocoder.css");
-			$cs->registerScriptFile($baseUrl."/assets/vendor/leaflet/plugin/geocoder/mapbox-gl-geocoder.min.js"
-			,CClientScript::POS_END); 	
-		}
+		
+		ScriptManager::includeMappLibrary(true);
+		$enabled_food_search_menu = getOptionA('enabled_food_search_menu');
+		if($enabled_food_search_menu==1){
+			ScriptManager::includeTypeHead();
+		}	
+		
 		
 		unset($_SESSION['kr_receipt']);
 		unset($_SESSION['confirm_order_data']);
 				
-		$data=$_GET;		
+		$data=$_GET; $page_slug='';		
 		$current_merchant='';
 		if (isset($_SESSION['kr_merchant_id'])){
 			$current_merchant=$_SESSION['kr_merchant_id'];
 		}
-						
-		$url=isset($_SERVER['REQUEST_URI'])?explode("/",$_SERVER['REQUEST_URI']):false;		
-		if(!is_array($url) && count($url)<=0){		
-			 $this->render('404-page',array(
-			   'header'=>true,
-			  'msg'=>"Sorry but we cannot find what you are looking for"
-			));			
-			return ;
-		}			
-		$page_slug=$url[count($url)-1];
-		$page_slug=str_replace('menu-','',$page_slug);			
-		if(isset($_GET)){				
-			$c=strpos($page_slug,'?');
-			if(is_numeric($c)){
-				$page_slug=substr($page_slug,0,$c);
-			}
-		}			
-		$page_slug=trim($page_slug);
-		//dump($page_slug);
-		if (isset($data['merchant'])){
-			
-		} else $data['merchant']=$page_slug;		
-		
-		$res=FunctionsV3::getMerchantBySlug($data['merchant']);
+					
+		$page_slug = isset($data['slug'])?trim($data['slug']):'';			
+		if(empty($page_slug)){
+			$url=isset($_SERVER['REQUEST_URI'])?explode("/",$_SERVER['REQUEST_URI']):false;
+			if(!is_array($url) && count($url)<=0){		
+				 $this->render('404-page',array(
+				   'header'=>true,
+				  'msg'=>"Sorry but we cannot find what you are looking for"
+				));			
+				return ;
+			}			
+			$page_slug=$url[count($url)-1];
+			$page_slug=str_replace('menu-','',$page_slug);			
+			if(isset($_GET)){				
+				$c=strpos($page_slug,'?');
+				if(is_numeric($c)){
+					$page_slug=substr($page_slug,0,$c);
+				}
+			}			
+		}	
+				
+		$res=FunctionsV3::getMerchantBySlug($page_slug);
 		
 		if (is_array($res) && count($res)>=1){
 			if ( $current_merchant !=$res['merchant_id']){							 
@@ -919,10 +921,16 @@ class StoreController extends CController
 		    			    	
 		    	$distance_type='';
 		    	$distance='';
-		    	$merchant_delivery_distance='';
-		    	$delivery_fee=0; 
-		    	$distance_type_orig='';
-		    	$distance_type_raw='';
+		    	$merchant_delivery_distance = isset($res['delivery_distance_covered'])?(float)$res['delivery_distance_covered']:0;
+		    	$delivery_fee=0; 		    	
+		    	$unit_pretty='';
+		    	$min_fees=0;
+		    	$distance_pretty='';
+		    	$ratings = array(
+	              'ratings'=>isset($res['ratings'])?(float)$res['ratings']:0,
+	              'votes'=>isset($res['ratings_votes'])?(integer)$res['ratings_votes']:0,
+	             );
+	             $distance_error = '';
 		    			    			    	
 		    	/*double check if session has value else use cookie*/		    	
 		    	FunctionsV3::cookieLocation();
@@ -937,44 +945,37 @@ class StoreController extends CController
 		    	      $merchant_id,
 		    	      $res['delivery_charges'],
 		    	      $location_data
-		    	    );		    	    
+		    	    );		  
+		    	    $min_fees = isset($res['delivery_minimum_order'])?(float)$res['delivery_minimum_order']:0;
 		    	} else {
 			    	if (isset($_SESSION['client_location'])){
-			    		 
-			    		/*get the distance from client address to merchant Address*/             
-		                 $distance_type=FunctionsV3::getMerchantDistanceType($merchant_id); 
-		                 $distance_type_orig=$distance_type;
-		                 
-			             $distance=FunctionsV3::getDistanceBetweenPlot(
-			                $_SESSION['client_location']['lat'],
-			                $_SESSION['client_location']['long'],
-			                $res['latitude'],$res['lontitude'],$distance_type
-			             );           
-			             		            		 
-			             $distance_type_raw = $distance_type=="M"?"miles":"kilometers";            		            
-			             $distance_type=$distance_type=="M"?t("miles"):t("kilometers");
-			             $distance_type_orig = $distance_type;
-			             
-			              if(!empty(FunctionsV3::$distance_type_result)){
-			             	$distance_type_raw=FunctionsV3::$distance_type_result;
-			             	$distance_type=t(FunctionsV3::$distance_type_result);
-			             }
-			             
-			             $merchant_delivery_distance=getOption($merchant_id,'merchant_delivery_miles');
-			             
-			             if(FunctionsV3::isClassDeliveryTableExist()){
-			             	$delivery_fee = DeliveryTableRate::getDeliveryFee(
-			             	 $merchant_id,
-			             	 0,$res['delivery_charges'],$distance,$distance_type_raw
-			             	);
-			             } else {
-			                $delivery_fee=FunctionsV3::getMerchantDeliveryFee(
-			                          $merchant_id,
-			                          $res['delivery_charges'],
-			                          $distance,
-			                          $distance_type_raw);
-			             }
-			    				          
+			    		 try {			    		 				  			    		 	
+			    		 	$provider = FunctionsV3::getMapProvider(); 
+                 	        MapsWrapper::init($provider);  
+			             	$resp = CheckoutWrapper::getDeliveryDetails(array(
+			             	  'merchant_id'=>$merchant_id,
+			             	  'provider'=>$provider,
+			             	  'merchant_id'=>$merchant_id,
+			             	  'from_lat'=>isset($res['latitude'])?$res['latitude']:0,
+			             	  'from_lng'=>isset($res['lontitude'])?$res['lontitude']:0,
+			             	  'to_lat'=>$_SESSION['client_location']['lat'],
+			             	  'to_lng'=>$_SESSION['client_location']['long'],
+			             	  'delivery_charges'=>isset($res['delivery_charges'])?$res['delivery_charges']:0,
+			             	  'unit'=>isset($res['distance_unit'])?$res['distance_unit']:'',
+			             	  'delivery_distance_covered'=>isset($res['delivery_distance_covered'])?$res['delivery_distance_covered']:0,
+			             	  'order_subtotal'=>0,
+			             	  'minimum_order'=>isset($res['minimum_order'])?$res['minimum_order']:0
+			             	));	  	 			             	
+			             	$distance_error = isset($resp['distance_error'])?$resp['distance_error']:'';
+			             	$unit_pretty = $resp['pretty_unit'];
+			             	$distance = $resp['distance'];
+			             	$distance_pretty = $resp['pretty_distance'];
+			             	$delivery_fee = $resp['delivery_fee'];
+			             	$min_fees = $resp['min_order'];
+			             } catch (Exception $e) {
+			             	$distance_pretty = $e->getMessage();			             	
+			             	$delivery_fee = 0;
+			             }	             		          
 			    	}   
 		    	}
 		    	
@@ -982,18 +983,9 @@ class StoreController extends CController
 		    			    	
 		    	/*SESSION REF*/
 		    	$_SESSION['kr_merchant_id']=$merchant_id;
-                $_SESSION['kr_merchant_slug']=$data['merchant'];
+                $_SESSION['kr_merchant_slug']=$page_slug;
 		    	$_SESSION['shipping_fee']=$delivery_fee;		
-		    	
-		    	
-		    	unset($_SESSION['distance_info']);
-		    	if(FunctionsV3::isClassDeliveryTableExist()){		    		
-		    		$_SESSION['distance_info'] = array(
-		    		  'distance'=>$distance,
-		    		  'unit'=>$distance_type_raw
-		    		);
-		    	}
-		    	
+		    			    			    	
 		    			    	
 		    	/*CHECK IF BOOKING IS ENABLED*/
 		    	$booking_enabled=true;		    		
@@ -1029,26 +1021,13 @@ class StoreController extends CController
 		    	$minimum_order_dinein=getOption($merchant_id,'merchant_minimum_order_dinein');
 		    	$maximum_order_dinein=getOption($merchant_id,'merchant_maximum_order_dinein');
 		    	
-	            $cs = Yii::app()->getClientScript();			
-				$cs->registerScript(
-				  'dinein_minimum',
-				 "var dinein_minimum='$minimum_order_dinein';",
-				  CClientScript::POS_HEAD
-				);
-				$cs->registerScript(
-				  'dinein_max',
-				 "var dinein_max='$maximum_order_dinein';",
-				  CClientScript::POS_HEAD
-				);
-				
-				
+	            
 				$tbl_booking=getOption( $merchant_id ,'merchant_master_table_boooking');
 				if($tbl_booking==1){
 					$booking_enabled=false;
 				}
 				
-				$food_viewing_private=getOption($merchant_id,'food_viewing_private');
-				
+				$food_viewing_private=getOption($merchant_id,'food_viewing_private');				
 
 				/*CHECK DISABLED ORDERING FROM ADMIN AND MERCHANT SETTINGS*/			
 				$disabled_addcart = getOption($merchant_id,'merchant_disabled_ordering');
@@ -1061,42 +1040,43 @@ class StoreController extends CController
 				
 				$website_use_date_picker = getOptionA('website_use_date_picker');
 				$enabled_category_sked = getOption($merchant_id,'enabled_category_sked');
+				$website_review_type=getOptionA('website_review_type');				
 				
-				$cs->registerScript(
-				  'website_use_date_picker',
+				$merchant_opt_contact_delivery = getOption($merchant_id,'merchant_opt_contact_delivery');
+				
+				FunctionsV3::registerScript(array(
+				 "var dinein_minimum='$minimum_order_dinein';",
+				 "var dinein_max='$maximum_order_dinein';",
 				 "var website_use_date_picker='$website_use_date_picker';",
-				  CClientScript::POS_HEAD
-				);
-				
-				$cs->registerScript(
-				  'enabled_category_sked',
 				 "var enabled_category_sked='$enabled_category_sked';",
-				  CClientScript::POS_HEAD
-				);
-				
-				$website_review_type=getOptionA('website_review_type');
-				
-				$cs->registerScript(
-				  'website_review_type',
 				 "var website_review_type='$website_review_type';",
-				  CClientScript::POS_HEAD
-				);
-				
-				$cs->registerScript(
-				  'search_by_location',
 				 "var search_by_location='$search_by_location';",
-				  CClientScript::POS_HEAD
-				);
+				 "var distance_error='$distance_error';",
+				 "var merchant_opt_contact_delivery='$merchant_opt_contact_delivery';",
+				));		
 				
+				/*inventory*/
+                if($inv_enabled = FunctionsV3::inventoryEnabled($merchant_id)){
+                    Yii::app()->getClientScript()->registerCssFile(Yii::app()->baseUrl."/protected/modules/inventory/assets/css/front.css");                
+                    Yii::app()->getClientScript()->registerScriptFile(Yii::app()->baseUrl."/protected/modules/inventory/assets/js/inventory.js"
+                    ,CClientScript::POS_END);                
+                    InventoryWrapper::registerScript(array(
+                      "var inv_ajax='".CJavaScript::quote(Yii::app()->request->baseUrl."/inventory/Ajaxfront")."';",
+                      "var inv_loader='".CJavaScript::quote( t("loading") )."...';",
+                    ),'inventory_script');
+                } 
+
+												
 				$this->render('menu' ,array(
 				   'data'=>$res,
-				   'merchant_id'=>$merchant_id,
-				   'distance_type'=>$distance_type,
-				   'distance_type_orig'=>$distance_type_orig,
-				   'distance_type_raw'=>$distance_type_raw,
+				   'merchant_id'=>$merchant_id,				   
 				   'distance'=>$distance,
-				   'merchant_delivery_distance'=>$merchant_delivery_distance,
-				   'delivery_fee'=>$delivery_fee,
+				   'distance_pretty'=>$distance_pretty,
+				   'merchant_delivery_distance'=>(float)$merchant_delivery_distance,
+				   'unit_pretty'=>$unit_pretty,
+				   'delivery_fee'=>(float)$delivery_fee,
+				   'min_fees'=>(float)$min_fees,
+				   'ratings'=>$ratings,
 				   'disabled_addcart'=>$disabled_addcart,
 				   'merchant_website'=>getOption($merchant_id,'merchant_extenal'),
 				   'photo_enabled'=>$photo_enabled,
@@ -1109,7 +1089,7 @@ class StoreController extends CController
 				   'theme_map_tab'=>getOptionA('theme_map_tab'),
 				   'theme_info_tab'=>getOptionA('theme_info_tab'),
 				   'theme_photos_tab'=>getOptionA('theme_photos_tab'),
-				   'enabled_food_search_menu'=>getOptionA('enabled_food_search_menu'),
+				   'enabled_food_search_menu'=>$enabled_food_search_menu,
 				   'location_data'=>$location_data,
 				   'search_by_location'=>$search_by_location,
 				   'social_facebook_page'=>getOption($merchant_id,'facebook_page'),
@@ -1119,7 +1099,8 @@ class StoreController extends CController
 				   'maximum_order_dinein'=>$maximum_order_dinein,
 				   'food_viewing_private'=>$food_viewing_private,
 				   'website_review_type'=>$website_review_type,
-				   'website_use_date_picker'=>$website_use_date_picker
+				   'website_use_date_picker'=>$website_use_date_picker,
+				   'merchant_opt_contact_delivery'=>$merchant_opt_contact_delivery
 				));	
 								
 			}  else  $this->render('error',array(
@@ -1133,6 +1114,12 @@ class StoreController extends CController
 	
 	public function actionCheckout()
 	{
+		
+		if(!isset($_SESSION['kr_item'])){
+			$this->redirect(Yii::app()->createUrl('/store/index'));
+			Yii::app()->end();
+		}
+		
 		if ( Yii::app()->functions->isClientLogin()){	       			
  	       $this->redirect(Yii::app()->createUrl('/store/paymentoption'));
  	       die();
@@ -1146,8 +1133,7 @@ class StoreController extends CController
 			$this->redirect(Yii::app()->createUrl('/store')); 
 			die();
 		}
-
-		//$_SESSION['google_http_refferer']=websiteUrl()."/store/paymentoption";		
+		
 		$_SESSION['google_http_refferer']=websiteUrl()."/paymentoption";		
 		
 		$seo_title=Yii::app()->functions->getOptionAdmin('seo_checkout');
@@ -1185,12 +1171,15 @@ class StoreController extends CController
 		   'google_login_enabled'=>getOptionA('google_login_enabled'),
 		   'captcha_customer_login'=>getOptionA('captcha_customer_login'),
 		   'captcha_customer_signup'=>getOptionA('captcha_customer_signup'),
-		   'step'=>3
+		   'step'=>3,
+		   'customer_forgot_password_sms'=>getOptionA('customer_forgot_password_sms')
 		));
 	}
 	
 	public function actionPaymentOption()
 	{	
+		
+		ScriptManager::includeMappLibrary();
 		
 		unset($_SESSION['confirm_order_data']);
 		
@@ -1228,15 +1217,15 @@ class StoreController extends CController
 	        }
 		}
 		
-		$enabled_map_selection_delivery = getOptionA('enabled_map_selection_delivery');
-		
+				
 		$s=$_SESSION;
-		$transaction_type = $s['kr_delivery_options']['delivery_type'];		
+		$transaction_type = isset($s['kr_delivery_options']['delivery_type'])?$s['kr_delivery_options']['delivery_type']:'';		
+		$enabled_map_selection_delivery = getOptionA('enabled_map_selection_delivery');
 		
 		$cs = Yii::app()->getClientScript();			
 		$cs->registerScript(
 		  'enabled_map_selection_delivery',
-		 "var enabled_map_selection_delivery='$enabled_map_selection_delivery';",
+		 "var enabled_map_selection_delivery='".CJavaScript::quote($enabled_map_selection_delivery)."';",
 		  CClientScript::POS_HEAD
 		);		
 		$cs->registerScript(
@@ -1245,36 +1234,32 @@ class StoreController extends CController
 		  CClientScript::POS_HEAD
 		);
 		
-		$website_enabled_map_address = getOptionA('website_enabled_map_address');		
-				
-		if($transaction_type=="delivery"){
-			if($website_enabled_map_address==2 || $enabled_map_selection_delivery==1 ){
-				$temporary_address = isset($_SESSION['kr_search_address'])?$_SESSION['kr_search_address']:getOptionA('admin_country_set');			
-				if(empty($temporary_address)){
-					$temporary_address=Yii::app()->functions->adminCountry();
-				}		
-							
-				$lat = ''; $lng ='';
-				if($res=Yii::app()->functions->geodecodeAddress($temporary_address)){
-					$lat = $res['lat'];
-					$lng = $res['long'];
-				}			
-				$cs = Yii::app()->getClientScript();
-				$cs->registerScript(
-				  'temporary_address_lat',
-				 "var temporary_address_lat='$lat';",
-				  CClientScript::POS_HEAD
-				);
-				$cs->registerScript(
-				  'temporary_address_lng',
-				 "var temporary_address_lng='$lng';",
-				  CClientScript::POS_HEAD
-				);
-			}
+		if($transaction_type=="delivery"){			
+			$temporary_address = isset($_SESSION['kr_search_address'])?$_SESSION['kr_search_address']:getOptionA('admin_country_set');			
+			if(empty($temporary_address)){
+				$temporary_address=Yii::app()->functions->adminCountry();
+			}		
+									
+			$lat = ''; $lng ='';
+			if($res=Yii::app()->functions->geodecodeAddress($temporary_address)){
+				$lat = $res['lat'];
+				$lng = $res['long'];
+			}			
+						
+			$cs = Yii::app()->getClientScript();
+			$cs->registerScript(
+			  'temporary_address_lat',
+			 "var temporary_address_lat='$lat';",
+			  CClientScript::POS_HEAD
+			);
+			$cs->registerScript(
+			  'temporary_address_lng',
+			 "var temporary_address_lng='$lng';",
+			  CClientScript::POS_HEAD
+			);			
 		}
 		
-		$this->render('payment-option',array(
-		  'website_enabled_map_address'=>$website_enabled_map_address,
+		$this->render('payment-option',array(		  
 		  'address_book'=>Yii::app()->functions->showAddressBook(),
 		  'search_by_location'=>$search_by_location,	
 		  'client_id'=>$client_id,
@@ -1284,16 +1269,20 @@ class StoreController extends CController
 	}
 	
 	public function actionReceipt()
-	{
-		if ($data=Yii::app()->functions->getOrder2($_GET['id'])){
-			/*dump($data);
-			die();*/
-			$this->render('receipt',array(
-			  'data'=>$data
+	{		
+		if (Yii::app()->functions->isClientLogin()){
+			$order_id = isset($_GET['id'])?(integer)$_GET['id']:0;
+			$client_id = (integer) Yii::app()->functions->getClientId();
+			if ($data=FunctionsV3::getReceiptByID($order_id,$client_id)){
+				$this->render('receipt',array(
+				  'data'=>$data
+				));
+			} else $this->render('error',array(
+			  'message'=>t("Sorry but we cannot find what you are looking for.")
 			));
 		} else $this->render('error',array(
-		  'message'=>t("Sorry but we cannot find what you are looking for.")
-		));
+			  'message'=>t("Sorry but we cannot find what you are looking for.")
+			)); 
 	}
 	
 	public function actionLogout()
@@ -1345,28 +1334,15 @@ class StoreController extends CController
 		     'tabs'=>isset($_GET['tab'])?$_GET['tab']:'',
 		     'disabled_cc'=>getOptionA('disabled_cc_management'),
 		     'info'=>Yii::app()->functions->getClientInfo( Yii::app()->functions->getClientId()),
-		     'avatar'=>FunctionsV3::getAvatar( Yii::app()->functions->getClientId() )
+		     'avatar'=>FunctionsV3::getAvatar( Yii::app()->functions->getClientId() ),
+		     'booking_disabled'=>getOptionA('merchant_tbl_book_disabled'),
 		   ));
 		} else $this->render('404-page',array(
 		   'header'=>true
 		));
 	}
 	
-	/*public function actionCards()
-	{
-		if ( getOptionA('disabled_cc_management')=="yes"){
-			$this->render('error',array(
-			  'message'=>t("Sorry but we cannot find what you are looking for.")
-			));
-		} else {
-			if (isset($_GET['Do'])){
-				if ($_GET['Do']=="Edit"){
-					$this->render('cards-edit');
-				} else $this->render('cards-add');			
-			} else $this->render('cards');		
-		}
-	}*/
-	
+
 	public function actionhowItWork()
 	{
 		$this->render('dynamic-page');
@@ -1381,40 +1357,59 @@ class StoreController extends CController
 	
 	public function actionPage()
 	{
-		/*$_GET=array_flip($_GET);   
-        $slug=$_GET[''];*/
-               
-        $url=isset($_SERVER['REQUEST_URI'])?explode("/",$_SERVER['REQUEST_URI']):false;
-		if(is_array($url) && count($url)>=1){
-			$page_slug=$url[count($url)-1];
-			$page_slug=str_replace('page-','',$page_slug);			
-			if(isset($_GET)){				
-				$c=strpos($page_slug,'?');
-				if(is_numeric($c)){
-					$page_slug=substr($page_slug,0,$c);
-				}
-			}			
-			$page_slug=trim($page_slug);					
-	        if ($data=yii::app()->functions->getCustomPageBySlug($page_slug)){
-	        	
-	            /*SET SEO META*/
-				if (!empty($data['seo_title'])){
-				     $this->pageTitle=ucwords($data['seo_title']);
-				     Yii::app()->clientScript->registerMetaTag($data['seo_title'], 'title'); 
-				}
-				if (!empty($data['meta_description'])){   
-				     Yii::app()->clientScript->registerMetaTag($data['meta_description'], 'description'); 
-				}
-				if (!empty($data['meta_keywords'])){   
-				     Yii::app()->clientScript->registerMetaTag($data['meta_keywords'], 'keywords'); 
-				}
-	        	
-	        	$this->render('custom-page',array(
-	        	  'data'=>$data
-	        	));
-	        } else {
-	        	$this->render('404-page',array('header'=>true));
-	        }
+		$page_slug = isset($_GET['slug'])?trim($_GET['slug']):'';
+		if(empty($page_slug)){
+			$url=isset($_SERVER['REQUEST_URI'])?explode("/",$_SERVER['REQUEST_URI']):false;
+			if(is_array($url) && count($url)>=1){
+				$page_slug=$url[count($url)-1];
+				$page_slug=str_replace('page-','',$page_slug);
+				if(isset($_GET)){				
+					$c=strpos($page_slug,'?');
+					if(is_numeric($c)){
+						$page_slug=substr($page_slug,0,$c);
+					}
+				}				
+			}
+		}	
+				
+		if ($data=yii::app()->functions->getCustomPageBySlug($page_slug)){
+			
+			$data = Yii::app()->request->stripSlashes($data);
+        	$lang = Yii::app()->language;
+        	
+        	$page_name_trans['page_name_trans'] =  isset($data['page_name_trans'])? json_decode($data['page_name_trans'],true) : '';	        	
+        	$page_name = qTranslate($data['page_name'],'page_name',(array)$page_name_trans);	        	
+        	
+        	$content_trans['content_trans'] = isset($data['content_trans']) ? json_decode($data['content_trans'],true) : '';	        	
+        	$content = qTranslate($data['content'],'content',(array)$content_trans);	        	
+        	
+        	$seo_title_trans['seo_title_trans'] = isset($data['seo_title_trans']) ?  json_decode($data['seo_title_trans'],true) :'';	        	
+        	$seo_title = qTranslate($data['seo_title'],'seo_title',(array)$seo_title_trans);	        	
+        	
+        	$meta_description_trans['meta_description_trans'] = isset($data['meta_description_trans']) ?  json_decode($data['meta_description_trans'],true) :'';      	
+        	$meta_description = qTranslate($data['meta_description'],'meta_description',(array)$meta_description_trans);	        	
+        	
+        	$meta_keywords_trans['meta_keywords_trans'] = isset($data['meta_keywords_trans']) ? json_decode($data['meta_keywords_trans'],true) :'';
+        	$meta_keywords = qTranslate($data['meta_keywords'],'meta_keywords',(array)$meta_keywords_trans);	        	
+        	
+            /*SET SEO META*/
+			if (!empty($data['seo_title'])){
+			     $this->pageTitle=$seo_title;
+			     Yii::app()->clientScript->registerMetaTag($seo_title, 'title'); 
+			}
+			if (!empty($data['meta_description'])){   
+			     Yii::app()->clientScript->registerMetaTag($meta_description, 'description'); 
+			}
+			if (!empty($data['meta_keywords'])){   
+			     Yii::app()->clientScript->registerMetaTag($meta_keywords, 'keywords'); 
+			}
+        					
+        	$this->render('custom-page',array(
+        	  'data'=>array(
+        	    'page_name'=>$page_name,
+        	    'content'=>$content,
+        	  )
+        	));
 		} else $this->render('404-page',array(
 		   'header'=>true,
 		  'msg'=>"Sorry but we cannot find what you are looking for"
@@ -1451,7 +1446,51 @@ class StoreController extends CController
 	}
 	
 	public function actionBrowse()
-	{
+	{		
+		ScriptManager::includeMappLibrary(true);
+		
+		if(isset($_GET['s'])){
+			if(!isset($_SESSION['kr_search_address']) || !isset($_SESSION['client_location']['lat']) ){			
+				$_SESSION['kr_search_address'] = FunctionsV3::purify($_GET['s']);
+				try {
+					$resp = MapsWrapper::geoCodeAdress($_SESSION['kr_search_address']);					
+					$_SESSION['client_location']['lat'] = $resp['lat'];
+					$_SESSION['client_location']['long'] = $resp['long'];
+				} catch (Exception $e) {					
+				}				
+			}
+		}
+				
+		
+		if( $search_by_location = FunctionsV3::isSearchByLocation()){
+			
+			if(isset($_GET['city_id']) || isset($_GET['postal_code']) ){
+				$data = $_GET;
+				Cookie::setCookie('kr_location_search',json_encode($data));	
+				$this->redirect(Yii::app()->createUrl('/store/browse')); 	
+				Yii::app()->end();
+			}
+						
+			if (!$location_data = FunctionsV3::getSearchByLocationData()){
+				ScriptManager::includeTypeHead();
+				$this->render('enter_location',array(				 
+				 'form_action'=>"store/browse",
+				 'search_type'=>getOptionA('admin_zipcode_searchtype')
+				));
+				Yii::app()->end();
+			}		
+		} else {				
+			if(!isset($_SESSION['kr_search_address']) || !isset($_SESSION['client_location']['lat']) ){			
+				$provider = FunctionsV3::getMapProvider();
+				$this->render('enter_address',array(
+				 'map_provider'=>$provider,
+				 'form_action'=>"store/browse"
+				));
+				Yii::app()->end();
+			}
+		}
+				
+				
 		unset($_SESSION['confirm_order_data']);
 		
 		$act_menu=FunctionsV3::getTopMenuActivated();
@@ -1486,21 +1525,8 @@ class StoreController extends CController
 			  $list=Yii::app()->functions->getAllMerchant();		
 			  break;
 		}
-
-		$country_list=Yii::app()->functions->CountryList();
-		$country=getOptionA('merchant_default_country');  
-		if (array_key_exists($country,(array)$country_list)){
-			$country_name = $country_list[$country];
-		} else $country_name="United states";
-						
-    	if ($lat_res=Yii::app()->functions->geodecodeAddress($country_name)){    		
-    		$lat_res=array(
-    		  'lat'=>$lat_res['lat'],
-    		  'lng'=>$lat_res['long'],
-    		);
-    	} else {
-    		$lat_res=array();
-    	} 
+	
+    	$lat_res=array('lat'=>0,'lng'=>0);    	
     	
     	$cs = Yii::app()->getClientScript();
     	$cs->registerScript(
@@ -1512,7 +1538,8 @@ class StoreController extends CController
 					
 		$this->render('browse-resto',array(
 		  'list'=>$list,
-		  'tabs'=>$tabs
+		  'tabs'=>$tabs,
+		  'search_by_location'=>$search_by_location
 		));
 	}
 	
@@ -1930,6 +1957,7 @@ class StoreController extends CController
 	
 	public function actionGuestCheckout()
 	{
+		ScriptManager::includeMappLibrary();
 		unset($_SESSION['confirm_order_data']);
 		
 		/*POINTS PROGRAM*/
@@ -1973,11 +2001,9 @@ class StoreController extends CController
 		 "var transaction_type='$transaction_type';",
 		  CClientScript::POS_HEAD
 		);
+				
 		
-		$website_enabled_map_address = getOptionA('website_enabled_map_address');		
-		
-		if($transaction_type=="delivery"){
-			if($website_enabled_map_address==2 || $enabled_map_selection_delivery==1 ){
+		if($transaction_type=="delivery"){			
 				$temporary_address = isset($_SESSION['kr_search_address'])?$_SESSION['kr_search_address']:getOptionA('admin_country_set');			
 				if(empty($temporary_address)){
 					$temporary_address=Yii::app()->functions->adminCountry();
@@ -1998,8 +2024,7 @@ class StoreController extends CController
 				  'temporary_address_lng',
 				 "var temporary_address_lng='$lng';",
 				  CClientScript::POS_HEAD
-				);
-			}
+				);			
 		}
 		
 		$this->render('payment-option',
@@ -2065,7 +2090,13 @@ class StoreController extends CController
 	
 	public function actionDepositVerify()
 	{
-		$this->render('deposit-verify');
+		try {			
+			$order_id = isset($_GET['ref'])?(integer)$_GET['ref']:'';				
+			FunctionsV3::getBankDeposit($order_id);			
+			$this->render('error',array('message'=> t("There is already upload bank deposit for this transaction") ));			
+		} catch (Exception $e) {
+		   $this->render('deposit-verify');
+		}
 	}
 	
 	public function actionVerification()
@@ -2383,11 +2414,25 @@ class StoreController extends CController
 	public function actionItem()
 	{
 		$data=Yii::app()->functions->getItemById($_GET['item_id']);
+		$merchant_id = $data[0]['merchant_id'];
+		
+		/*inventory*/
+        if($inv_enabled = FunctionsV3::inventoryEnabled($merchant_id)){
+            Yii::app()->getClientScript()->registerCssFile(Yii::app()->baseUrl."/protected/modules/inventory/assets/css/front.css");                
+            Yii::app()->getClientScript()->registerScriptFile(Yii::app()->baseUrl."/protected/modules/inventory/assets/js/inventory.js"
+            ,CClientScript::POS_END);                
+            InventoryWrapper::registerScript(array(
+              "var inv_ajax='".CJavaScript::quote(Yii::app()->request->baseUrl."/inventory/Ajaxfront")."';",
+              "var inv_loader='".CJavaScript::quote( t("loading") )."...';",
+            ),'inventory_script');
+        } 
+		
 		$this->layout='mobile_tpl';
 		$this->render('item',array(
 		   'title'=>"test title",
 		   'data'=>$data,
-		   'this_data'=>isset($_GET)?$_GET:''
+		   'this_data'=>isset($_GET)?$_GET:'',
+		   'inv_enabled'=>FunctionsV3::inventoryEnabled($merchant_id)
 		));
 	}
 	
@@ -2939,22 +2984,33 @@ class StoreController extends CController
 		    	if ( getOptionA('theme_photos_tab')==2){
 		    		$photo_enabled=false;
 		    	}
-
 		    	
 		    	$website_use_date_picker = getOptionA('website_use_date_picker');
 				$enabled_category_sked = getOption($merchant_id,'enabled_category_sked');
 				
-				$cs->registerScript(
-				  'website_use_date_picker',
-				 "var website_use_date_picker='$website_use_date_picker';",
-				  CClientScript::POS_HEAD
-				);
+				$merchant_info = array(
+				  'merchant_id'=>$data['merchant_id']
+				);							
+				$merchant_opt_contact_delivery = getOption($merchant_id,'merchant_opt_contact_delivery');	
 				
-				$cs->registerScript(
-				  'enabled_category_sked',
-				 "var enabled_category_sked='$enabled_category_sked';",
-				  CClientScript::POS_HEAD
-				);
+				FunctionsV3::registerScript(array(
+				  "var website_use_date_picker='$website_use_date_picker';",
+				  "var enabled_category_sked='$enabled_category_sked';",
+				  "var merchant_information =".json_encode($merchant_info)."",
+				  "var merchant_opt_contact_delivery='$merchant_opt_contact_delivery';",
+				));
+				
+			
+			/*inventory*/
+            if($inv_enabled = FunctionsV3::inventoryEnabled($merchant_id)){
+                Yii::app()->getClientScript()->registerCssFile(Yii::app()->baseUrl."/protected/modules/inventory/assets/css/front.css");                
+                Yii::app()->getClientScript()->registerScriptFile(Yii::app()->baseUrl."/protected/modules/inventory/assets/js/inventory.js"
+                ,CClientScript::POS_END);                
+                InventoryWrapper::registerScript(array(
+                  "var inv_ajax='".CJavaScript::quote(Yii::app()->request->baseUrl."/inventory/Ajaxfront")."';",
+                  "var inv_loader='".CJavaScript::quote( t("loading") )."...';",
+                ),'inventory_script');
+            } 		
 			
 			$this->render('mobile-cart',array(
 			   'data'=>$data,
@@ -2965,7 +3021,8 @@ class StoreController extends CController
 			   'distance'=>$distance,
 			   'merchant_delivery_distance'=>$merchant_delivery_distance,
 			   'delivery_fee'=>$delivery_fee,
-			   'website_use_date_picker'=>$website_use_date_picker
+			   'website_use_date_picker'=>$website_use_date_picker,
+			   'merchant_opt_contact_delivery'=>$merchant_opt_contact_delivery
 			));
 		} else {
 			$this->render('error',array(
@@ -3452,10 +3509,10 @@ class StoreController extends CController
 		$order_info = array();
 		$order_token = isset($_GET['order_token'])?$_GET['order_token']:'';
 		if(!empty($order_token)){
-			$order_info = FunctionsV3::getOrderInfoByToken($order_token);
+			$order_info = FunctionsV3::getOrderInfoByTokenWithCustomerName($order_token);
 		}		
 		
-		if(is_array($order_info) && count($order_info)>=1){
+		if(is_array($order_info) && count($order_info)>=1){			
 			$this->render('add_review',array(		  
 			  'order_info'=>$order_info
 			));
@@ -3520,7 +3577,7 @@ class StoreController extends CController
 					$trans_type='order';	
 					
 					$params = array(
-					   'customer_email' => $client_email,					   
+					   'customer_email' => trim($client_email),					   
 					   'payment_method_types'=>array('card'),
 					   'client_reference_id'=>$trans_type."-".$reference_id,					   
 					   'line_items'=>array(
@@ -4435,6 +4492,32 @@ class StoreController extends CController
 				));
 	    		break;
 	    }
+	}
+	
+	public function actionchangepassword_sms()
+	{
+		FunctionsV3::registerScript(array(
+		 "var ajax_action= 'verify_change_password_code'"
+		));		
+		$token = isset($_GET['token'])?$_GET['token']:'';		
+		if($res = Yii::app()->functions->getLostPassToken($token)){			
+			$this->render('changepassword_sms',array(
+			 'token'=>$token
+			));
+		}  else $this->render('error',array(
+	       'message'=>t("Sorry but this merchant is no longer available")
+	    ));
+	}
+	
+	public function actionchangepassword_successful()
+	{
+		$token = isset($_GET['token'])?$_GET['token']:'';	
+		if($res = Yii::app()->functions->getLostPassToken($token)){
+			$this->render('changepassword_ty',array(			 
+			));
+		}  else $this->render('error',array(
+	       'message'=>t("Sorry but this merchant is no longer available")
+	    ));
 	}
 		
 	/*START CUSTOM CODE*/

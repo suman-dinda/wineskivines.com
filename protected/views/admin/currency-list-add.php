@@ -5,7 +5,7 @@
 
 <?php 
 if (isset($_GET['id'])){
-	if (!$data=Yii::app()->functions->getCurrencyDetails($_GET['id'])){
+	if (!$data=Yii::app()->functions->getCurrencyDetailsByID($_GET['id'])){
 		echo "<div class=\"uk-alert uk-alert-danger\">".
 		Yii::t("default","Sorry but we cannot find what your are looking for.")."</div>";
 		return ;
@@ -28,7 +28,10 @@ if (isset($_GET['id'])){
   <?php 
   echo CHtml::textField('currency_code',
   isset($data['currency_code'])?$data['currency_code']:""
-  ,array('class'=>"uk-form-width-large",'data-validation'=>"required"))
+  ,array('class'=>"uk-form-width-large",
+    'data-validation'=>"required",
+    'maxlength'=>3
+    ))
   ?>
 </div>
 

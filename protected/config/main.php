@@ -27,7 +27,7 @@ $patern.="|driver_signup|driver_signup_ty";
 $patern.="|viva_verify|viva_failed|vivainit";
 $patern.="|stripe_success|stripe_cancel|stripe_webhook";
 $patern.="|paypal_init_reg|paypal_success|paypal_v2init";
-$patern.="|mercadopago_success|mercadopago_failure|mercadopagoinit";
+$patern.="|mercadopago_success|mercadopago_failure|mercadopagoinit|changepassword_sms";
 
 $patern=strtolower($patern);
 
@@ -74,6 +74,7 @@ return array(
 		'singlemerchant'=>array(),
 		'mobileappv2'=>array(),
 		'inventory'=>array(),
+		'merchantappv2'=>array(),
 	),
 	
 	'components'=>array(		   
@@ -110,12 +111,15 @@ return array(
                 'store/mollie_webhook',
                 'singlemerchant/ajax/upload',
                 'singlemerchant/voguepay',
-				'singlemerchant/braintree',
-				'mobileappv2/api',
- 				'mobileappv2/voguepay',
+                'singlemerchant/braintree',                
+				'mobileappv2/api', 
+				'mobileappv2/voguepay',
 				'mobileappv2/braintree',
-		  		'mobileappv2/ajax/uploadFile',
-		  		'inventory/upload',
+				'mobileappv2/ajax/uploadFile',
+				'inventory/upload',
+				'singlemerchant/payu',
+				'mobileappv2/payu',
+				'merchantappv2/api'
 	        ),
         ),
         'session' => array(
@@ -126,13 +130,15 @@ return array(
 		    'urlFormat'=>'path',		    
 		    'showScriptName'=>false,		    
 		    'rules'=>array(		
-		        '' => 'store/index',
+		        '' => 'store/index',		        
 		        '<action:('.$patern.')>' => 'store/<action>',
+		        'menu/<slug:[\w\-]+>'=>'store/menu',
+		        'cuisine/<slug:[\w\-]+>'=>'store/cuisine',
+		        'page/<slug:[\w\-]+>'=>'store/page',
                 '<controller:\w+>/<id:\d+>'=>'<controller>/view',
 		        '<controller:\w+>'=>'<controller>/index',		         
 		        '<controller:\w+>/<action:\w+>/<id:\d+>'=>'<controller>/<action>',
-		        '<controller:\w+>/<action:\w+>'=>'<controller>/<action>',
-		        //'<lang:\w+>/<module:\w+>/<controller:\w+>/<action:\w+>/'=>'<module>/<controller>/<action>',		
+		        '<controller:\w+>/<action:\w+>'=>'<controller>/<action>'		        
 		    )		    
 		),
 				
@@ -144,7 +150,7 @@ return array(
 			'password'         => '',
 			'charset'          => 'utf8',
 			'tablePrefix'      => 'mt_',
-	    ),			
+	    ),
 		
 	    'functions'=> array(
 	       'class'=>'Functions'	       

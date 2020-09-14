@@ -100,35 +100,6 @@ class MerchantController extends CController
 		 "var current_panel='merchant';",
 		  CClientScript::POS_HEAD
 		);
-				
-	    $map_provider = getOptionA('map_provider');
-		if(empty($map_provider)){
-			$map_provider='google.maps';
-		}
-		$cs->registerScript(
-		   'map_provider',
-		   "var map_provider='$map_provider';",
- 		   CClientScript::POS_HEAD
-		);	
-		$this->map_provider=$map_provider;
-		
-		$mapbox_access_token = getOptionA('mapbox_access_token');
-		$cs->registerScript(
-		  'mapbox_access_token',
-		 "var mapbox_access_token='$mapbox_access_token';",
-		  CClientScript::POS_HEAD
-		);	
-		
-		$mapbox_default_zoom = getOptionA('mapbox_default_zoom');
-		if($mapbox_default_zoom<=0 || empty($mapbox_default_zoom)){
-			$mapbox_default_zoom=13;
-		}
-		$cs->registerScript(
-		  'mapbox_default_zoom',
-		 "var mapbox_default_zoom='$mapbox_default_zoom';",
-		  CClientScript::POS_HEAD
-		);	
-	
 		
 		if (Yii::app()->functions->isMerchantLogin()){
 			if(!FunctionsV3::validateMerchantControllerAccess($action_name)){	
@@ -368,6 +339,43 @@ class MerchantController extends CController
 	
 	public function actionMerchant()
 	{
+		$provider = FunctionsV3::getMapProvider();		
+		$map_api = isset($provider['map_api'])?$provider['map_api']:'';
+		$map_provider = isset($provider['provider'])?$provider['provider']:'';		
+		$cs = Yii::app()->getClientScript();
+		$cs->registerScript(
+		  'map_apikey',
+		  "var map_apikey = '$map_api';",
+		  CClientScript::POS_HEAD
+		);
+		$cs->registerScript(
+		  'map_provider',
+		  "var map_provider = '$map_provider';",
+		  CClientScript::POS_HEAD
+		);
+		
+		$mapbox_default_zoom = getOptionA('mapbox_default_zoom');
+		if(empty($mapbox_default_zoom)){
+			$mapbox_default_zoom=20;
+		}
+		$cs->registerScript(
+		  'mapbox_default_zoom',
+		  "var mapbox_default_zoom = '$mapbox_default_zoom';",
+		  CClientScript::POS_HEAD
+		);		
+		
+		switch ($provider['provider']) {
+			case "google.maps":			
+				$cs->registerScriptFile("https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places&key=".$map_api,CClientScript::POS_HEAD); 
+				break;
+				
+			case "mapbox":					
+				$cs->registerScriptFile(Yii::app()->baseUrl."/assets/vendor/leaflet/leaflet.js"
+		        ,CClientScript::POS_END); 					
+		        $cs->registerCssFile(Yii::app()->baseUrl."/assets/vendor/leaflet/leaflet.css");										
+				break;						
+		}
+		
 		$this->crumbsTitle=Yii::t("default","Merchant");
 		$this->render('merchant-info');
 	}
@@ -1045,9 +1053,17 @@ class MerchantController extends CController
 			return ;
 		}
 		
+		$merchant_id =Yii::app()->functions->getMerchantID();
+		$balance_month = Yii::app()->functions->getMerchantBalanceThisMonth($merchant_id);	
+		$total_sale = Yii::app()->functions->getMerchantTotalSales($merchant_id);		
+		
 		$this->crumbsTitle=Yii::t("default","Earnings");		
 		$this->render('earnings',array(
-		 'merchant_type'=>FunctionsV3::getMerchantTypeBySession()
+		 'merchant_type'=>FunctionsV3::getMerchantTypeBySession(),
+		 'sale_month'=>$balance_month['balance'],
+		 'sale_month_count'=>$balance_month['count'],
+		 'sale_total'=>$total_sale['balance'],
+		 'total_sale_count'=>$total_sale['count']
 		));
 	}
 	
@@ -2083,16 +2099,6 @@ header('Location: '.Yii::app()->request->baseUrl."/merchant/smsReceipt/id/".Yii:
 			$this->render('noaccess');
 		}
 	}
-
-	public function actionbanner_settings(){
-		$merchant_id = Yii::app()->functions->getMerchantID();
-		$this->crumbsTitle = t("Banner Settings");
-		$this->render('banner-settings',array(
-			'merchant_id'=>$merchant_id,
-			'banner'=>getOption($merchant_id,'merchant_banner'),
-			'banner_enabled'=>getOption('','banner_enabled'),
-		));
-	}
 	
 	public function actionmercadopago_v2()
 	{
@@ -2156,6 +2162,70 @@ header('Location: '.Yii::app()->request->baseUrl."/merchant/smsReceipt/id/".Yii:
 			  'message'=>$error
 			));
 		}
+	}
+		
+	public function actionbanner_settings()
+	{
+		$merchant_id = Yii::app()->functions->getMerchantID();
+		$this->crumbsTitle = t("Banner Settings");
+		$this->render('banner-settings',array(
+		  'merchant_id'=>$merchant_id,
+		  'banner'=>getOption($merchant_id,'merchant_banner'),
+		  'banner_enabled'=>getOption('','banner_enabled'),		  
+		));
+	}
+	
+	public function actionallorder()
+	{
+		$merchant_id = Yii::app()->functions->getMerchantID();
+		$this->crumbsTitle = t("Banner Settings");
+		$this->render('all-order-list',array(
+		  'merchant_id'=>$merchant_id		  
+		));
+	}
+	
+	public function actionsinglemerchant()
+	{
+		if (!FunctionsV3::hasModuleAddon("singlemerchant")){
+			$this->render('noaccess');
+			return ;
+		}
+		
+		if(!Yii::app()->db->schema->getTable("{{singleapp_pages}}")){						
+			$this->render('noaccess');
+			return ;
+		}
+		
+		$merchant_id = Yii::app()->functions->getMerchantID();
+		
+		if($merchant_id>0){
+			
+			FunctionsV3::registerJS(array(
+			  Yii::app()->baseUrl."/assets/vendor/bootstrap/js/bootstrap.min.js"
+			));
+			FunctionsV3::registerCSS(array(
+			  Yii::app()->baseUrl."/assets/vendor/bootstrap/css/bootstrap.min.css",
+			  '//pro.fontawesome.com/releases/v5.10.0/css/all.css'
+			));
+			
+			$data = array(
+			  'merchant_id'=>$merchant_id
+			);
+			
+			$action_id = '';
+			if(is_array($_GET) && count($_GET)>=1){
+				foreach ($_GET as $key=>$val) {
+					$action_id = $key;
+				}
+			}
+																					
+			$this->crumbsTitle = t("Single Merchant");
+			$this->render('single_merchant_settings',array(
+			  'merchant_id'=>$merchant_id,
+			  'action_id'=>$action_id,
+			  'data'=>$data
+			));
+		} else $this->render('noaccess');
 	}
 	
 }

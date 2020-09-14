@@ -1,8 +1,8 @@
 <?php 
 $item_found=false;
 if (is_array($data) && count($data)>=1){
-	$data=$data[0];
-	$item_found=true;
+    $data=$data[0];
+    $item_found=true;
 } else $data['item_name']='';
 
 $slug=isset($this_data['slug'])?$this_data['slug']:'';
@@ -11,6 +11,7 @@ $this->renderPartial('/front/mobile_header',array(
     'slug'=> $slug,
     'title'=>$data['item_name']
 ));
+
 ?>
 
 <div class="container">
@@ -22,15 +23,15 @@ $item_data=array();
 $price_select='';
 $size_select='';
 if (array_key_exists("row",(array)$this_data)){
-	$row=$this_data['row'];	
-	$item_data=$_SESSION['kr_item'][$row];
-	//dump($item_data);
-	$price=Yii::app()->functions->explodeData($item_data['price']);
-	if (is_array($price) && count($price)>=1){
-		$price_select=isset($price[0])?$price[0]:'';
-		$size_select=isset($price[1])?$price[1]:'';
-	}
-	$row++;
+    $row=$this_data['row'];    
+    $item_data=$_SESSION['kr_item'][$row];
+    //dump($item_data);
+    $price=Yii::app()->functions->explodeData($item_data['price']);
+    if (is_array($price) && count($price)>=1){
+        $price_select=isset($price[0])?$price[0]:'';
+        $size_select=isset($price[1])?$price[1]:'';
+    }
+    $row++;
 }
 $disabled_website_ordering=Yii::app()->functions->getOptionAdmin('disabled_website_ordering');
 $hide_foodprice=Yii::app()->functions->getOptionAdmin('website_hide_foodprice');
@@ -48,11 +49,11 @@ echo CHtml::hiddenField('hide_foodprice',$hide_foodprice);
 <?php echo CHtml::hiddenField('category_id',isset($_GET['category_id'])?$_GET['category_id']:'' );?>
 <?php 
 if ($data['two_flavors']==2){
-	$data['prices'][0]=array(
-	  'price'=>0,
-	  'size'=>''
-	);	
-	echo CHtml::hiddenField('two_flavors',$data['two_flavors']);
+    $data['prices'][0]=array(
+      'price'=>0,
+      'size'=>''
+    );    
+    echo CHtml::hiddenField('two_flavors',$data['two_flavors']);
 }
 ?>
 
@@ -114,19 +115,19 @@ if ($data['two_flavors']==2){
                  <?php                  
                  $size_id=isset($price['size_id'])?$price['size_id']:''; 
                  echo CHtml::radioButton('price',
-		          $size_select==$price['size']?true:false
-		          ,array(
-		            'value'=>$price['price']."|".$price['size']."|".$size_id,
-		            'class'=>"price_cls item_price"
-		          ))?>
-		          <?php echo qTranslate($price['size'],'size',$price)?>
+                  $size_select==$price['size']?true:false
+                  ,array(
+                    'value'=>$price['price']."|".$price['size']."|".$size_id,
+                    'class'=>"price_cls item_price"
+                  ))?>
+                  <?php echo qTranslate($price['size'],'size',$price)?>
               <?php else :?>
                   <?php echo CHtml::radioButton('price',
-		            count($price['price'])==1?true:false
-		            ,array(
-		            'value'=>$price['price'],
-		            'class'=>"item_price"
-		          ))?>
+                    count( (array) $price['price'])==1?true:false
+                    ,array(
+                    'value'=>$price['price'],
+                    'class'=>"price_cls item_price"
+                  ))?>
              <?php endif;?>
              
              <?php if (isset($price['price'])):?>  
@@ -155,23 +156,30 @@ if ($data['two_flavors']==2){
     </a>     
     <div class="row">
        <div class="col-md-1 col-xs-1 border into-row-2 text-to-right">
-          <a href="javascript:;" class="green-button inline qty-minus" ><i class="ion-minus"></i></a>
+          <a href="javascript:;" class="green-button inline <?php echo $inv_enabled==true?"inv_qty_minus":'qty-minus'?>" ><i class="ion-minus"></i></a>
        </div>
        <div class="col-md-2 col-xs-2 border into-row-2">
           <?php echo CHtml::textField('qty',
-	      isset($item_data['qty'])?$item_data['qty']:1
-	      ,array(
-	      'class'=>"uk-form-width-mini numeric_only qty",      
-	      ))?>
+          isset($item_data['qty'])?$item_data['qty']:1
+          ,array(
+          'class'=>"uk-form-width-mini numeric_only qty",
+          'maxlength'=>5,
+          'readonly'=>true     
+          ))?>
        </div>
        <div class="col-md-1 col-xs-1 border into-row-2 text-to-left">
-         <a href="javascript:;" class="qty-plus green-button inline"><i class="ion-plus"></i></a>
+         <a href="javascript:;" class="green-button inline <?php echo $inv_enabled==true?"inv_qty_plus":'qty-plus'?>"><i class="ion-plus"></i></a>
        </div>
        <div class="col-md-8 col-xs-8 border into-row">
-         <a href="javascript:;" class="special-instruction orange-button inline"><?php echo t("Special Instructions")?></a>
+          <!--inventory-->
+          <span class="remaining_stock"></span>         
        </div>
     </div> <!--row-->
   </div> <!-- section-label--> 
+  
+  <div class="row" style="margin-top:10px;">
+  <a href="javascript:;" class="special-instruction orange-button inline"><?php echo t("Special Instructions")?></a>
+  </div>
   
   <div class="notes-wrap">
   <?php echo CHtml::textArea('notes',
@@ -203,11 +211,11 @@ if ($data['two_flavors']==2){
       <div class="col-md-5 ">
          <?php $item_data['cooking_ref']=isset($item_data['cooking_ref'])?$item_data['cooking_ref']:''; ?>
          <?php echo CHtml::radioButton('cooking_ref',
-	       $item_data['cooking_ref']==$val?true:false
-	       ,array(
-	         'value'=>$val
-	       ))?>&nbsp;             
-	       <?php echo qTranslate($val,'cooking_ref',$data);?>
+           $item_data['cooking_ref']==$val?true:false
+           ,array(
+             'value'=>$val
+           ))?>&nbsp;             
+           <?php echo qTranslate($val,'cooking_ref',$data);?>
       </div> <!--col-->
       <?php endforeach;?>
     </div> <!--row-->
@@ -219,7 +227,7 @@ if ($data['two_flavors']==2){
   <!--Ingredients-->  
   <?php 
   if (!isset($item_data['ingredients'])){
-  	  $item_data['ingredients']='';
+        $item_data['ingredients']='';
   }
   ?>
   <?php if (isset($data['ingredients'])):?>  
@@ -235,11 +243,11 @@ if ($data['two_flavors']==2){
          <?php $item_data['ingredients_id']=isset($item_data['ingredients_id'])?$item_data['ingredients_id']:''; ?>
          <div class="col-md-5 ">
            <?php echo CHtml::checkbox('ingredients[]',
-	       in_array($val,(array)$item_data['ingredients'])?true:false
-	       ,array(
-	         'value'=>$val
-	       ))?>&nbsp;             
-	       <?php echo $val;?>
+           in_array($val,(array)$item_data['ingredients'])?true:false
+           ,array(
+             'value'=>$val
+           ))?>&nbsp;             
+           <?php echo $val;?>
          </div>         
          <?php endforeach;?>
      </div>     
@@ -261,25 +269,25 @@ if ($data['two_flavors']==2){
      'data-name'=>strtoupper($val['subcat_name'])
     ))?>
     
-	  <div class="section-label">
-	    <a class="section-label-a">
-	      <span class="bold">
-	      <?php echo qTranslate($val['subcat_name'],'subcat_name',$val)?>
-	      </span>
-	      <b></b>
-	    </a>        
-	  </div>  
-	  <?php if (is_array($val['sub_item']) && count($val['sub_item'])>=1):?>
-	  <?php $x=0;?>
-	  <?php foreach ($val['sub_item'] as $val_addon):?>    
-	  <?php 
-	  $subcat_id=$val['subcat_id'];
+      <div class="section-label">
+        <a class="section-label-a">
+          <span class="bold">
+          <?php echo qTranslate($val['subcat_name'],'subcat_name',$val)?>
+          </span>
+          <b></b>
+        </a>        
+      </div>  
+      <?php if (is_array($val['sub_item']) && count($val['sub_item'])>=1):?>
+      <?php $x=0;?>
+      <?php foreach ($val['sub_item'] as $val_addon):?>    
+      <?php 
+      $subcat_id=$val['subcat_id'];
       $sub_item_id=$val_addon['sub_item_id'];
       $multi_option_val=$val['multi_option'];
       
        /** fixed select only one addon*/
         if ( $val['multi_option']=="custom" || $val['multi_option']=="multiple"){
-        	$sub_item_name="sub_item[$subcat_id][$x]";
+            $sub_item_name="sub_item[$subcat_id][$x]";
         } else $sub_item_name="sub_item[$subcat_id][]"; 
         
         $sub_addon_selected='';
@@ -287,85 +295,85 @@ if ($data['two_flavors']==2){
                     
         $item_data['sub_item']=isset($item_data['sub_item'])?$item_data['sub_item']:'';
         if (array_key_exists($subcat_id,(array)$item_data['sub_item'])){
-        	$sub_addon_selected=$item_data['sub_item'][$subcat_id];
-        	if (is_array($sub_addon_selected) && count($sub_addon_selected)>=1){
-            	foreach ($sub_addon_selected as $val_addon_selected) {
-            		$val_addon_selected=Yii::app()->functions->explodeData($val_addon_selected);
-            		if (is_array($val_addon_selected)){
-            		    $sub_addon_selected_id[]=$val_addon_selected[0];
-            		}
-            	}
-        	}
+            $sub_addon_selected=$item_data['sub_item'][$subcat_id];
+            if (is_array($sub_addon_selected) && count($sub_addon_selected)>=1){
+                foreach ($sub_addon_selected as $val_addon_selected) {
+                    $val_addon_selected=Yii::app()->functions->explodeData($val_addon_selected);
+                    if (is_array($val_addon_selected)){
+                        $sub_addon_selected_id[]=$val_addon_selected[0];
+                    }
+                }
+            }
         }
-	  ?>	    
-	    <div class="row top10">
-	        <div class="col-md-5 col-xs-5 border into-row ">
-	        <?php 
-	         if ( $val['multi_option']=="custom" || $val['multi_option']=="multiple"): 
+      ?>        
+        <div class="row top10">
+            <div class="col-md-5 col-xs-5 border into-row ">
+            <?php 
+             if ( $val['multi_option']=="custom" || $val['multi_option']=="multiple"): 
                             
-	            echo CHtml::checkBox($sub_item_name,
-	            in_array($sub_item_id,(array)$sub_addon_selected_id)?true:false
-	            ,array(
-	              'value'=>$val_addon['sub_item_id']."|".$val_addon['price']."|".$val_addon['sub_item_name']."|".$val['two_flavor_position'],
-	              'data-id'=>$val['subcat_id'],
-	              'data-option'=>$val['multi_option_val'],
-	              'rel'=>$val['multi_option'],
-	              'class'=>'sub_item_name sub_item_name_'.$val['subcat_id']
-	            ));
-            else :            	                            
-	            echo CHtml::radioButton($sub_item_name,
-	            in_array($sub_item_id,(array)$sub_addon_selected_id)?true:false
-	            ,array(
-	              'value'=>$val_addon['sub_item_id']."|".$val_addon['price']."|".$val_addon['sub_item_name']."|".$val['two_flavor_position'],	             
-	              'class'=>'sub_item sub_item_name_'.$val['subcat_id']	             
-	            ));
+                echo CHtml::checkBox($sub_item_name,
+                in_array($sub_item_id,(array)$sub_addon_selected_id)?true:false
+                ,array(
+                  'value'=>$val_addon['sub_item_id']."|".$val_addon['price']."|".$val_addon['sub_item_name']."|".$val['two_flavor_position'],
+                  'data-id'=>$val['subcat_id'],
+                  'data-option'=>$val['multi_option_val'],
+                  'rel'=>$val['multi_option'],
+                  'class'=>'sub_item_name sub_item_name_'.$val['subcat_id']
+                ));
+            else :                                            
+                echo CHtml::radioButton($sub_item_name,
+                in_array($sub_item_id,(array)$sub_addon_selected_id)?true:false
+                ,array(
+                  'value'=>$val_addon['sub_item_id']."|".$val_addon['price']."|".$val_addon['sub_item_name']."|".$val['two_flavor_position'],                 
+                  'class'=>'sub_item sub_item_name_'.$val['subcat_id']                 
+                ));
             endif;
             
             echo "&nbsp;".qTranslate($val_addon['sub_item_name'],'sub_item_name',$val_addon);
-	        ?>
-	         <span class="hide-food-price to-show">
-	        <?php echo !empty($val_addon['price'])?displayPrice(getCurrencyCode(),$val_addon['price']):"-";?>
-	        </span>
-	        </div> <!--col-->
-	        
-	        <div class="col-md-4 col-xs-4 border into-row ">
-	          <?php if ($val['multi_option']=="multiple"):?>
-		      <?php             
-	          $qty_selected=1;
-	          if (!isset($item_data['addon_qty'])){
-	           	 $item_data['addon_qty']='';
-	          }
-	          if (array_key_exists($subcat_id,(array)$item_data['addon_qty'])){            	            
-	              $qty_selected=$item_data['addon_qty'][$subcat_id][$x];
-	          }            
-	          ?>
-	          
-	          <div class="row quantity-wrap-small">
-	            <div class="col-md-3 col-xs-3 border ">
-	              <a href="javascript:;" class="green-button inline qty-addon-minus"><i class="ion-minus"></i></a>
-	            </div>
-	            <div class="col-md-5 col-xs-5 border">
-	              <?php echo CHtml::textField("addon_qty[$subcat_id][$x]",$qty_selected,array(
-		          'class'=>"numeric_only left addon_qty",      
-		          ))?>
-	            </div>
-	            <div class="col-md-3 col-xs-3 border ">
-	              <a href="javascript:;" class="green-button inline qty-addon-plus"><i class="ion-plus"></i></a>
-	            </div>
-	          </div>
-	          
-	          <?php endif;?>
-	        </div> <!--col-->
-	        
-	        <div class="col-md-3 col-xs-3 border text-right into-row">
-	        <span class="hide-food-price to-hide">
-	        <?php echo !empty($val_addon['price'])?displayPrice(getCurrencyCode(),$val_addon['price']):"-";?>
-	        </span>
-	        </div> <!--col-->
-	    </div> <!--row-->	    
-	    <?php $x++;?>
-	  <?php endforeach;?>	  
-	  <?php endif;?>
+            ?>
+             <span class="hide-food-price to-show">
+            <?php echo !empty($val_addon['price'])?displayPrice(getCurrencyCode(),$val_addon['price']):"-";?>
+            </span>
+            </div> <!--col-->
+            
+            <div class="col-md-4 col-xs-4 border into-row ">
+              <?php if ($val['multi_option']=="multiple"):?>
+              <?php             
+              $qty_selected=1;
+              if (!isset($item_data['addon_qty'])){
+                    $item_data['addon_qty']='';
+              }
+              if (array_key_exists($subcat_id,(array)$item_data['addon_qty'])){                            
+                  $qty_selected=$item_data['addon_qty'][$subcat_id][$x];
+              }            
+              ?>
+              
+              <div class="row quantity-wrap-small">
+                <div class="col-md-3 col-xs-3 border ">
+                  <a href="javascript:;" class="green-button inline qty-addon-minus"><i class="ion-minus"></i></a>
+                </div>
+                <div class="col-md-5 col-xs-5 border">
+                  <?php echo CHtml::textField("addon_qty[$subcat_id][$x]",$qty_selected,array(
+                  'class'=>"numeric_only left addon_qty",      
+                  ))?>
+                </div>
+                <div class="col-md-3 col-xs-3 border ">
+                  <a href="javascript:;" class="green-button inline qty-addon-plus"><i class="ion-plus"></i></a>
+                </div>
+              </div>
+              
+              <?php endif;?>
+            </div> <!--col-->
+            
+            <div class="col-md-3 col-xs-3 border text-right into-row">
+            <span class="hide-food-price to-hide">
+            <?php echo !empty($val_addon['price'])?displayPrice(getCurrencyCode(),$val_addon['price']):"-";?>
+            </span>
+            </div> <!--col-->
+        </div> <!--row-->        
+        <?php $x++;?>
+      <?php endforeach;?>      
+      <?php endif;?>
      <?php endforeach;?>
   <?php endif;?>
   <?php endif;?>
@@ -403,4 +411,4 @@ if ($data['two_flavors']==2){
 <p class="text-danger top25 center"><?php echo t("Sorry but we cannot find what you are looking for.")?></p>
 <?php endif;?>
 
-</div> <!--container-->
+</div> <!--container--> 

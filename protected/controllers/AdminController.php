@@ -3,8 +3,6 @@
  * AdminController Controller
  *
  */
-ini_set("display_errors",true);
-error_reporting(E_ALL & ~E_NOTICE);
 //if (!isset($_SESSION)) { session_start(); }
 
 class AdminController extends CController
@@ -238,8 +236,14 @@ class AdminController extends CController
 	
 	public function actionMerchantAdd()
 	{
+		$tags =   (array)FunctionsV3::dropdownFormat(
+		   FunctionsV3::getTags(),'tag_id','tag_name'
+		);
+		
 		$this->crumbsTitle=Yii::t("default","Merchant Add");
-		$this->render('merchant-add');
+		$this->render('merchant-add',array(
+		 'tags'=>$tags
+		));
 	}
 	
 	public function actionPackages()
@@ -270,7 +274,8 @@ class AdminController extends CController
 		$this->crumbsTitle=Yii::t("default","Settings");
 		$this->render('settings-new',array(
 		 'status_list'=>Yii::app()->functions->orderStatusList2(true),
-		 'cancel_order_status'=>getOptionA('cancel_order_status_accepted')
+		 'cancel_order_status'=>getOptionA('cancel_order_status_accepted'),
+		 'restrict_order_by_status'=>getOptionA('restrict_order_by_status')
 		));
 	}
 	
@@ -382,8 +387,20 @@ class AdminController extends CController
 	{
 		if (isset($_GET['Do'])){
 			if ($_GET['Do']=="Add"){
+				
+			   $data = array();
+			   if(isset($_GET['id'])){
+			   	  $data=Yii::app()->functions->getCustomPage((integer)$_GET['id']);
+			   	  if(!$data){
+			   	  	$this->render('error',array('msg'=>t("Sorry but we cannot find what your are looking for.")));
+			   	  	return ;
+			   	  }
+			   }
+				
 			   $this->crumbsTitle=Yii::t("default","Custom page Add");
-		       $this->render('custom-add');
+		       $this->render('custom-add',array(
+		         'data'=>$data
+		       ));
 			} elseif ($_GET['Do']=="AddCustom"){
 				$this->crumbsTitle=Yii::t("default","Add New Custom Link");
 		        $this->render('custom-add-link');
@@ -536,7 +553,7 @@ class AdminController extends CController
 	}
 	
 	public function actionrptMerchanteSales()
-	{
+	{		
 		$this->crumbsTitle=Yii::t("default","Merchant Sales Report");		
 		$this->render('rpt-merchant-sales');
 	}
@@ -599,8 +616,9 @@ class AdminController extends CController
 		      'customer_forgot_password'=>
 		       array(
 		         'email'=>true,
-		         'sms'=>false,		        
+		         'sms'=>true,		        
 		         'email_tag'=>'firstname,lastname,change_pass_link,sitename,siteurl',
+		         'sms_tag'=>'firstname,lastname,code',
 		      ),
 		      'merchant_welcome_signup'=>array(
 		        'email'=>true,
@@ -699,6 +717,7 @@ class AdminController extends CController
 		       'push'=>true, 
 		       'email_tag'=>'customer_name,order_id,restaurant_name,sitename,siteurl,request_status', 
 		       'sms_tag'=>'customer_name,order_id,restaurant_name,sitename,siteurl,request_status', 
+		       'push_tag'=>'customer_name,order_id,restaurant_name,sitename,siteurl,request_status', 
 		     ),
 		     
 		     'order_request_cancel_to_admin'=>array(
@@ -737,6 +756,13 @@ class AdminController extends CController
 		       'push'=>true,               
 		       'email_tag'=>'booking_id,restaurant_name,number_guest,date_booking,time,customer_name,email,mobile,instruction,status,merchant_remarks,sitename,siteurl',	       
 		       'push_tag'=>'booking_id,restaurant_name,number_guest,date_booking,time,customer_name,email,mobile,instruction,status,merchant_remarks,sitename,siteurl', 
+		     ),
+		     'booking_request_cancel'=>array(
+		       'email'=>true,
+		       'sms'=>true,		       
+		       'push'=>true,               
+		       'email_tag'=>'booking_id,restaurant_name,number_guest,date_booking,booking_time,booking_name,email,mobile,booking_notes,status,merchant_remarks,sitename,siteurl',	       
+		       'push_tag' =>'booking_id,restaurant_name,number_guest,date_booking,booking_time,booking_name,email,mobile,booking_notes,status,merchant_remarks,sitename,siteurl',	       
 		     )
 		  ),
 		  
@@ -750,6 +776,12 @@ class AdminController extends CController
 		       'email'=>true,
 		       'sms'=>false,		        
 		       'email_tag'=>'customer_name,amount,verify_payment_link,sitename,siteurl',	       
+		     ),
+		     'offline_new_bank_deposit'=>array(
+		       'email'=>true,
+		       'sms'=>true,		        
+		       'email_tag'=>'merchant_name,customer_name,amount,sitename,siteurl',	       
+		       'sms_tag'=>'merchant_name,customer_name,amount,sitename,siteurl'	       
 		     )
 		  ),
 		  
@@ -951,6 +983,7 @@ class AdminController extends CController
 	
 	public function actionThemeSettings()
 	{
+		$this->crumbsTitle=t("Theme settings");
 		$this->render('theme-settings');
 	}
 	
@@ -1060,7 +1093,7 @@ class AdminController extends CController
 	
 	public function actionIncomingOrders()
 	{
-		$this->crumbsTitle=t("Incoming Orders");
+		$this->crumbsTitle=t("All Orders");
 		$this->render('incoming-orders');
 	}
 	
@@ -1149,20 +1182,69 @@ class AdminController extends CController
 	
 	public function actiontestmapapi()
 	{
+		$this->crumbsTitle=t("Test map api");
 		$map = FunctionsV3::getMapProvider();		
 		
 		$country = Yii::app()->functions->adminCountry();
 		if(empty($country)){
 			$country = 'United states';
+		}		
+		
+		$provider = FunctionsV3::getMapProvider();		
+		$api = isset($provider['token'])?$provider['token']:'';
+		$map_api = isset($provider['map_api'])?trim($provider['map_api']):'';
+		$cs = Yii::app()->getClientScript();
+		$cs->registerScript(
+		  'map_apikey',
+		  "var map_apikey = '$map_api';",
+		  CClientScript::POS_HEAD
+		);
+									
+		try {
+			
+			MapsWrapper::init($provider);
+			$geocode = MapsWrapper::geoCodeAdress($country);
+			$lat = $geocode['lat']; $lng = $geocode['long'];
+			
+			switch ($provider['provider']) {
+			case "google.maps":
+					$cs->registerScriptFile("https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places&key=".$map_api,CClientScript::POS_END); 
+					$cs->registerScriptFile(Yii::app()->baseUrl."/assets/vendor/gmaps.js",CClientScript::POS_END);            
+					$cs->registerScriptFile(Yii::app()->baseUrl."/assets/js/map_wrapper.js",CClientScript::POS_END);            
+					$cs->registerScript(
+					  'init_map',
+					  'initMap("google.maps","test_map","'.$lat.'","'.$lng.'");'
+					  ,
+					  CClientScript::POS_END 
+					);
+					break;
+					
+			case "mapbox":					
+					$cs->registerScriptFile(Yii::app()->baseUrl."/assets/vendor/leaflet/leaflet.js"
+			        ,CClientScript::POS_END); 					
+			        $cs->registerCssFile(Yii::app()->baseUrl."/assets/vendor/leaflet/leaflet.css");
+					
+					$cs->registerScriptFile(Yii::app()->baseUrl."/assets/js/map_wrapper.js",CClientScript::POS_END);            
+					$cs->registerScript(
+					  'init_map',
+					  'initMap("mapbox","test_map","'.$lat.'","'.$lng.'");'
+					  ,
+					  CClientScript::POS_END 
+					);
+					break;		
+			
+				default:
+					break;
+			}
+			
+		} catch (Exception $e) {
+			$geocode = $e->getMessage();
 		}
-		if ( $res = Yii::app()->functions->geodecodeAddress($country)){
-			echo '<h3>'.$map['provider'].'</h3>';
-			echo "<h3 style=\"color:blue;\">".t("GEOCODING API SUCCESSFUL")."</h3>";
-			dump($res);
-		} else {
-			echo '<h3>'.$map['provider'].'</h3>';
-			echo "<h3 style=\"color:red;\">".t("GEOCODING API HAS FAILED")."</h3>";
-		}
+		
+		$this->render('test_map',array(		  
+		   'geocode'=>$geocode,
+		   'provider'=>isset($provider['provider'])?$provider['provider']:''
+		));
 	}
 	
 	public function actionpaypal_v2()
@@ -1176,6 +1258,339 @@ class AdminController extends CController
 		$this->crumbsTitle=t("mercadopago V2");
 		$this->render('mercadopago-v2-settings');
 	}
+	
+	public function actiontags()
+	{
+		$this->crumbsTitle=t("Tags");
+		$this->render('tags-list');
+	}
+	
+	public function actiontags_add()
+	{
+		$this->crumbsTitle=t("Tags");
+		$this->render('tags-add');
+	}
+
+	public function actionupdate_cuisine()
+	{
+		$this->crumbsTitle=t("Update cuisine table");
+		$logger = '';
 		
+		$stmt="
+		SELECT 
+		a.merchant_id,
+		a.cuisine
+		FROM {{merchant}} a	
+		WHERE 
+		merchant_id NOT IN (
+		   select merchant_id
+		   from {{cuisine_merchant}}
+		   where merchant_id=a.merchant_id
+		)
+		LIMIT 0,3000
+		";						
+		if($res = Yii::app()->db->createCommand($stmt)->queryAll()){
+			foreach ($res as $key=>$val) {
+				$key++;
+				$merchant_id = $val['merchant_id'];
+				if ($cuisine = json_decode($val['cuisine'],true)){
+					foreach ($cuisine as $cuisine_id) {
+						$params = array(
+						  'merchant_id'=>$merchant_id,
+						  'cuisine_id'=>$cuisine_id
+						);
+						Yii::app()->db->createCommand()->insert("{{cuisine_merchant}}",$params);					
+					}
+					$logger.="<li>";
+					$logger.= Yii::t("default","Adding data [count]",array(
+					  '[count]'=>$key
+					));
+					$logger.="</li>";
+				}
+			}
+			$logger.="<p>".t("Done")."....</p>";
+			
+		} else $logger.="<p>".t("No records to process")."....</p>";
+				
+				
+		$this->render('update_table',array(		  
+		  'logger'=>$logger
+		));
+	}
+	
+	public function actionupdate_opening_hours()
+	{
+		$this->crumbsTitle=t("Update merchant opening hours");
+		$logger = '';
+		
+		$stmt="
+		SELECT
+		a.merchant_id,
+		a.option_name,
+		a.option_value
+		
+		FROM {{option}} a	
+		WHERE 
+		option_name IN ('stores_open_starts')
+		and
+		merchant_id NOT IN (
+		   select merchant_id
+		   from {{opening_hours}}
+		   where merchant_id=a.merchant_id
+		)
+		ORDER BY a.merchant_id ASC
+		LIMIT 0,3000
+		";			
+		if($res = Yii::app()->db->createCommand($stmt)->queryAll()){
+			foreach ($res as $key=>$val) {
+				$key++;				
+				$merchant_id = $val['merchant_id'];								
+				$val['option_value'] = stripslashes($val['option_value']);
+				$open_starts = json_decode($val['option_value'],true);
+				
+				$open_end = getOption($merchant_id,'stores_open_ends');
+				$open_end = !empty($open_end)?json_decode( stripslashes($open_end),true):'';
+				
+				$open_day = getOption($merchant_id,'stores_open_day');
+				$open_day = !empty($open_day)?json_decode( stripslashes($open_day),true):'';
+				
+				$open_pm_start = getOption($merchant_id,'stores_open_pm_start');
+				$open_pm_start = !empty($open_pm_start)?json_decode( stripslashes($open_pm_start),true):'';
+				
+				$open_pm_ends = getOption($merchant_id,'stores_open_pm_ends');
+				$open_pm_ends = !empty($open_pm_start)?json_decode( stripslashes($open_pm_ends),true):'';
+				
+								
+				if(is_array($open_starts) && count($open_starts)>=1){
+					foreach ($open_starts as $day=> $time) {
+						$params = array(
+						  'merchant_id'=>$merchant_id,	
+						  'day'=>$day,
+						  'status'=>in_array($day,(array)$open_day)?"open":"close",
+						  'start_time'=>$time,
+						  'end_time'=>array_key_exists($day,(array)$open_end)?$open_end[$day]:'',
+						  'start_time_pm'=>array_key_exists($day,(array)$open_pm_start)?$open_pm_start[$day]:'',
+						  'end_time_pm'=>array_key_exists($day,(array)$open_pm_ends)?$open_pm_ends[$day]:'',
+						);						
+						Yii::app()->db->createCommand()->insert("{{opening_hours}}",$params);
+					}
+				}
+				
+				$logger.="<li>";
+				$logger.= Yii::t("default","Adding data [count]",array(
+				  '[count]'=>$key
+				));
+				$logger.="</li>";
+								
+			}			
+			$logger.="<p>".t("Done")."....</p>";			
+		} else $logger.="<p>".t("No records to process")."....</p>";
+		
+		$this->render('update_table',array(		  
+		  'logger'=>$logger
+		));
+	}
+	
+	public function actionupdate_currency()
+	{
+		$this->crumbsTitle=t("Update currency table");
+		$logger = '';
+			
+		try {
+								
+			$table_prefix=Yii::app()->db->tablePrefix;
+		    $table_name= $table_prefix."currency";		
+		    $temp_table_name= $table_prefix."currency_temp";		
+		    
+		    $date_default = "datetime NOT NULL DEFAULT CURRENT_TIMESTAMP";			
+			if($res = Yii::app()->db->createCommand("SELECT VERSION() as mysql_version")->queryRow()){					
+				$mysql_version = (float)$res['mysql_version'];				
+				if($mysql_version<=5.5){				
+					$date_default="datetime NOT NULL DEFAULT '0000-00-00 00:00:00'";
+				}
+			}
+								
+		    if(Yii::app()->db->schema->getTable($table_name)){
+		    	if(!NotificationWrapper::hasAutoIncrement($table_name)){
+		    		$stmt="
+		    		SELECT * FROM
+		    		{{currency}}		    		
+		    		";
+		    		if($res = Yii::app()->db->createCommand($stmt)->queryAll()){
+		    			
+		    			if(!Yii::app()->db->schema->getTable($temp_table_name)){	
+			    			Yii::app()->db->createCommand()->createTable($temp_table_name,
+							  array(
+							     'id' => 'pk',
+							     'currency_code'=>"varchar(3) NOT NULL DEFAULT ''",
+							     'currency_symbol'=>"varchar(100) NOT NULL DEFAULT ''",
+							     'date_created'=>$date_default,
+							     'date_modified'=>$date_default,
+							     'ip_address'=>"varchar(50) NOT NULL DEFAULT ''"
+							  ),
+							'ENGINE=InnoDB DEFAULT CHARSET=utf8');
+		    			}
+		    			
+		    			foreach ($res as $key=>$val) {
+		    				$key++;		    				
+		    				
+		    				$logger.="<li>";
+							$logger.= Yii::t("default","Adding data [count]",array(
+							  '[count]'=>$key
+							));
+							$logger.="</li>";
+									
+							$val['ip_address'] = $_SERVER['REMOTE_ADDR'];    				
+		    			    Yii::app()->db->createCommand()->insert($temp_table_name,$val);
+		    			}
+		    			
+		    			Yii::app()->db->createCommand()->dropTable($table_name);
+		    			Yii::app()->db->createCommand()->renameTable($temp_table_name, $table_name);		    			
+		    		}
+		    		$logger.="<p>".t("Done")."....</p>";			
+		    		
+		    	} else $logger.="<p>".t("No records to process")."....</p>";
+		    } else $logger.="<p>".t("Table not found")."....</p>";
+		    
+		    
+		} catch (Exception $e) {
+    		$logger.= $e->getMessage();
+    	}
+    	
+    	$this->render('update_table',array(		  
+		  'logger'=>$logger
+		));
+	}
+	
+	public function actionupdate_cuisine_slug()
+	{
+		$this->crumbsTitle=t("Update cuisine table");
+		$logger = '';
+		
+		$stmt="
+		SELECT 
+		a.cuisine_id,
+		a.cuisine_name,
+		a.slug
+		
+		FROM {{cuisine}} a		
+		WHERE slug=''
+		LIMIT 0,3000
+		";								
+		if($res = Yii::app()->db->createCommand($stmt)->queryAll()){	
+			$res = Yii::app()->request->stripSlashes($res);		
+			foreach ($res as $key=>$val) {
+				$key++;
+				$cuisine_id = $val['cuisine_id'];
+				$cuisine_name = $val['cuisine_name'];
+				$slug = FunctionsV3::createSlug('cuisine',$val['cuisine_name']);
+				$params = array(
+				  'slug'=>$slug,
+				  'date_modified'=>FunctionsV3::dateNow(),
+				  'ip_address'=>$_SERVER['REMOTE_ADDR']
+				);
+				
+				Yii::app()->db->createCommand()->update("{{cuisine}}",$params,
+		  	    'cuisine_id=:cuisine_id',
+			  	    array(
+			  	      ':cuisine_id'=>$cuisine_id
+			  	    )
+		  	    );
+		  	    				
+				$logger.="<li>";
+				$logger.= Yii::t("default","Adding data [count]",array(
+				  '[count]'=>$key
+				));
+				$logger.="</li>";
+			}
+			$logger.="<p>".t("Done")."....</p>";
+			
+		} else $logger.="<p>".t("No records to process")."....</p>";
+				
+				
+		$this->render('update_table',array(		  
+		  'logger'=>$logger
+		));
+	}
+	
+	public function actionupdate_distance_covered()
+	{
+		$this->crumbsTitle=t("Update merchant");
+		$logger = '';
+		$distance = getOptionA('home_search_radius');		
+		if($distance<=0){
+			$distance = 10;
+		}
+		
+		$stmt="SELECT a.merchant_id,
+		(
+		  select option_value
+		  from {{option}}
+		  where 
+		  merchant_id = a.merchant_id
+		  and option_name = 'merchant_delivery_miles'
+		  limit 0,1
+		) as merchant_distance,
+		
+		(
+		  select option_value
+		  from {{option}}
+		  where 
+		  merchant_id = a.merchant_id
+		  and option_name = 'merchant_distance_type'
+		  limit 0,1
+		) as distance_unit
+		
+		FROM {{merchant}} a
+		WHERE a.delivery_distance_covered<=0
+		LIMIT 0,2000
+		";
+		if($res = Yii::app()->db->createCommand($stmt)->queryAll()){	
+			$res = Yii::app()->request->stripSlashes($res);		
+			foreach ($res as $key=>$val) {				
+				$key++;
+				$merchant_id = $val['merchant_id'];
+				
+				if($val['merchant_distance']>0){
+					$distance = $val['merchant_distance'];
+				}				
+				$params = array(
+				  'distance_unit'=>!empty($val['distance_unit'])?$val['distance_unit']:'mi',
+				  'delivery_distance_covered'=>(float)$distance,
+				  'date_modified'=>FunctionsV3::dateNow(),
+				  'ip_address'=>$_SERVER['REMOTE_ADDR']
+				);			
+				Yii::app()->db->createCommand()->update("{{merchant}}",$params,
+		  	    'merchant_id=:merchant_id',
+			  	    array(
+			  	      ':merchant_id'=>$merchant_id
+			  	    )
+		  	    );
+		  	    
+		  	    Yii::app()->functions->updateOption("merchant_delivery_miles",
+		        $params['delivery_distance_covered']
+		        ,$merchant_id);
+		        
+		         Yii::app()->functions->updateOption("merchant_distance_type",
+		        $params['distance_unit']
+		        ,$merchant_id);	
+	  	    
+		  	    				
+				$logger.="<li>";
+				$logger.= Yii::t("default","Adding data [count]",array(
+				  '[count]'=>$key
+				));
+				$logger.="</li>";
+			}
+			$logger.="<p>".t("Done")."....</p>";
+			
+		} else $logger.="<p>".t("No records to process")."....</p>";
+				
+				
+		$this->render('update_table',array(		  
+		  'logger'=>$logger
+		));
+	}
+	
 } 
 /*END CONTROLLER*/

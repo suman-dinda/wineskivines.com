@@ -1,3 +1,6 @@
+var my_notification = document.getElementById("my_notification");  
+var notification_interval =  20000; //33000; //20000 //15000
+
 function clear_elements(ele) {	
     $("#"+ele).find(':input').each(function() {						    	
         switch(this.type) {
@@ -284,24 +287,31 @@ function form_submit(formid)
         			close_fb();        			        			
         		}
         		
-        	} else {
-        		//$("#"+form_id).before("<p class=\"uk-alert uk-alert-danger\">"+data.msg+"</p>");
-        		uk_msg(data.msg);
+        	} else {        		
+        		
+        		switch(action){
+        			case "merchantLogin":
+        			case "login":
+        			  uk_msg(data.msg);        			
+        			  if (typeof captcha_site_key === "undefined" || captcha_site_key==null || captcha_site_key=="" ) {         			      
+        			  } else  {
+        			  	 recaptchav3();  
+        			  }        			          			 
+        			break;
+        			
+        			default:
+        			  uk_msg(data.msg);
+        			break;
+        		}
+        		
         	}
-        	        	
-        	/*setTimeout(function () {
-               $(".uk-alert").fadeOut();
-            }, 5000);        	*/
+        	        	        	
         }, 
         error: function(){	        	
         	btn.attr("disabled", false );
         	btn.val(btn_cap);
         	busy(false);        	
-        	//$("#"+form_id).before("<p class=\"uk-alert uk-alert-danger\">ERROR:</p>");
-        	uk_msg(data.msg);
-        	/*setTimeout(function () {
-               $(".uk-alert").fadeOut();
-            }, 5000);  */
+        	uk_msg(data.msg);        	
         }		
     });
 }
@@ -552,28 +562,18 @@ jQuery(document).ready(function() {
     });      
     
         
-    if ( $("#alert_off").val()=="" ) {		
-    	////console.debug("alert_off");
-	    $("#jquery_jplayer_1").jPlayer({
-		    ready: function () {
-		       $(this).jPlayer("setMedia", {
-		          mp3: sites_url+"/assets/sound/notify.mp3"	          	         
-		       });
-		    },
-		    swfPath: sites_url+"/assets/vendor/jQuery.jPlayer.2.6.0/",
-		    supplied: "m4a,mp3"
-	    });        	    
+    if ( $("#alert_off").val()=="" ) {		    		    
 	}   
 	
 	//if ( $("#alert_off").val()=="" ){	 	
 	if ( $("#currentController").val()=="merchant" ){
-	 	new_order_notify = setInterval(function(){get_new_order()}, 7000);
+	 	new_order_notify = setInterval(function(){get_new_order()}, notification_interval+1000 );
 	}	
 	//}
 	
 	if ( $("#booking_alert").exists() ){				
 		if ( $("#booking_alert").val()=="" ){				
-		 	new_order_notify = setInterval(function(){get_booking()}, 7000);
+		 	new_order_notify = setInterval(function(){get_booking()}, notification_interval+2000);
 		}
 	}
 	
@@ -656,8 +656,8 @@ function get_new_order()
         		}
         		if( $('.uk-notify').is(':visible') ) {           			
         		} else {              			
-        			if ( $("#alert_off").val()=="" ){	        				
-        			   $("#jquery_jplayer_1").jPlayer("play");  			        			
+        			if ( $("#alert_off").val()=="" ){	          			   
+        			   my_notification.play(); 
         			} else {        				
         			}
         			$.UIkit.notify({
@@ -1553,10 +1553,9 @@ function get_booking()
         		if( $('.uk-notify').is(':visible') ) {           			
         		} else {      
         			if ( $("#alert_off").val()=="" ) {
-        			    $("#jquery_jplayer_1").jPlayer("play");  			
+        			    my_notification.play(); 
         			}
-        			$.UIkit.notify({
-		       	   	   //message : data.msg+" "+js_lang.trans_34	       	   	   
+        			$.UIkit.notify({		       	   	   	       	   	  
 		       	   	   message : data.msg
 		       	    }); 	       	        
         		}
@@ -1724,7 +1723,7 @@ jQuery(document).ready(function() {
     if ( $("#wd_payout_alert").exists() ){
     	var wd_payout_alert=$("#wd_payout_alert").val();    	
     	if ( wd_payout_alert=="2"){    		
-    		new_order_notify = setInterval(function(){wdPayoutNotification()}, 7000);
+    		new_order_notify = setInterval(function(){wdPayoutNotification()}, notification_interval+3000);
     	}
     }    
         
@@ -2191,17 +2190,7 @@ jQuery(document).ready(function() {
 	
 	if ( $("#currentController").val()=="admin" ){
 		if (order_notification!=1){
-			 new_order_notify = setInterval(function(){getAdminNewOrder()}, 7000);
-					 
-			 $("#jquery_jplayer_1").jPlayer({
-			    ready: function () {
-			       $(this).jPlayer("setMedia", {
-			          mp3: sites_url+"/assets/sound/notify.mp3"	          	         
-			       });
-			    },
-			    swfPath: sites_url+"/assets/vendor/jQuery.jPlayer.2.6.0/",
-			    supplied: "m4a,mp3"
-		    });        	   
+			 new_order_notify = setInterval(function(){getAdminNewOrder()}, notification_interval+4000);					 			 
 		}		
 	}
 	
@@ -2256,8 +2245,8 @@ function getAdminNewOrder()
         		if( $('.uk-notify').is(':visible') ) {           			
         		} else {              			
         			
-        			if (order_notification_sounds!=1){
-        			   $("#jquery_jplayer_1").jPlayer("play");  
+        			if (order_notification_sounds!=1){        			           			   
+        			   my_notification.play(); 
         			}
         			
         			$.UIkit.notify({
@@ -2459,7 +2448,15 @@ function callAjax(action,params,button)
 	 	      button.css({ 'pointer-events' : 'auto' });
 	 	   }
 	 	} else {
-	 	   busy(true);	 	  
+	 	   switch (action){	
+		 	  	case "getNotification":
+		 	  	//
+		 	  	break;
+		 	  	
+		 	  	default:
+		 	  	busy(true);	 	  
+		 	  	break;
+	 	    }	 	     
 	 	}
 	 },
 	 complete: function(data) {					
@@ -2590,6 +2587,16 @@ function callAjax(action,params,button)
 	 	 	 	  alert(js_lang.trans_49);
 	 	 	 	break;
 	 	 	 	
+	 	 	 	case "getNotification":
+	 	 	 	  $(".system_notification").addClass("uk-badge-danger");
+	 	 	 	  $(".system_notification").html( data.details.count);
+	 	 	 	  html='';
+	 	 	 	  $.each(data.details.error, function( index_error, val_error ) {
+	 	 	 	  	html+='<li><a href="javascript:;">'+val_error+'</a></li>';
+	 	 	 	  });
+	 	 	 	  $(".system_notification_list").html(html);
+	 	 	 	break;
+	 	 	 	
 	 	 	 	default:
 	 	 	 	uk_msg_sucess(data.msg);
 	 	 	 	break;
@@ -2618,6 +2625,14 @@ function callAjax(action,params,button)
 	 	 	 	
 	 	 	 	case "LoadTableRates":
 	 	 	 	$(".location_table_rates").html('');
+	 	 	 	break;	 	 	 		 	 	 	
+	 	 	 	
+	 	 	 	case "getNotification":
+	 	 	 	  $(".system_notification").removeClass("uk-badge-danger");
+	 	 	 	  $(".system_notification").html( '');
+	 	 	 	  html='';	 	 	 	  
+	 	 	 	  html+='<li><a href="javascript:;">'+data.msg+'</a></li>';	 	 	 	  
+	 	 	 	  $(".system_notification_list").html(html);
 	 	 	 	break;
 	 	 	 	
 	 	 		default:
@@ -3128,7 +3143,7 @@ jQuery(document).ready(function() {
 	if ( current_panel =="admin" ){
 		if(!empty(has_session)){
 			if(has_session==1){
-		 	   admin_cancel_order_handle = setInterval(function(){getNewCancelOrderAdmin()}, 15000);
+		 	   admin_cancel_order_handle = setInterval(function(){getNewCancelOrderAdmin()}, notification_interval+5000);
 			}
 		}
 	}	
@@ -3156,11 +3171,8 @@ function getNewCancelOrderAdmin()
         success: function(data){      
         	if (data.code==1){        		           		
         		if( $('.uk-notify').is(':visible') ) {           			
-        		} else {              			
-        			if ( $("#alert_off").val()=="" ){	        				
-        			   $("#jquery_jplayer_1").jPlayer("play");  			        			
-        			} else {        				
-        			}
+        		} else {            
+        			my_notification.play(); 
         			$.UIkit.notify({
 		       	   	   message : data.msg
 		       	    }); 	       	        
@@ -3198,10 +3210,10 @@ mapbox_init_map = function(lat, lng){
 				/*scrollWheelZoom:false,
 				zoomControl:false,*/
 			 }).setView([lat,lng], mapbox_default_zoom );
-			
-			L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token='+mapbox_access_token, {		    
+						
+			L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token='+map_apikey, {		    	
 			    maxZoom: 18,
-			    id: 'mapbox.streets',		    
+			    id: 'mapbox/streets-v11',    
 			}).addTo(mapbox_handle);
 			
 			mapbox_marker = L.marker([lat,lng], { draggable : true } ).addTo(mapbox_handle);
@@ -3355,5 +3367,13 @@ jQuery(document).ready(function() {
 		    uk_msg(result.error.message);
 		});		
 	});
+	
+		
+	if( $(".system_notification").exists()){
+		setTimeout(function(){ 
+		   callAjax("getNotification","");
+		}, 1000);		
+	}
+	
 });
 /*end ready*/

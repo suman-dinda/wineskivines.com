@@ -192,6 +192,10 @@
 	       	  }
 	       	  
 	       }
+	       
+	       if ($data['trans_type']=="delivery" && $data['opt_contact_delivery']==1){
+	       	  FunctionsV3::receiptTableRow( t("Delivery options") ,t("Leave order at the door or gate"));	       	  
+	       }	       	 
 	       ?>   
 	   </tbody>
 	   </table>

@@ -53,8 +53,8 @@
 
 <input type="hidden" name="action" id="action" value="merchanBbookingSummaryReport">
 <input type="hidden" name="tbl" id="tbl" value="item">
-<table id="table_list" class="uk-table uk-table-hover uk-table-striped uk-table-condensed">
-  <!--<caption>Merchant List</caption>-->
+<input type="hidden" name="server_side" id="server_side" value="1">	
+<table id="table_list" class="uk-table uk-table-hover uk-table-striped uk-table-condensed">  
    <thead>
         <tr>                         
            <th width="3%"><?php echo Yii::t('default',"Merchant Name")?></th> 

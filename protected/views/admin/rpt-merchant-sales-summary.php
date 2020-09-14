@@ -1,4 +1,3 @@
-<!--<form id="frm_table_list" method="POST" class="report uk-form uk-form-horizontal" >-->
 <form id="frm_table_list" method="GET" class="report uk-form uk-form-horizontal" >
 
 <?php echo CHtml::hiddenField('start_date',isset($_GET['start_date'])?$_GET['start_date']:"")?>
@@ -44,14 +43,7 @@ $order_stats=Yii::app()->functions->orderStatusList2(false);
 <?php 
 
 $default=Yii::app()->functions->getCommissionOrderStatsArray();
-/*if (isset($_GET['stats_id'])){	
-	if (is_array($_GET['stats_id']) && count($_GET['stats_id'])>=1){
-		$default='';
-		foreach ($_GET['stats_id'] as $stats_val) {
-			$default[]=$stats_val;
-		}
-	}
-}*/
+
 if (isset($_GET['merchant_id'])){	
 	$default=isset($_GET['stats_id'])?$_GET['stats_id']:'';
 }
@@ -66,8 +58,7 @@ if (isset($_GET['merchant_id'])){
 </div>
 
 <div class="uk-form-row">
-  <label class="uk-form-label">&nbsp;</label>
-  <!--<input type="button" class="uk-button uk-form-width-medium uk-button-success" value="Search" onclick="sales_summary_reload();">  -->
+  <label class="uk-form-label">&nbsp;</label>  
   <input type="submit" value="<?php echo t("Search")?>" class="uk-button uk-form-width-medium uk-button-success">
   <a href="javascript:;" rel="rptmerchantsalesummary" class="export_btn uk-button"><?php echo t("Export")?></a>
 </div>  
@@ -85,14 +76,14 @@ if (isset($_GET['merchant_id'])){
 
 <input type="hidden" name="action" id="action" value="rptMerchantSalesSummaryReport">
 <input type="hidden" name="tbl" id="tbl" value="item">
+<input type="hidden" name="server_side" id="server_side" value="1">	
 <table id="table_list" class="uk-table uk-table-hover uk-table-striped uk-table-condensed">  
    <thead>
         <tr> 
             <th width="3%"><?php echo Yii::t('default',"Merchant Name")?></th>            
             <th width="3%"><?php echo Yii::t('default',"Total Sales")?></th>                                    
             <th width="3%"><?php echo Yii::t('default',"Total Commission")?></th>
-            <th width="3%"><?php echo Yii::t('default',"Merchant Earnings")?></th>
-            <!--<th width="3%"><?php echo Yii::t('default',"Approved No. Of Guests")?></th>-->
+            <th width="3%"><?php echo Yii::t('default',"Merchant Earnings")?></th>            
         </tr>
     </thead>
     <tbody>    

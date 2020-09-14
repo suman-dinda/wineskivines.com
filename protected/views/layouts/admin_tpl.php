@@ -105,20 +105,7 @@
 
 <div class="main_wrapper">
   <div class="left_panel left">
-      <div class="menu">
-        <!--<ul>
-         <li>
-         <a href="<?php echo Yii::app()->request->baseUrl."/admin"?>"><i class="fa fa-home"></i> Dashboard</a>
-         </li>
-         
-         <li>
-         <a href="<?php echo Yii::app()->request->baseUrl."/admin/merchant"?>"><i class="fa fa-cutlery"></i> Merchant</a>
-         </li>         
-         
-         <li>
-         <a href="<?php echo Yii::app()->request->baseUrl."/admin/login/logout/true"?>"><i class="fa fa-sign-out"></i> Logout</a></li>  
-         
-        </ul>-->
+      <div class="menu">        
         <?php $this->widget('zii.widgets.CMenu', Yii::app()->functions->adminMenu());?>
       </div>
   </div>
@@ -127,7 +114,23 @@
        <div class="breadcrumbs">
         <div class="inner">
           <h2 class="uk-h2"><?php echo $this->crumbsTitle;?></h2>
+          
+          <div class="language-wrapper">
+          
+           <div data-uk-dropdown="{mode:'click'}" class="uk-button-dropdown">
+             <button class="uk-button uk-button-primary"><i class="fa fa-bell"></i> 
+              <div class="uk-badge system_notification"></div>
+             </button>
+             <div class="uk-dropdown" >
+                <ul class="uk-nav uk-nav-dropdown system_notification_list">                 
+                </ul>
+             </div>
+           </div>
+          
+          
           <?php Widgets::languageBar("admin",true);?>
+          </div>
+          
         </div>
        </div> <!--breadcrumbs-->
        
@@ -176,9 +179,12 @@ NOTIFICATION PLAYER END HERE
 </div> 
 <!--PRELOADER-->
 
-</body>
+<audio id="my_notification">  
+  <source src="<?php echo Yii::app()->request->baseUrl."/assets/sound/notify.ogg";?>" type="audio/ogg">
+  <source src="<?php echo Yii::app()->request->baseUrl."/assets/sound/notify.mp3";?>" type="audio/mpeg">  
+</audio>
 
-<!--<script src="//code.jquery.com/jquery-1.10.2.min.js" type="text/javascript"></script>  -->
+
 <script src="<?php echo Yii::app()->request->baseUrl;?>/assets/vendor/jquery-1.10.2.min.js" type="text/javascript"></script>  
 <script src="<?php echo Yii::app()->request->baseUrl;?>/assets/vendor/jquery.printelement.js" type="text/javascript"></script>  
 
@@ -196,11 +202,8 @@ var jsLanguageValidator=<?php echo json_encode($js_lang_validator)?>;
 <script src="<?php echo Yii::app()->request->baseUrl;?>/assets/vendor/JQV/form-validator/jquery.form-validator.min.js" type="text/javascript"></script>
 
 <script src="//code.jquery.com/ui/1.10.3/jquery-ui.js" type="text/javascript"></script>
-<!--<script src="http://code.jquery.com/ui/1.11.3/jquery-ui.min.js" type="text/javascript"></script>-->
 <script src="<?php echo Yii::app()->request->baseUrl;?>/assets/vendor/jquery.ui.timepicker-0.0.8.js" type="text/javascript"></script>
 
-<!--<script src="<?php echo Yii::app()->request->baseUrl;?>/assets/js/uploader.js" type="text/javascript"></script>
-<script src="<?php echo Yii::app()->request->baseUrl;?>/assets/vendor/ajaxupload/fileuploader.js" type="text/javascript"></script>-->
 
 <script src="<?php echo Yii::app()->request->baseUrl;?>/assets/vendor/SimpleAjaxUploader.min.js" type="text/javascript"></script>
 
@@ -221,8 +224,8 @@ var jsLanguageValidator=<?php echo json_encode($js_lang_validator)?>;
 
 <script type="text/javascript" src="<?php echo Yii::app()->request->baseUrl;?>/assets/vendor/jQuery-TE_v.1.4.0/jquery-te-1.4.0.min.js"></script>
 
-<script type="text/javascript" src="<?php echo Yii::app()->request->baseUrl;?>/assets/vendor/jQuery.jPlayer.2.6.0/jquery.jplayer.min.js"></script>
-
 <script src="<?php echo Yii::app()->request->baseUrl; ?>/assets/js/admin.js?ver=1" type="text/javascript"></script>  
+
+</body>
 
 </html>

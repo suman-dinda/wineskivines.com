@@ -341,20 +341,7 @@ function form_submit(formid)
         	btn.val(btn_cap);        	
     		return;
     	}    	
-	}
-	if( action=="clientRegistrationModal"){
-		var dob = $('#dob').val();
-		var dob_year=new Date(dob).getFullYear();
-		var curr_year=new Date().getFullYear();
-		let yearsDiff=curr_year-dob_year;
-		if(yearsDiff < 21){
-			alert('As per Goernement Policy you must be 21 years old.');
-			btn.attr("disabled", false );
-    		btn.val(js_lang.create_account);
-    		busy(false);
-			return false;
-		}
-	}   
+    }   
     
     /*if(!empty(csrf_token)){
     	params+="&csrf_token="+csrf_token;
@@ -421,12 +408,16 @@ function form_submit(formid)
         			return;
         		}
         		        		
-        		if ( action=="forgotPassword"){        			
-        			//if ( $(".checkout-page").exists()){
-        				$(".section-forgotpass").hide();
-        				$("#username-email").val('');
+        		if ( action=="forgotPassword"){        			        			
+        			if (data.details.verification_type=="sms"){        				        	
+        				setTimeout(function () {
+                           window.location.href= data.details.url;
+                        }, 2501);        	
         				return;
-        			//}        		
+        			}
+        			$(".section-forgotpass").hide();
+        			$("#username-email").val('');
+        			return;        				        			
         		}
         		
         		if ( action=="clientRegistration"){
@@ -464,11 +455,15 @@ function form_submit(formid)
         			return;
         		}
         		        		
-        		if ( action=="clientLogin"){
-        			if ( $("#single_page").exists() ){
-	        			window.location.href=sites_url+"/";
-	        			return;
-        			}
+        		if ( action=="clientLogin"){        			
+        			if (typeof data.details.redirect === "undefined" || data.details.redirect==null || data.details.redirect=="" ) {
+        				if ( $("#single_page").exists() ){
+		        			window.location.href=sites_url+"/";
+		        			return;
+	        			}
+        			} else {
+        				window.location.href = data.details.redirect;
+        			}        			
         		}
         		
         		if ( action=="subscribeNewsletter"){
@@ -747,15 +742,18 @@ function form_submit(formid)
         		 	uk_msg(data.msg);
         		 }
         	} else {
-        		//$("#"+form_id).before("<p class=\"uk-alert uk-alert-danger\">"+data.msg+"</p>");
-        		/*$("#"+form_id).before("<p class=\"uk-alert uk-alert-danger\">"+data.msg+"</p>");
-        		setTimeout(function () {
-                   $(".uk-alert-danger").fadeOut();
-                }, 4000);        	*/
-        		
-        		if ( action=="placeOrder" || action=="InitPlaceOrder"){
-        		   $(".place_order").css({ 'pointer-events' : 'auto' });
+        		        		
+        		switch(action){        			
+        			case "placeOrder":
+        			case "InitPlaceOrder":
+        			   $(".place_order").css({ 'pointer-events' : 'auto' });
+        			break;
         		}
+
+        		if (typeof captcha_site_key === "undefined" || captcha_site_key==null || captcha_site_key=="" ) {         			      
+			    } else  {
+			  	   recaptchav3(); 
+			    }        			          			        		
         		
         		uk_msg(data.msg);
         	}        	
@@ -1092,9 +1090,7 @@ jQuery(document).ready(function() {
    $( document ).on( "click", ".checkout", function() {    	  
    	   	   	 
    	 var subtotal= parseFloat($("#subtotal_order").val());
-   	 
-   	 /*check if delivery/pickup date is empty*/   	 
-   	
+   	    	 
    	 if ( $("#delivery_type").val()=="delivery"){
 	   	  if ( $("#minimum_order").length>=1){   	  	  
 	   	  	  var minimum= parseFloat($("#minimum_order").val());	   	  	  
@@ -1119,6 +1115,7 @@ jQuery(document).ready(function() {
 	          }   	  	     	  	  
 	   	  }  
    	 }
+   	    	 
    	 
    	 if ( $("#delivery_type").val()=="pickup"){   	     
    	 	   	 	 
@@ -1144,15 +1141,18 @@ jQuery(document).ready(function() {
     	      }              	      
    	     }   	 
    	 }   
-   	  
-   	  //if ( $("#delivery_type").val()=="delivery" ){   	  	  
+   	     	    	 
    	  switch ($("#delivery_type").val())
    	  {
    	  	   case "delivery":
    	  	   
-   	  	   if ( $("#is_ok_delivered").val()==2){	   	  	 
-	   	  	 uk_msg(js_lang.trans_15+" "+$("#merchant_delivery_miles").val() + " "+$("#unit_distance").val());   	  
-	   	  	 return;
+   	  	   if ( $("#is_ok_delivered").val()==2){	   	  	 	   	  	 
+	   	  	   if(!empty(distance_error)){
+	   	  	   	   uk_msg(distance_error);	   
+	   	  	   } else {
+	   	  	   	   uk_msg(js_lang.trans_15+" "+$("#merchant_delivery_miles").val() + " "+$("#unit_distance").val());   	  
+	   	  	   }   	  	   
+	   	  	   return;
 	   	   }   
 	   	   if ( $("#delivery_date").val()==""){
    	  	 	  uk_msg(js_lang.trans_43);  	  	 
@@ -1226,6 +1226,13 @@ jQuery(document).ready(function() {
    	  params+="&delivery_time="+$("#delivery_time").val();
    	  params+="&delivery_asap="+$("#delivery_asap:checked").val();
    	  params+="&merchant_id="+$("#merchant_id").val();
+   	  
+   	  if (typeof merchant_opt_contact_delivery === "undefined" || merchant_opt_contact_delivery==null ) {  
+   	  	//   	      
+   	  } else {
+   	  	params+="&opt_contact_delivery="+$("#opt_contact_delivery:checked").val();
+   	  }   
+   	  
    	  params+= addValidationRequest();
    	  
    	    busy(true);
@@ -1952,7 +1959,7 @@ function uk_msg(msg)
 		 type        : "warning" ,		 
 		 theme       : 'relax',
 		 layout      : 'topCenter',		 
-		 timeout:2500,
+		 timeout:3500,
 		 animation: {
 	        open: 'animated fadeInDown', // Animate.css class names
 	        close: 'animated fadeOut', // Animate.css class names	        
@@ -1988,6 +1995,18 @@ function load_item_cart()
 	params+="&card_fee="+ card_fee;
 	
 	params+= addValidationRequest();
+	
+	
+	if (typeof merchant_opt_contact_delivery === "undefined" || merchant_opt_contact_delivery==null ) {
+		//
+	} else { 
+		$transaction_type = $("#delivery_type").val();				
+		if($transaction_type=="delivery"){
+			$(".opt_contact_delivery_wrap").show();
+		} else {
+			$(".opt_contact_delivery_wrap").hide();
+		}
+	}
 		
 	busy(true);
     $.ajax({    
@@ -2674,18 +2693,19 @@ jQuery(document).ready(function() {
 	
 	if ( $("#google_auto_address").val()=="yes" ){		
 	} else {
-		if ( $("#google_default_country").val()=="yes" ){			
-			$("#s").geocomplete({
-			  country: $("#admin_country_set").val()
-			  //country: ["PH","US"]
-		   });			  
-		   
-		   /*$("#s").geocomplete().bind("geocode:result", function(event, result){
-		      $("#forms-search").submit();
-		   });*/
-		    
-		} else {			
-			$("#s").geocomplete();	
+		
+		if (typeof map_provider === "undefined" || map_provider==null ) {     
+			//			
+		} else {
+			if(map_provider=="google.maps"){
+				if ( $("#google_default_country").val()=="yes" ){			
+					$("#s").geocomplete({
+					  country: $("#admin_country_set").val()			  
+				   });			  		   		   
+				} else {			
+					$("#s").geocomplete();	
+				}
+			}
 		}
 	}
 	
@@ -3184,6 +3204,10 @@ function dump(data)
 {
 	console.debug(data);
 }
+
+dump2 = function(data) {
+	alert(JSON.stringify(data));	
+};
 
 function photo(data)
 {
@@ -3924,7 +3948,7 @@ jQuery(document).ready(function($){
 }); /*end docu*/
 /*SCROLLING DIV ENDS HERE*/
 
-var temp_geocoder = new google.maps.Geocoder();
+//var temp_geocoder = new google.maps.Geocoder();
 
 function mapAddress()
 {		  	  
@@ -4007,25 +4031,6 @@ function clearCartButton(option)
 	}
 }
 
-var recaptcha1; // for customer signup
-var recaptcha2; // for customer login
-
-var KMRSCaptchaCallback = function(){
-	dump('init recaptcha');
-	if ( !$(".recaptcha").exists()){
-		return;
-	}
-	if (typeof captcha_site_key === "undefined" || captcha_site_key==null || captcha_site_key=="") {   
-		return;
-	}			
-	if ( $("#RecaptchaField1").exists() ){
-		dump('RecaptchaField1');
-        recaptcha1=grecaptcha.render('RecaptchaField1', {'sitekey' : captcha_site_key});    
-	}
-	if ( $("#RecaptchaField2").exists() ){
-        recaptcha2=grecaptcha.render('RecaptchaField2', {'sitekey' : captcha_site_key});    
-	}
-};
 /** START ADDED CODE VERSION 2.4*/
 
 

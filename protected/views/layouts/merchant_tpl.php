@@ -47,9 +47,6 @@
 
 <link href="<?php echo Yii::app()->request->baseUrl; ?>/assets/vendor/rupee/rupyaINR.css" rel="stylesheet" />
 
-<?php if($this->map_provider=="mapbox" && $this->global_action_name=="merchant"):?>
-<link href="<?php echo Yii::app()->request->baseUrl; ?>/assets/vendor/leaflet/leaflet.css" rel="stylesheet" />
-<?php endif;?>
 
 </head>
 <body id="merchant">
@@ -143,9 +140,13 @@
        <div class="breadcrumbs">
         <div class="inner">
           <h2 class="uk-h2"><?php echo !empty($this->crumbsTitle)?$this->crumbsTitle:'&nbsp;';?></h2>
+          
+          <div class="language-wrapper">
           <?php Widgets::smsBalance();?>
           <?php Widgets::FaxBalance();?>
           <?php Widgets::languageBar("merchant",true);?>
+          </div>
+          
         </div>
        </div> <!--breadcrumbs-->
        
@@ -170,7 +171,6 @@ if ( !empty($website_time_picker_format)){
 	echo CHtml::hiddenField('website_time_picker_format',$website_time_picker_format);
 }
 ?>
-</body>
 
 <!--*****************************************
 NOTIFICATION PLAYER STARTS HERE
@@ -203,8 +203,12 @@ NOTIFICATION PLAYER END HERE
 </div> 
 <!--PRELOADER-->
 
+<audio id="my_notification">  
+  <source src="<?php echo Yii::app()->request->baseUrl."/assets/sound/notify.ogg";?>" type="audio/ogg">
+  <source src="<?php echo Yii::app()->request->baseUrl."/assets/sound/notify.mp3";?>" type="audio/mpeg">  
+</audio>
 
-<script src="//code.jquery.com/jquery-1.10.2.min.js" type="text/javascript"></script>  
+<script src="//code.jquery.com/jquery-1.10.2.min.js" type="text/javascript"></script> 
 <!--<script src="<?php echo Yii::app()->request->baseUrl;?>/assets/vendor/jquery-1.10.2.min.js" type="text/javascript"></script>  -->
 
 <?php $js_lang=Yii::app()->functions->jsLanguageAdmin(); ?>
@@ -224,10 +228,7 @@ var jsLanguageValidator=<?php echo json_encode($js_lang_validator)?>;
 <script src="//code.jquery.com/ui/1.10.3/jquery-ui.js" type="text/javascript"></script>
 <script src="<?php echo Yii::app()->request->baseUrl;?>/assets/vendor/jquery.ui.timepicker-0.0.8.js" type="text/javascript"></script>
 
-<!--<script src="<?php echo Yii::app()->request->baseUrl;?>/assets/js/uploader.js" type="text/javascript"></script>
-<script src="<?php echo Yii::app()->request->baseUrl;?>/assets/vendor/ajaxupload/fileuploader.js" type="text/javascript"></script>-->
 <script src="<?php echo Yii::app()->request->baseUrl;?>/assets/vendor/SimpleAjaxUploader.min.js" type="text/javascript"></script>
-
 
 <!--UIKIT-->
 <script src="<?php echo Yii::app()->request->baseUrl; ?>/assets/vendor/uikit/js/uikit.js"></script>
@@ -242,17 +243,8 @@ var jsLanguageValidator=<?php echo json_encode($js_lang_validator)?>;
 
 <script type="text/javascript" src="<?php echo Yii::app()->request->baseUrl;?>/assets/vendor/chosen/chosen.jquery.min.js"></script>
 
-<!--Google Maps-->
-<?php $apikey=getOptionA('google_geo_api_key');?>
-<?php if (!empty($apikey)):?>
-<script src="//maps.googleapis.com/maps/api/js?v=3.exp&key=<?php echo $apikey?>"></script>
-<?php else :?>
-<script src="//maps.googleapis.com/maps/api/js?v=3.exp&"></script>
-<?php endif;?>
-<!--END Google Maps-->
 
 <script src="<?php echo Yii::app()->request->baseUrl;?>/assets/vendor/fancybox/source/jquery.fancybox.js"></script>
-<!--<script type="text/javascript" src="<?php echo Yii::app()->request->baseUrl;?>/assets/vendor/jQuery.print.js"></script>-->
 <script type="text/javascript" src="<?php echo Yii::app()->request->baseUrl;?>/assets/vendor/jquery.printelement.js"></script>
 
 <!--START JQPLOT-->
@@ -270,20 +262,16 @@ var jsLanguageValidator=<?php echo json_encode($js_lang_validator)?>;
 <script type="text/javascript" src="<?php echo Yii::app()->request->baseUrl;?>/assets/vendor/jqplot/plugins/jqplot.canvasAxisTickRenderer.min.js"></script>
 <!--END JQPLOT-->
 
-<script type="text/javascript" src="<?php echo Yii::app()->request->baseUrl;?>/assets/vendor/jQuery.jPlayer.2.6.0/jquery.jplayer.min.js"></script>
-
 <script type="text/javascript" src="<?php echo Yii::app()->request->baseUrl;?>/assets/vendor/jQuery-TE_v.1.4.0/jquery-te-1.4.0.min.js"></script>
 
 <script type="text/javascript" src="<?php echo Yii::app()->request->baseUrl;?>/assets/vendor/intel/build/js/intlTelInput.js?ver=2.1.5"></script>
 
 <script type="text/javascript" src="<?php echo Yii::app()->request->baseUrl;?>/assets/vendor/jquery.creditCardValidator.js"></script>
 
-<?php if($this->map_provider=="mapbox" && $this->global_action_name=="merchant"):?>
-<script src="<?php echo Yii::app()->request->baseUrl; ?>/assets/vendor/leaflet/leaflet.js?ver=1" type="text/javascript"></script>  
-<?php endif;?>
-
 <script src="<?php echo Yii::app()->request->baseUrl; ?>/assets/js/admin.js?ver=1" type="text/javascript"></script>  
 
 <script src="<?php echo Yii::app()->request->baseUrl; ?>/assets/js/merchant.js?ver=1" type="text/javascript"></script>  
+
+</body>
 
 </html>

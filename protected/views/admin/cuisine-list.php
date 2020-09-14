@@ -17,7 +17,8 @@
         <tr>
             <th width="3%"><?php echo Yii::t("default","ID")?></th>
             <th width="7%"><?php echo Yii::t("default","Cuisine")?></th>
-            <th width="7%"><?php echo Yii::t("default","Featured Image")?></th>
+            <th width="5%"><?php echo Yii::t("default","Page slug")?></th>
+            <th width="5%"><?php echo Yii::t("default","Featured Image")?></th>
             <th width="5%"><?php echo Yii::t("default","Date Created")?></th>            
         </tr>
     </thead>

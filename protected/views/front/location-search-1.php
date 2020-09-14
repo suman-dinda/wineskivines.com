@@ -10,26 +10,46 @@
        <div class="col-sm-4 left-border rounded-corner typhead-city-wrap">
          <i class="ion-ios-arrow-down"></i>
          <?php 
-         echo CHtml::hiddenField('city_id');
-         echo CHtml::hiddenField('city_name');
-         echo CHtml::hiddenField('area_id');
-         echo CHtml::hiddenField('location_search_type',$location_search_type);
+         $city_id = isset($location_data['city_id'] )?(integer)$location_data['city_id']:0;
+         $area_id = isset($location_data['area_id'] )?(integer)$location_data['area_id']:0;
+         $city_name = isset($location_data['city_name'] )?(string)$location_data['city_name']:'';
+         $area_name = isset($location_data['location_area'] )?(string)$location_data['location_area']:'';         
+         echo CHtml::hiddenField('city_id',$city_id);
+         echo CHtml::hiddenField('city_name',$city_name);
+         echo CHtml::hiddenField('area_id',$area_id);
+         echo CHtml::hiddenField('location_search_type',$location_search_type);         
          ?>
-         <?php echo CHtml::textField('location_city','',array(
+         
+        <div class="typeahead__container">
+        <div class="typeahead__field">
+        <div class="typeahead__query">                
+         <?php echo CHtml::textField('location_city',$city_name,array(
           'placeholder'=>t("City"),
           'class'=>"typhead_city rounded-corner",
           'autocomplete'=>"off",
           'required'=>true
          ))?>
        </div>
+       </div>
+       </div>  
+         
+       </div>
        <div class="col-sm-4 left-border with-location-loader">
          <div class="location-loader"></div>
-         <?php echo CHtml::textField('location_area','',array(
+         
+         <div class="typeahead__container">
+         <div class="typeahead__field">
+         <div class="typeahead__query">
+         <?php echo CHtml::textField('location_area',$area_name,array(
            'placeholder'=>t("District / Area"),
            'class'=>"typhead_area",
            'autocomplete'=>"off",
-           'required'=>true
+           //'required'=>true
          ))?>
+         </div>
+         </div>
+         </div>  
+         
        </div>
        <div class="col-sm-4 right-border rounded-end">
          <button type="submit" class="location-search-submit"><?php echo t("SHOW RESTAURANTS")?></button>

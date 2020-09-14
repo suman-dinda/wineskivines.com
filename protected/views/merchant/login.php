@@ -27,13 +27,14 @@
        <div class="uk-form-icon uk-width-1">
         <i class="uk-icon-lock"></i>
         <?php echo CHtml::passwordField('password','',array('class'=>"uk-width-1",'placeholder'=>Yii::t("default","Password"),
-        'data-validation'=>"required"
+        'data-validation'=>"required",
+        'autocomplete'=>"new-password"
         ));?>
        </div>     
    </div>        
    
    <?php if (getOptionA('captcha_merchant_login')==2):?>
-   <?php GoogleCaptcha::displayCaptcha()?>
+      <div class="recaptcha_v3"><?php GoogleCaptchaV3::init();?></div>      
    <?php endif;?>
    
    <div class="uk-form-row">   

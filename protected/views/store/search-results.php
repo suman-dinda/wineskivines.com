@@ -11,10 +11,9 @@ $search_address  = $p->purify($search_address);
 die();
 */
 /*SEARCH BY LOCATION*/
-$search_by_location=false; $location_data='';
-if (FunctionsV3::isSearchByLocation()){
-	if($location_data=FunctionsV3::getSearchByLocationData()){		
-		$search_by_location=TRUE;		
+$location_data='';
+if ($search_by_location){	
+	if($location_data=FunctionsV3::getSearchByLocationData()){				
 		switch ($location_data['location_type']) {
 			case 1:
 				$search_address= $location_data['location_city']." ".$location_data['location_area'];
@@ -33,7 +32,6 @@ if (FunctionsV3::isSearchByLocation()){
 		}	    
 	}	
 }
-
 $this->renderPartial('/front/search-header',array(
    'search_address'=>$search_address,
    'total'=>$data['total']
@@ -248,6 +246,7 @@ echo CHtml::hiddenField('clien_long',$data['client']['long']);
               <div class="col-md-6 col-xs-6 border ">	           
 	           <?php 
 	           $filter_list=array(
+	             'open_status'=>t("Open"),
 	             'restaurant_name'=>t("Name"),
 	             'ratings'=>t("Rating"),
 	             'minimum_order'=>t("Minimum"),
@@ -255,6 +254,9 @@ echo CHtml::hiddenField('clien_long',$data['client']['long']);
 	           );
 	           if (isset($_GET['st'])){
 	           	   unset($filter_list['distance']);
+	           }
+	           if(FunctionsV3::isSearchByLocation()){
+	           	  unset($filter_list['distance']);
 	           }
 	           echo CHtml::dropDownList('sort-results',$sort_filter,$filter_list,array(
 	             'class'=>"sort-results selectpicker",
@@ -302,106 +304,82 @@ echo CHtml::hiddenField('clien_long',$data['client']['long']);
              <div class="row infinite-container">
              
              
-             <?php if ($data):?>
-                          
+             <?php if ($data):?>                          
+                 <?php 
+                 $provider = array(); 
+                 if(!$search_by_location){
+                 	$provider = FunctionsV3::getMapProvider(); 
+                 	MapsWrapper::init($provider);                 	
+                 } 
+                 ?>
+                 
 	             <?php foreach ($data['list'] as $val):?>
-	             <?php 
-	             $merchant_id=$val['merchant_id'];             
-	             $ratings=Yii::app()->functions->getRatings($merchant_id);   
-	             
-	             /*get the distance from client address to merchant Address*/             
-	             $distance_type=FunctionsV3::getMerchantDistanceType($merchant_id); 
-	             $distance_type_orig=$distance_type;
-	             
-	             /*dump("c lat=>".$data['client']['lat']);         
-	             dump("c lng=>".$data['client']['long']);	             
-	             dump("m lat=>".$val['latitude']);
-	             dump("c lng=>".$val['lontitude']);*/
-	             	              
-	             //dump($distance_type);
-	             	             
-	             $distance=FunctionsV3::getDistanceBetweenPlot(
-	                $data['client']['lat'],$data['client']['long'],
-	                $val['latitude'],$val['lontitude'],$distance_type
-	             );      
-	             
-	             
-	             	             	     
-	             $distance_type_raw = $distance_type=="M"?"miles":"kilometers";
-	             $distance_type = $distance_type=="M"?t("miles"):t("kilometers");
-	             $distance_type_orig = $distance_type_orig=="M"?t("miles"):t("kilometers");
-	             
-	             /*dump($distance_type_raw);
-	             dump($distance_type);
-	             dump($distance_type_orig);*/
-	             
-	             if(!empty(FunctionsV3::$distance_type_result)){
-	             	$distance_type_raw=FunctionsV3::$distance_type_result;
-	             	$distance_type=t(FunctionsV3::$distance_type_result);
-	             }
-	             
-	             /*dump($distance_type);
-	             dump($distance);
-	             die();*/
-	             
-	             $merchant_delivery_distance=getOption($merchant_id,'merchant_delivery_miles');             
-	             
-	             if ($search_by_location){
+	             <?php	          
+	             $distance=0; $delivery_fee=0; $ratings = array(); $unit_pretty = ''; $min_fees=0;
+	             $merchant_id=$val['merchant_id'];   	    
+
+	             $ratings = array(
+	              'ratings'=>isset($val['ratings'])?(float)$val['ratings']:0,
+	              'votes'=>isset($val['ratings_votes'])?(integer)$val['ratings_votes']:0,
+	             );
+	                        
+	             if(!$search_by_location){
+		             try {		         		             	
+		             	$resp = CheckoutWrapper::getDeliveryDetails(array(
+		             	  'merchant_id'=>$merchant_id,
+		             	  'provider'=>$provider,	             	  
+		             	  'from_lat'=>isset($val['latitude'])?$val['latitude']:0,
+		             	  'from_lng'=>isset($val['lontitude'])?$val['lontitude']:0,
+		             	  'to_lat'=>$data['client']['lat'],
+		             	  'to_lng'=>$data['client']['long'],
+		             	  'delivery_charges'=>isset($val['delivery_charges'])?$val['delivery_charges']:0,
+		             	  'unit'=>isset($val['distance_unit'])?$val['distance_unit']:'',
+		             	  'delivery_distance_covered'=>isset($val['delivery_distance_covered'])?$val['delivery_distance_covered']:0,
+		             	  'order_subtotal'=>0,
+		             	  'minimum_order'=>isset($val['minimum_order'])?$val['minimum_order']:0
+		             	));	  	             	
+		             	$unit_pretty = $resp['pretty_unit'];
+		             	$distance = $resp['pretty_distance'];
+		             	$delivery_fee = $resp['delivery_fee'];
+		             	$min_fees = $resp['min_order'];
+		             } catch (Exception $e) {
+		             	$distance = $e->getMessage();
+		             	$delivery_fee = 0;
+		             }	     
+	             } else {
+	             	$unit_pretty = MapsWrapper::prettyUnit($val['distance_unit']);	             	
 	             	$delivery_fee = FunctionsV3::getLocationDeliveryFee(
 	             	   $merchant_id,
 	             	   $val['delivery_charges'],
 	             	   $location_data
 	             	);
-	             } else {
-	             	if(FunctionsV3::isClassDeliveryTableExist()){
-	             		$delivery_fee = DeliveryTableRate::getDeliveryFee(	             		                
-	             		                $merchant_id,
-	             		                0,
-	             		                $val['delivery_charges'],
-	             		                $distance,
-	             		                $distance_type_raw);
-	             	} else {
-		                $delivery_fee=FunctionsV3::getMerchantDeliveryFee(
-		                          $merchant_id,
-		                          $val['delivery_charges'],
-		                          $distance,
-		                          $distance_type_raw);
-	             	}
-	             } 
-	             
-	             if (FunctionsV3::enabledExtraCharges()){	                 
-	                 $delivery_fee = FunctionsV3::extraDeliveryFee($merchant_id,$delivery_fee,'');
-	             }
-	             	             
-	             //dump("Final Fee=>".$delivery_fee);
-	             ?>
-	             
-	             <?php 	           	                                               
+	             }      
+	              
 	             if ( $display_type=="listview"){
 	             	 $this->renderPartial('/front/search-list-2',array(
 					   'data'=>$data,
 					   'val'=>$val,
 					   'merchant_id'=>$merchant_id,
-					   'ratings'=>$ratings,
-					   'distance_type'=>$distance_type,
-					   'distance_type_orig'=>$distance_type_raw,
+					   'ratings'=>$ratings,					  					   
 					   'distance'=>$distance,
-					   'merchant_delivery_distance'=>$merchant_delivery_distance,
-					   'delivery_fee'=>$delivery_fee,
-					   'search_by_location'=>$search_by_location
+					   'distance_covered'=> (float) $val['delivery_distance_covered'],
+					   'unit_pretty'=>$unit_pretty,
+					   'delivery_fee'=> (float) $delivery_fee,
+					   'search_by_location'=>$search_by_location,
+					   'min_fees'=>(float) $min_fees
 					 ));
 	             } else {
 		             $this->renderPartial('/front/search-list-1',array(
-					   'data'=>$data,
+					  'data'=>$data,
 					   'val'=>$val,
 					   'merchant_id'=>$merchant_id,
-					   'ratings'=>$ratings,
-					   'distance_type'=>$distance_type,
-					   'distance_type_orig'=>$distance_type_raw,
+					   'ratings'=>$ratings,					  					   
 					   'distance'=>$distance,
-					   'merchant_delivery_distance'=>$merchant_delivery_distance,
-					   'delivery_fee'=>$delivery_fee,
-					   'search_by_location'=>$search_by_location
+					   'distance_covered'=> (float) $val['delivery_distance_covered'],
+					   'unit_pretty'=>$unit_pretty,
+					   'delivery_fee'=> (float) $delivery_fee,
+					   'search_by_location'=>$search_by_location,
+					   'min_fees'=>(float) $min_fees
 					 ));
 	             }
 				 ?>

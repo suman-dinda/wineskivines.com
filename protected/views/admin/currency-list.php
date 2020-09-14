@@ -8,12 +8,13 @@
 <input type="hidden" name="action" id="action" value="currencyList">
 <input type="hidden" name="tbl" id="tbl" value="currency">
 <input type="hidden" name="clear_tbl"  id="clear_tbl" value="clear_tbl">
-<input type="hidden" name="whereid"  id="whereid" value="currency_code">
+<input type="hidden" name="whereid"  id="whereid" value="id">
 <input type="hidden" name="slug" id="slug" value="ManageCurrency">
 <table id="table_list" class="uk-table uk-table-hover uk-table-striped uk-table-condensed">
   <caption><?php echo Yii::t("default","Currency List")?></caption>
    <thead>
         <tr>
+            <th width="3%"><?php echo Yii::t("default","ID")?></th>
             <th width="7%"><?php echo Yii::t("default","Currency Code")?></th>
             <th width="7%"><?php echo Yii::t("default","Currency Symbol")?></th>
             <th width="7%"><?php echo Yii::t("default","Date Created")?></th>            

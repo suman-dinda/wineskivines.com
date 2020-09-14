@@ -170,7 +170,7 @@ function getNewCancelOrder()
         		if( $('.uk-notify').is(':visible') ) {           			
         		} else {              			
         			if ( $("#alert_off").val()=="" ){	        				
-        			   $("#jquery_jplayer_1").jPlayer("play");  			        			
+        			   my_notification.play(); 			        			
         			} else {        				
         			}
         			$.UIkit.notify({

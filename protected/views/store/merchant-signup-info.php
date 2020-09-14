@@ -196,6 +196,30 @@ $this->renderPartial('/front/progress-merchantsignup',array(
         </div>
       </div>
       
+       <div class="row top10">
+        <div class="col-md-3"><?php echo t("Delivery Distance Covered")?></div>
+        <div class="col-md-3">
+		  <?php 
+		  echo CHtml::textField('delivery_distance_covered',
+		  ''
+		  ,array(
+		  'placeholder'=>"",
+		  "class"=>"numeric_only form-control",
+		  'data-validation'=>"required"
+		  ));
+		  ?>           
+        </div>
+        <div class="col-md-3">
+         <?php 
+		  echo CHtml::dropDownList('distance_unit',
+		  'mi',
+		  Yii::app()->functions->distanceOption(),array(
+		    "class"=>"form-control",
+		  ));
+		  ?>
+        </div>
+      </div>
+      
       <div class="top15">
       <?php FunctionsV3::sectionHeader('Commission Type');?>
       </div>
@@ -285,9 +309,7 @@ $this->renderPartial('/front/progress-merchantsignup',array(
       
      
       <?php if ($kapcha_enabled==2):?>      
-      <div class="top10 capcha-wrapper">        
-        <div id="kapcha-1"></div>
-      </div>
+      <div class="recaptcha_v3"><?php GoogleCaptchaV3::init();?></div> 
       <?php endif;?>
       
       <div class="row top10">

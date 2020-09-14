@@ -522,7 +522,7 @@ class AjaxmerchantController extends CController
 						FunctionsV3::updateReviews($order_id , $cancel_status);
 					}
 					
-					FunctionsV3::notifyCustomerCancelOrder($res, t($params['request_cancel_status']) );
+					FunctionsV3::notifyCustomerCancelOrder($res, $params['request_cancel_status'] );
 					
 					/*UPDATE POINTS BASED ON ORDER STATUS*/
     				if (FunctionsV3::hasModuleAddon("pointsprogram")){    						    				

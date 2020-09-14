@@ -61,6 +61,31 @@
 
 <h3 style="margin-top:20px;margin-bottom:20px;">Admin user</h3>
 
+<div class="row">
+ <div class="col-md-6">
+ 
+ <div class="form-group">
+   <label>First name</label>
+   <?php echo CHtml::textField('first_name','',array(
+    'class'=>"form-control",
+    'required'=>true
+   ))?>
+</div>
+
+ </div> <!--col-->
+ <div class="col-md-6">
+ 
+ <div class="form-group">
+   <label>Last name</label>
+   <?php echo CHtml::textField('last_name','',array(
+    'class'=>"form-control",
+    'required'=>true
+   ))?>
+</div>
+ 
+ </div> <!--col-->
+</div> <!--row-->
+
 <div class="form-group">
    <label>Username</label>
    <?php echo CHtml::textField('username','',array(

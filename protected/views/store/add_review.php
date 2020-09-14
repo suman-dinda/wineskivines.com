@@ -35,6 +35,20 @@ $this->renderPartial('/front/banner-receipt',array(
         'required'=>true,
         'class'=>"grey-inputs"
      ))?>
+     
+     <div class="row padtop15">
+       <div class="col-md-6"><?php echo Yii::t("default","Review as [customer_name]",array(
+         '[customer_name]'=>$order_info['customer_name']
+       ))?></div>
+       <div class="col-md-6 text-right">         
+         <?php echo t("Anonymous")?>
+         <?php echo CHtml::checkBox('as_anonymous',false,array(
+          'value'=>1,
+          'class'=>"icheck"
+         ))?>
+       </div>
+     </div>
+     
      </div>
      <div class="top10">
         <button class="orange-button inline" type="submit"><?php echo t("PUBLISH REVIEW")?></button>

@@ -39,12 +39,19 @@ $this->renderPartial('/front/default-header',array(
       
       <ul id="tab">
           <li class="<?php echo $tabs==1?"active":''?>" >            
-            <?php
+            <?php                         
+             $provider = array(); 
+             if(!$search_by_location){
+             	$provider = FunctionsV3::getMapProvider(); 
+             	MapsWrapper::init($provider);                 	
+             } 
             if ( $tabs==1):
 	            if (is_array($list['list']) && count($list['list'])>=1){
 		            $this->renderPartial('/front/browse-list',array(
 					   'list'=>$list,
-					   'tabs'=>$tabs
+					   'tabs'=>$tabs,
+					   'provider'=>$provider,
+					   'search_by_location'=>$search_by_location
 					));
 	            } else echo '<p class="text-danger">'.t("No restaurant found").'</p>';
             endif;
@@ -56,7 +63,9 @@ $this->renderPartial('/front/default-header',array(
 	            if (is_array($list['list']) && count($list['list'])>=1){
 		            $this->renderPartial('/front/browse-list',array(
 					   'list'=>$list,
-					   'tabs'=>$tabs			   
+					   'tabs'=>$tabs,
+					   'provider'=>$provider,
+					   'search_by_location'=>$search_by_location	   
 					));
 	            } else echo '<p class="text-danger">'.t("No restaurant found").'</p>';
             endif;
@@ -69,7 +78,9 @@ $this->renderPartial('/front/default-header',array(
 	            if (is_array($list['list']) && count($list['list'])>=1){
 		            $this->renderPartial('/front/browse-list',array(
 					   'list'=>$list,
-					   'tabs'=>$tabs
+					   'tabs'=>$tabs,
+					   'provider'=>$provider,
+					   'search_by_location'=>$search_by_location	
 					));
 	            } else echo '<p class="text-danger">'.t("No restaurant found").'</p>';
             endif;

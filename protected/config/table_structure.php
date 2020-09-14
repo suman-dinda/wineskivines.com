@@ -22,7 +22,9 @@ CREATE TABLE IF NOT EXISTS ".$table_prefix."address_book (
   `as_default` int(1) NOT NULL DEFAULT '1',
   `date_created` $date_default,
   `date_modified` $date_default,
-  `ip_address` varchar(100) NOT NULL DEFAULT ''
+  `ip_address` varchar(100) NOT NULL DEFAULT '',
+  `latitude` varchar(255) NOT NULL DEFAULT '',
+  `longitude` varchar(255) NOT NULL DEFAULT ''
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 ALTER TABLE  ".$table_prefix."address_book
@@ -50,7 +52,9 @@ CREATE TABLE IF NOT EXISTS  ".$table_prefix."admin_user (
   `lost_password_code` varchar(255) NOT NULL DEFAULT '',
   `session_token` varchar(255) NOT NULL DEFAULT '',
   `last_login` $date_default,
-  `user_access` text
+  `user_access` text,
+  `status` varchar(100) NOT NULL DEFAULT 'active',
+  `contact_number` varchar(50) NOT NULL DEFAULT ''
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
@@ -133,7 +137,8 @@ CREATE TABLE IF NOT EXISTS  ".$table_prefix."bookingtable (
   `date_modified` $date_default,
   `status` varchar(255) NOT NULL DEFAULT 'pending',
   `viewed` int(1) NOT NULL DEFAULT '1',
-  `client_id` int(14) NOT NULL DEFAULT '0'
+  `client_id` int(14) NOT NULL DEFAULT '0',
+  `request_cancel` int(1) NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 ALTER TABLE  ".$table_prefix."bookingtable
@@ -236,7 +241,11 @@ CREATE TABLE IF NOT EXISTS  ".$table_prefix."client (
   `custom_field2` varchar(255) NOT NULL DEFAULT '',
   `avatar` varchar(255) NOT NULL DEFAULT '',
   `email_verification_code` varchar(14) NOT NULL DEFAULT '',
-  `is_guest` int(1) NOT NULL DEFAULT '2'
+  `is_guest` int(1) NOT NULL DEFAULT '2',
+  `payment_customer_id` varchar(255) NOT NULL DEFAULT '',
+  `social_id` varchar(255) NOT NULL DEFAULT '',
+  `verify_code_requested` $date_default,
+  `single_app_merchant_id` int(14) NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
@@ -319,7 +328,8 @@ CREATE TABLE IF NOT EXISTS  ".$table_prefix."cuisine (
   `ip_address` varchar(50) NOT NULL DEFAULT '',
   `cuisine_name_trans` text,
   `status` varchar(100) NOT NULL DEFAULT 'publish',
-  `featured_image` varchar(255) NOT NULL DEFAULT ''
+  `featured_image` varchar(255) NOT NULL DEFAULT '',
+  `slug` varchar(255) NOT NULL DEFAULT ''
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 ALTER TABLE  ".$table_prefix."cuisine
@@ -333,6 +343,7 @@ ALTER TABLE  ".$table_prefix."cuisine
 
 $tbl['currency']="
 CREATE TABLE IF NOT EXISTS  ".$table_prefix."currency (
+  `id` int(14) NOT NULL DEFAULT '0',
   `currency_code` varchar(3) NOT NULL DEFAULT '',
   `currency_symbol` varchar(100) NOT NULL DEFAULT '',
   `date_created` $date_default,
@@ -341,13 +352,15 @@ CREATE TABLE IF NOT EXISTS  ".$table_prefix."currency (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 ALTER TABLE  ".$table_prefix."currency
-  ADD PRIMARY KEY (`currency_code`),
+  ADD PRIMARY KEY (`id`),
   ADD KEY `currency_symbol` (`currency_symbol`),
   ADD KEY `currency_code` (`currency_code`);
+  
+ALTER TABLE  ".$table_prefix."currency
+  MODIFY `id` int(14) NOT NULL AUTO_INCREMENT;    
 ";
 
 $tbl['custom_page']="
-
 CREATE TABLE IF NOT EXISTS  ".$table_prefix."custom_page (
   `id` int(14) NOT NULL,
   `slug_name` varchar(255) NOT NULL DEFAULT '',
@@ -364,7 +377,12 @@ CREATE TABLE IF NOT EXISTS  ".$table_prefix."custom_page (
   `date_modified` $date_default,
   `ip_address` varchar(100) NOT NULL DEFAULT '',
   `open_new_tab` int(11) NOT NULL DEFAULT '1',
-  `is_custom_link` int(2) NOT NULL DEFAULT '1'
+  `is_custom_link` int(2) NOT NULL DEFAULT '1',
+  `page_name_trans` text ,
+  `content_trans` text ,
+  `seo_title_trans` text ,
+  `meta_description_trans` text ,
+  `meta_keywords_trans` text 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 ALTER TABLE  ".$table_prefix."custom_page
@@ -607,7 +625,11 @@ CREATE TABLE IF NOT EXISTS  ".$table_prefix."item (
   `points_earned` int(14) NOT NULL DEFAULT '0',
   `points_disabled` int(1) NOT NULL DEFAULT '1',
   `packaging_fee` float(14,4) NOT NULL DEFAULT '0.0000',
-  `packaging_incremental` int(1) NOT NULL DEFAULT '0'  
+  `packaging_incremental` int(1) NOT NULL DEFAULT '0',
+  `item_token` varchar(50) NOT NULL DEFAULT '',
+  `with_size` integer(1) NOT NULL DEFAULT '0',
+  `track_stock` integer(1) NOT NULL DEFAULT '1',
+  `supplier_id` integer(14) NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 ALTER TABLE  ".$table_prefix."item
@@ -623,26 +645,6 @@ ALTER TABLE  ".$table_prefix."item
 
 ALTER TABLE  ".$table_prefix."item
   MODIFY `item_id` int(14) NOT NULL AUTO_INCREMENT;  
-";
-
-$tbl['languages']="
-CREATE TABLE IF NOT EXISTS  ".$table_prefix."languages (
-  `lang_id` int(14) NOT NULL,
-  `country_code` varchar(14) NOT NULL DEFAULT '',
-  `language_code` varchar(255) NOT NULL DEFAULT '',
-  `source_text` text,
-  `is_assign` int(1) NOT NULL DEFAULT '2',
-  `date_created` $date_default,
-  `last_updated` $date_default,
-  `status` varchar(50) NOT NULL DEFAULT '',
-  `ip_address` varchar(50) NOT NULL DEFAULT ''
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-ALTER TABLE  ".$table_prefix."languages
-  ADD PRIMARY KEY (`lang_id`);
-  
-  ALTER TABLE  ".$table_prefix."languages
-  MODIFY `lang_id` int(14) NOT NULL AUTO_INCREMENT;
 ";
 
 $tbl['location_area']="
@@ -815,7 +817,9 @@ CREATE TABLE IF NOT EXISTS  ".$table_prefix."merchant (
   `merchant_type` int(1) NOT NULL DEFAULT '1',
   `invoice_terms` int(14) NOT NULL DEFAULT '7',
   `payment_gateway_ref` varchar(255) NOT NULL DEFAULT '',
-  `user_access` text
+  `user_access` text,
+  `distance_unit` varchar(20) NOT NULL DEFAULT 'mi',
+  `delivery_distance_covered` float(14,2) NOT NULL DEFAULT '0.00'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
@@ -890,7 +894,8 @@ CREATE TABLE IF NOT EXISTS  ".$table_prefix."merchant_user (
   `contact_email` varchar(255) NOT NULL DEFAULT '',
   `session_token` varchar(255) NOT NULL DEFAULT '',
   `mobile_session_token` varchar(255) NOT NULL DEFAULT '',
-  `lost_password_code` varchar(20) NOT NULL DEFAULT ''
+  `lost_password_code` varchar(20) NOT NULL DEFAULT '',
+  `contact_number` varchar(50) NOT NULL DEFAULT ''
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 ALTER TABLE  ".$table_prefix."merchant_user
@@ -1059,7 +1064,9 @@ CREATE TABLE IF NOT EXISTS  ".$table_prefix."order (
   `request_cancel_status` varchar(255) NOT NULL DEFAULT 'pending',
   `sofort_trans_id` varchar(255) NOT NULL DEFAULT '',
   `dinein_table_number` varchar(50) NOT NULL DEFAULT '',
-  `payment_gateway_ref` varchar(255) NOT NULL DEFAULT ''
+  `payment_gateway_ref` varchar(255) NOT NULL DEFAULT '',
+  `distance` varchar(100) NOT NULL DEFAULT '',
+  `cancel_reason` text
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 ALTER TABLE  ".$table_prefix."order
@@ -1099,7 +1106,14 @@ CREATE TABLE IF NOT EXISTS  ".$table_prefix."order_delivery_address (
   `formatted_address` text,
   `google_lat` varchar(50) NOT NULL DEFAULT '',
   `google_lng` varchar(50) NOT NULL DEFAULT '',
-  `area_name` varchar(255) NOT NULL DEFAULT ''
+  `area_name` varchar(255) NOT NULL DEFAULT '',
+  `first_name` varchar(255) NOT NULL DEFAULT '',
+  `last_name` varchar(255) NOT NULL DEFAULT '',
+  `contact_email` varchar(255) NOT NULL DEFAULT '',
+  `dinein_number_of_guest` varchar(14) NOT NULL DEFAULT '',
+  `dinein_special_instruction` varchar(255) NOT NULL DEFAULT '',
+  `dinein_table_number` varchar(50) NOT NULL DEFAULT '',
+  `opt_contact_delivery` int(1) NOT NULL DEFAULT '0'  
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 ALTER TABLE  ".$table_prefix."order_delivery_address
@@ -1129,7 +1143,9 @@ CREATE TABLE IF NOT EXISTS  ".$table_prefix."order_details (
   `cooking_ref` varchar(255) NOT NULL DEFAULT '',
   `addon` text,
   `ingredients` text,
-  `non_taxable` int(1) NOT NULL DEFAULT '1'
+  `non_taxable` int(1) NOT NULL DEFAULT '1',
+  `size_id` integer(14) NOT NULL DEFAULT '0',
+  `cat_id` integer(14) NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 ALTER TABLE  ".$table_prefix."order_details
@@ -1162,7 +1178,10 @@ CREATE TABLE IF NOT EXISTS  ".$table_prefix."order_history (
   `notes` varchar(255) NOT NULL DEFAULT '',
   `photo_task_id` int(14) NOT NULL DEFAULT '0',
   `receive_by` varchar(255) NOT NULL DEFAULT '',
-  `signature_base30` text
+  `signature_base30` text,
+  `update_by_type` varchar(255) NOT NULL DEFAULT '',
+  `update_by_id` integer(14) NOT NULL DEFAULT '0',
+  `update_by_name` varchar(255) NOT NULL DEFAULT ''
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 ALTER TABLE  ".$table_prefix."order_history
@@ -1666,55 +1685,6 @@ ALTER TABLE  ".$table_prefix."subcategory_item
   MODIFY `sub_item_id` int(14) NOT NULL AUTO_INCREMENT;
 ";
 
-$tbl['voucher']="
-CREATE TABLE IF NOT EXISTS  ".$table_prefix."voucher (
-  `voucher_id` int(14) NOT NULL,
-  `voucher_name` varchar(255) NOT NULL DEFAULT '',
-  `merchant_id` int(14) NOT NULL DEFAULT '0',
-  `number_of_voucher` int(14)NOT NULL DEFAULT '0',
-  `amount` float NOT NULL,
-  `voucher_type` varchar(100) NOT NULL DEFAULT 'fixed amount',
-  `status` varchar(100) NOT NULL DEFAULT '',
-  `date_created` varchar(50) NOT NULL DEFAULT '',
-  `date_modified` $date_default,
-  `ip_address` varchar(50) NOT NULL DEFAULT ''
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
-ALTER TABLE  ".$table_prefix."voucher
-  ADD PRIMARY KEY (`voucher_id`),
-  ADD KEY `voucher_name` (`voucher_name`),
-  ADD KEY `merchant_id` (`merchant_id`),
-  ADD KEY `voucher_type` (`voucher_type`),
-  ADD KEY `status` (`status`);
-  
-ALTER TABLE  ".$table_prefix."voucher
-  MODIFY `voucher_id` int(14) NOT NULL AUTO_INCREMENT;
-";
-
-$tbl['voucher_list']="
-CREATE TABLE IF NOT EXISTS  ".$table_prefix."voucher_list (
-  `voucher_id` int(14) NOT NULL,
-  `voucher_code` varchar(50) NOT NULL DEFAULT '',
-  `status` varchar(50) CHARACTER SET latin1 NOT NULL DEFAULT 'unused',
-  `client_id` int(14) NOT NULL DEFAULT '0',
-  `date_used` varchar(50) NOT NULL DEFAULT '',
-  `order_id` int(14) NOT NULL DEFAULT '0'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-ALTER TABLE  ".$table_prefix."voucher_list
-  ADD PRIMARY KEY (`voucher_id`),
-  ADD KEY `voucher_code` (`voucher_code`),
-  ADD KEY `status` (`status`),
-  ADD KEY `client_id` (`client_id`),
-  ADD KEY `order_id` (`order_id`),
-  ADD KEY `date_used` (`date_used`);
-  
-ALTER TABLE  ".$table_prefix."voucher_list
-  MODIFY `voucher_id` int(14) NOT NULL AUTO_INCREMENT;
-
-";
-
 $tbl['voucher_new']="
 CREATE TABLE IF NOT EXISTS  ".$table_prefix."voucher_new (
   `voucher_id` int(14) NOT NULL,
@@ -1824,7 +1794,9 @@ CREATE TABLE IF NOT EXISTS ".$table_prefix."address_book_location (
   `as_default` int(1) NOT NULL DEFAULT '0',
   `date_created` $date_default,
   `date_modified` $date_default,
-  `ip_address` varchar(50) NOT NULL DEFAULT ''
+  `ip_address` varchar(50) NOT NULL DEFAULT '',
+  `latitude` varchar(255) NOT NULL DEFAULT '',
+  `longitude` varchar(255) NOT NULL DEFAULT ''
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 ALTER TABLE ".$table_prefix."address_book_location
@@ -1898,18 +1870,74 @@ ALTER TABLE ".$table_prefix."stripe_logger
 MODIFY `id` int(14) NOT NULL AUTO_INCREMENT;
 ";
 
+/*5.4*/
+$tbl['opening_hours']="
+CREATE TABLE IF NOT EXISTS ".$table_prefix."opening_hours (
+  `id` int(14) NOT NULL,
+  `merchant_id` int(14) NOT NULL DEFAULT '0',
+  `day` varchar(20) NOT NULL DEFAULT '',
+  `status` varchar(100) NOT NULL DEFAULT 'open',
+  `start_time` varchar(14) NOT NULL DEFAULT '',
+  `end_time` varchar(14) NOT NULL DEFAULT '',
+  `start_time_pm` varchar(14) NOT NULL DEFAULT '',
+  `end_time_pm` varchar(14) NOT NULL DEFAULT ''
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+ALTER TABLE ".$table_prefix."opening_hours
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `merchant_id` (`merchant_id`),
+  ADD KEY `day` (`day`),
+  ADD KEY `status` (`status`),
+  ADD KEY `start_time` (`start_time`),
+  ADD KEY `end_time` (`end_time`),
+  ADD KEY `start_time_pm` (`start_time_pm`),
+  ADD KEY `end_time_pm` (`end_time_pm`);
+  
+ALTER TABLE ".$table_prefix."opening_hours
+  MODIFY `id` int(14) NOT NULL AUTO_INCREMENT;  
+";
+
+$tbl['cuisine_merchant']="
+CREATE TABLE IF NOT EXISTS ".$table_prefix."cuisine_merchant (
+  `id` int(14) NOT NULL,
+  `merchant_id` varchar(14) NOT NULL DEFAULT '0',
+  `cuisine_id` varchar(14) NOT NULL DEFAULT '0'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+ALTER TABLE ".$table_prefix."cuisine_merchant
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `merchant_id` (`merchant_id`),
+  ADD KEY `cuisine_id` (`cuisine_id`);
+  
+  ALTER TABLE ".$table_prefix."cuisine_merchant
+  MODIFY `id` int(14) NOT NULL AUTO_INCREMENT;
+";
+
+$tbl['tags']="
+CREATE TABLE IF NOT EXISTS ".$table_prefix."tags (
+  `tag_id` bigint(20) NOT NULL,
+  `tag_name` varchar(255) NOT NULL DEFAULT '',
+  `slug` varchar(255) NOT NULL DEFAULT '',
+  `description` text,
+  `tag_name_trans` text,
+  `description_trans` text,
+  `date_created` $date_default,
+  `ip_address` varchar(50) NOT NULL DEFAULT ''
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+ALTER TABLE ".$table_prefix."tags
+  ADD PRIMARY KEY (`tag_id`);
+  
+  ALTER TABLE ".$table_prefix."tags
+  MODIFY `tag_id` bigint(20) NOT NULL AUTO_INCREMENT;
+";
+
+/*END 5.4*/
+
 
 /*VIEW TABLES */
-
-/*$tbl['view_ratings']="
-create OR REPLACE VIEW ".$table_prefix."view_ratings as
-select 
-merchant_id,
-SUM(ratings)/COUNT(*) AS ratings
-from
-".$table_prefix."rating
-group by merchant_id
-";*/
 
 $tbl['view_ratings']="
 create OR REPLACE VIEW ".$table_prefix."view_ratings as
@@ -1989,3 +2017,31 @@ left join ".$table_prefix."location_area e
 on
 a.area_id = e.area_id
 ";
+
+/*5.4 view*/
+
+$tbl['view_cuisine_merchant']="
+CREATE OR REPLACE VIEW ".$table_prefix."view_cuisine_merchant as
+select 
+a.merchant_id,
+a.cuisine_id,
+b.cuisine_name,
+b.cuisine_name_trans,
+b.status,
+b.featured_image,
+c.restaurant_name
+
+from ".$table_prefix."cuisine_merchant a
+left join ".$table_prefix."cuisine b
+on
+a.cuisine_id = b.cuisine_id	
+
+left join ".$table_prefix."merchant c
+on
+a.merchant_id = c.merchant_id
+
+where 
+a.merchant_id = c.merchant_id
+";
+
+/*END 5.4 view*/
