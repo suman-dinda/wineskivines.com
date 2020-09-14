@@ -1064,3 +1064,9 @@ margin-left:0;
 margin-right:0;
 padding-left: 8px;
 }
+
+/*Applying right align to current_stock in sales_item*/
+
+#table-list tbody td:nth-last-child(n) {
+    text-align: right;
+}
