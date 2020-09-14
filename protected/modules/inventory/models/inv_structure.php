@@ -897,9 +897,14 @@ sum(a.discount) as discount,
 (sum(a.total_sale)-sum(a.discount)) as net_sale,
 sum(a.total_cost) as total_cost,
 
-(sum(a.total_sale)-sum(a.discount)) -  sum(a.total_cost) as gross_profit
+(sum(a.total_sale)-sum(a.discount)) -  sum(a.total_cost) as gross_profit,
+b.stock_after as current_stock
+
 
 from ".$table_prefix."view_inventory_order_details a
+left join ".$table_prefix."view_inventory_stocks b
+on
+a.merchant_id=b.merchant_id AND b.transaction_type="sale" AND b.transaction_code="OR"
 group by a.sale_date,a.merchant_id
 ";
 

@@ -143,7 +143,8 @@ class ReportsController extends CController
 		$data_columns[] = array('data'=>"discount");
 		$data_columns[] = array('data'=>"net_sale");
 		$data_columns[] = array('data'=>"total_cost");		
-		$data_columns[] = array('data'=>"gross_profit");		
+		$data_columns[] = array('data'=>"gross_profit");
+		$data_columns[] = array('data'=>"current_stock");  //added_to_get_current_stock
 		$data_columns = json_encode($data_columns);		
 		
 		$days = InventoryWrapper::reportsRange();
