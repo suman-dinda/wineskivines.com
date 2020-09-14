@@ -142,7 +142,7 @@ $x = 0;
  <th width="10%" class="col-qty no-sort"><?php echo translate("Cost of goods")?></th> 
  <th width="10%" class="col-qty no-sort"><?php echo translate("Gross profit")?></th>
  <!-- added_to_view_current_stock -->
- <th width="10%" class=""><?php echo translate("Current Stock") ?></th> 
+ <th width="10%" class="no-sort"><?php echo translate("Current Stock") ?></th> 
 </tr>
 </thead>
 <tbody>  

@@ -146,7 +146,7 @@ class AjaxreportsController extends CController
 	{
 		$feed_data = array();
     	    					
-    	$cols = array('item_name','categories_name','item_sold','discount','net_sale','total_cost','gross_profit','current_stock');
+    	$cols = array('item_name','categories_name','item_sold','current_stock','discount','net_sale','total_cost','gross_profit');
     	$resp = DatatablesWrapper::format($cols,$this->data);    	
     	$where = $resp['where'];
 		$order = $resp['order'];
@@ -180,11 +180,11 @@ class AjaxreportsController extends CController
 		a.discount,
 		a.category_name as categories_name,		
 		sum(a.qty) as item_sold,
+		b.stock_after as current_stock,
 		sum(a.total_sale) - sum(a.discount) as net_sale,
 		sum(a.total_cost) as total_cost,
 		
-		(sum(a.total_sale)-sum(a.discount)) - sum(a.total_cost) as gross_profit,
-		b.stock_after as current_stock
+		(sum(a.total_sale)-sum(a.discount)) - sum(a.total_cost) as gross_profit
 		
 		from {{view_inventory_order_details}} a						
 		left join {{view_inventory_stocks}} b
@@ -226,7 +226,9 @@ class AjaxreportsController extends CController
 						case 2:	
 						    $cols_data[$cols_val] = InventoryWrapper::prettyQuantity($val[$cols_val]);
 							break;
-					
+						case 3:	
+						    $cols_data[$cols_val] = InventoryWrapper::prettyQuantity($val[$cols_val]);
+							break;
 						default:							
 							$cols_data[$cols_val]= FunctionsV3::prettyPrice($val[$cols_val]);
 							break;
