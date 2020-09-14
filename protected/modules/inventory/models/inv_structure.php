@@ -904,7 +904,7 @@ b.stock_after as current_stock
 from ".$table_prefix."view_inventory_order_details a
 left join ".$table_prefix."view_inventory_stocks b
 on
-a.merchant_id=b.merchant_id AND b.transaction_type='sale' AND b.transaction_code='OR'
+a.merchant_id=b.merchant_id
 group by a.sale_date,a.merchant_id
 ";
 
