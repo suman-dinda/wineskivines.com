@@ -108,8 +108,8 @@
          <tr>
           <th width="25%"><?php echo translate("Item")?></th>
           <th width="10%"><?php echo translate("In Stock")?></th>
-		  <th width="10%"><?php echo translate("Case")?></th>
           <th width="10%"><?php echo translate("Incoming")?></th>
+		  <th width="10%"><?php echo translate("Case")?></th>
           <th width="10%"><?php echo translate("Quantity")?></th>
           <th width="15%"><?php echo translate("Purchase cost")?></th>
           <th width="10%"><?php echo translate("Amount")?></th>
