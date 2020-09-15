@@ -1544,7 +1544,7 @@
 	               					   
 				   var $item_qty = ''; var $total_amount = ''; var $po_details_id='';
 				   var shtml=''; var less_receive=0; var $total_receive =0;
-				   var $item_case = parseInt("0");
+				   var $item_case = '1';
 				   
 				   if ((typeof item.total_receive !== "undefined") && (item.total_receive !== null)) {
 				   	   less_receive =  parseFloat(item.qty) - parseFloat(item.total_receive) ;			   	   
