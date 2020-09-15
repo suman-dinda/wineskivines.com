@@ -1571,9 +1571,9 @@
 				      if($total_receive>0){
 				      	$item_qty = ' value="'+ prettyQty(less_receive) +'" ';	 
 					  }
-					  if(parseInt(size_name) == 750){
-						$item_qty = 12 * parseFloat($item_case);
-					  }
+					//   if(parseInt(size_name) == 750){
+					// 	$item_qty = 12 * parseFloat($item_case);
+					//   }
 				      $total_amount =   parseFloat(item.qty) * parseFloat(item.cost_price);
 				      $po_details_id = '<input type="hidden" name="po_details_id[]" value="'+ item.po_details_id +'" >';
 				   }			   						   			   
