@@ -1544,7 +1544,7 @@
 	               					   
 				   var $item_qty = ''; var $total_amount = ''; var $po_details_id='';
 				   var shtml=''; var less_receive=0; var $total_receive =0;
-				   var $item_case = parseInt(0);
+				   var $item_case = parseInt("0");
 				   
 				   if ((typeof item.total_receive !== "undefined") && (item.total_receive !== null)) {
 				   	   less_receive =  parseFloat(item.qty) - parseFloat(item.total_receive) ;			   	   
@@ -1571,7 +1571,9 @@
 				      if($total_receive>0){
 				      	$item_qty = ' value="'+ prettyQty(less_receive) +'" ';	 
 					  }
-					  $item_qty = parseFloat(item.qty) * $item_case;
+					  if(parseInt(size_name) == 750){
+						$item_qty = 12 * parseFloat($item_case);
+					  }
 				      $total_amount =   parseFloat(item.qty) * parseFloat(item.cost_price);
 				      $po_details_id = '<input type="hidden" name="po_details_id[]" value="'+ item.po_details_id +'" >';
 				   }			   						   			   
