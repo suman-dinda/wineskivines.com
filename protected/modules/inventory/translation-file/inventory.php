@@ -414,5 +414,5 @@ $lang['Contact number already exist'] = '';
 $lang['Either email addres or contact number already exist'] = '';
 $lang['Invalid file extension'] = '';
 $lang['Current Stock'] = '';
-
+$lang['Case'] = '';
 return $lang;

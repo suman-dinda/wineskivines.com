@@ -1564,12 +1564,13 @@
 							shtml+='</tr>';									 			   	   
 				   	   }
 				   } 
-				   
+				   //case calulation implemenatation
 				   if ((typeof item.po_id !== "undefined") && (item.po_id !== null)) {
 				      $item_qty = ' value="'+ prettyQty(item.qty) +'" ';	 
 				      if($total_receive>0){
 				      	$item_qty = ' value="'+ prettyQty(less_receive) +'" ';	 
-				      }
+					  }
+					  $item_qty = parseFloat(item.qty) * $item_case;
 				      $total_amount =   parseFloat(item.qty) * parseFloat(item.cost_price);
 				      $po_details_id = '<input type="hidden" name="po_details_id[]" value="'+ item.po_details_id +'" >';
 				   }			   						   			   
@@ -1577,6 +1578,7 @@
 				   html+='<tr>';
 					 html+='<td>'+ $po_details_id + input_sku_hidden + item.item_name + size_name +  '<div>' + t("SKU") +" " +  item.sku + '</div>'  +'</td>';
 					 html+='<td>'+ prettyQty(stocks) +'</td>';
+					 html+='<td><input type="text" class="form-control numeric_only text-right input_case" name="case[]" required="required" '+ $item_case +' ></td>';				 
 					 html+='<td>'+ prettyQty(item.incoming_balance) +'</td>';
 					 html+='<td><input type="text" class="form-control numeric_only text-right input_qty" name="qty[]" required="required" '+ $item_qty +' ></td>';				 
 					 html+='<td><input type="text" class="form-control numeric_only text-right input_cost" name="cost[]" value="'+ prettyPrice(item.cost_price) +'"  required="required" ></td>';
