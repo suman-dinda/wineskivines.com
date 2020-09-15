@@ -1544,7 +1544,7 @@
 	               					   
 				   var $item_qty = ''; var $total_amount = ''; var $po_details_id='';
 				   var shtml=''; var less_receive=0; var $total_receive =0;
-				   var $item_case = '1';
+				   //var $item_case = '1';
 				   
 				   if ((typeof item.total_receive !== "undefined") && (item.total_receive !== null)) {
 				   	   less_receive =  parseFloat(item.qty) - parseFloat(item.total_receive) ;			   	   
@@ -1582,7 +1582,7 @@
 					 html+='<td>'+ $po_details_id + input_sku_hidden + item.item_name + size_name +  '<div>' + t("SKU") +" " +  item.sku + '</div>'  +'</td>';
 					 html+='<td>'+ prettyQty(stocks) +'</td>';				 
 					 html+='<td>'+ prettyQty(item.incoming_balance) +'</td>';
-					 html+='<td><input type="text" class="form-control numeric_only text-right input_case" name="case[]" required="required" '+ $item_case +' ></td>';
+					//  html+='<td><input type="text" class="form-control numeric_only text-right input_case" name="case[]" required="required" '+ $item_case +' ></td>';
 					 html+='<td><input type="text" class="form-control numeric_only text-right input_qty" name="qty[]" required="required" '+ $item_qty +' ></td>';				 
 					 html+='<td><input type="text" class="form-control numeric_only text-right input_cost" name="cost[]" value="'+ prettyPrice(item.cost_price) +'"  required="required" ></td>';
 					 html+='<td>'+ prettyPrice($total_amount) +'</td>';
