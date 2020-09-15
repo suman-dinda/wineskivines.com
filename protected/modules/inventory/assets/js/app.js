@@ -442,7 +442,7 @@
 				break;
 				
 				case "purchase_order":
-				  var stock_after_div = $(this).parent().parent().find("td:nth-child(6)") ;
+				  var stock_after_div = $(this).parent().parent().find("td:nth-child(7)") ;
 				  if(!isNaN(qty)){
 				  	var cost  = parseFloat( $(this).parent().parent().find(".input_cost").val() ) ;
 					var stock_after = prettyPrice(qty * cost);
@@ -1558,7 +1558,6 @@
 							 shtml+='<td>'+  item.item_name + size_name +  '<div>' + t("SKU") +" " +  item.sku + '</div>'  +'</td>';
 							 shtml+='<td>'+ prettyQty(stocks) +'</td>';
 							 shtml+='<td>'+ prettyQty(item.incoming_balance) +'</td>';
-							 stml+='<td><input type="text" class="form-control numeric_only text-right input_case" name="case[]" required="required"></td>';
 							 shtml+='<td>'+ prettyQty(item.total_receive) +'</td>';				 
 							 shtml+='<td>'+ prettyPrice(item.cost_price) +'</td>';
 							 shtml+='<td>'+ prettyPrice($total_amount) +'</td>';
@@ -1572,6 +1571,9 @@
 				      if($total_receive>0){
 				      	$item_qty = ' value="'+ prettyQty(less_receive) +'" ';	 
 					  }
+					//   if(parseInt(size_name) == 750){
+					// 	$item_qty = 12 * parseFloat($item_case);
+					//   }
 				      $total_amount =   parseFloat(item.qty) * parseFloat(item.cost_price);
 				      $po_details_id = '<input type="hidden" name="po_details_id[]" value="'+ item.po_details_id +'" >';
 				   }			   						   			   
