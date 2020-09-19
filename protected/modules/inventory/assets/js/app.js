@@ -418,7 +418,26 @@
 		if ( $(".typhead_item").exists() ){
 			autoFillItem();
 		}	
-			
+		//case-implementation
+		$( document ).on( "keyup", ".input_case", function(event) {
+			var case_qty = parseFloat( $(this).val() )+ 0;
+			transaction_type = $(".adjustment_transaction_type").val();		
+			dump("transaction_type=>"+ transaction_type);
+
+			switch(transaction_type){
+				case "inventory_count":			  
+				  return;
+				break;
+				case "purchase_order":
+					alert("Case Section is working");
+				default:			  
+					stock_after_div = $(this).parent().parent().find("td:nth-child(5)") ;
+					if(!isNaN(qty)){
+						stock_after = in_stock+qty;
+					} else stock_after = in_stock;
+				break;
+
+		});
 		$( document ).on( "keyup", ".input_qty", function(event) {
 			
 			var qty = parseFloat( $(this).val() )+ 0;
