@@ -39,16 +39,16 @@
    <?php endif;?>
    
    <div class="uk-form-row">   
-   <button class="uk-button uk-width-1"><?php echo Yii::t("default","Signin")?> <i class="uk-icon-chevron-circle-right"></i></button>
+   <button class="uk-button uk-width-1 admin-btn"><?php echo Yii::t("default","Signin")?> <i class="uk-icon-chevron-circle-right"></i></button>
    </div>
    
-   <p><a href="javascript:;" class="mt-fp-link"><?php echo Yii::t("default","Forgot Password")?>?</a></p>
+   <p class="f-pwd"><a href="javascript:;" class="mt-fp-link"><?php echo Yii::t("default","Forgot Password")?>?</a></p>
    </form>
    
    
     <form id="mt-frm" class="uk-form mt-frm" onsubmit="return false;" method="POST">   
    <?php echo CHtml::hiddenField("action",'adminForgotPass')?>
-   <h4><?php echo Yii::t("default","Forgot Password")?></h4>
+   <h4 class="f-pwd"><?php echo Yii::t("default","Forgot Password")?></h4>
    
    <div class="uk-form-row">
       <div class="uk-form-icon uk-width-1">

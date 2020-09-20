@@ -5,7 +5,8 @@ margin:0;
 padding:0;
 height:100%;
 font-size:14px;
-background:#E4E7EA !important;
+background:url('../images/autopay-hover.svg') !important;
+background-color:#FAFAFA !important;
 }
 
 ul,li{
@@ -33,6 +34,7 @@ padding-top:7%;
 
 .login_wrap .uk-panel{
 margin:auto;
+box-shadow: #9E9E9E 0px 1px 6px 1px;
 }
 
 .login_logo{
@@ -40,6 +42,8 @@ height:80px;
 width:80px;
 margin:auto;
 background:url("../images/store-logo4.png") no-repeat;
+background-size: contain;
+margin-bottom: 10px;
 }
 
 /*.help-block.form-error{
@@ -419,6 +423,8 @@ cursor:move;
 
 .login_wrap h3{
 text-transform:capitalize;
+text-align: center;
+font-weight: bold;
 }
 
 #frm_table_list caption{
@@ -1285,4 +1291,12 @@ padding-left: 54px;
 border:1px solid #999;
 height:300px;
 width:500px;
+}
+.f-pwd{
+  text-align: right;
+  font-weight: bold;
+}
+.admin-btn{
+  background: linear-gradient(45deg, #512DA8, #EDE7F6, #4527A0) !important;
+  font-weight: bold;
 }

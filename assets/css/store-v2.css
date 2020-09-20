@@ -295,7 +295,7 @@ width:auto;
 display:block;
 height:110px;
 width:110px;
-border:1px solid #f75d34;
+border:1px ridge #FFC107;
 margin:auto;
 text-indent:-9999px;
 
@@ -321,7 +321,7 @@ opacity: 1;
 -ms-transform: scale(1);
 transform: scale(1);
 color: white;
-box-shadow: inset 0 0 0 138px #040c13, 0 0 0 6px rgba(50, 50, 50, 0.75), 0 1px 2px rgba(0, 0, 0, 0.1);
+box-shadow: inset 0 0 0 138px #040c13, 0 0 0 6px rgba(255,170,0, 0.75), 0 1px 2px rgba(0, 0, 0, 0.1);
 border:none;
 }
 
@@ -336,22 +336,27 @@ display:block;
 
 .search-menu a.byaddress i{
 background:url("../images/byaddress.png") no-repeat center top;
+background-size: contain;
 }
 
 .search-menu a.byname i{
 background:url("../images/byname.png") no-repeat center top;
+background-size: contain;
 }
 
 .search-menu a.bystreet i{
 background:url("../images/bystreet.png") no-repeat center top;
+background-size: contain;
 }
 
 .search-menu a.bycuisine i{
 background:url("../images/bycuisine.png") no-repeat center top;
+background-size: contain;
 }
 
 .search-menu a.byfood i{
 background:url("../images/byfood.png") no-repeat center top;
+background-size: contain;
 }
 
 
@@ -590,7 +595,7 @@ text-align:center;
 }
 
 .section-how-it-works h3{
-background:#f75d34;
+background:#F4511E;
 color:#fff;
 padding:5px;
 display:inline-table;
@@ -1090,7 +1095,8 @@ padding-top:15px;
 .menu-2 .box-grey .top10,
 .bottom10
 {
-margin-bottom:10px;
+margin-top:10px;
+margin-bottom: 10px;
 }
 
 .bottom15,
