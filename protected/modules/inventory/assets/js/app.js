@@ -431,11 +431,9 @@
 				case "purchase_order":
 					alert("Case Section is working");
 				default:			  
-					stock_after_div = $(this).parent().parent().find("td:nth-child(5)") ;
-					if(!isNaN(qty)){
-						stock_after = in_stock+qty;
-					} else stock_after = in_stock;
+					return;
 				break;
+			}
 
 		});
 		$( document ).on( "keyup", ".input_qty", function(event) {
