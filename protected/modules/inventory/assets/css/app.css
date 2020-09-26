@@ -387,8 +387,11 @@ padding-bottom:5px;
 }
 .main_login_wraper .left{
 float:left;
-background:#626f80;
+background:#009688;
 color:#fff;
+}
+.myrounded.btn_login.extended_button.btn.btn-raised.btn-info{
+background-color:#009688;
 }
 .main_login_wraper .right{
 float:left;

@@ -63,7 +63,7 @@ $this->widget(APP_FOLDER.'.components.languageBar');
 	    <?php 
 	    echo CHtml::submitButton( translate("Login"),array(
 	     'name'=>"btn_login",
-	     'class'=>"myrounded  extended_button btn btn-raised btn-info"
+	     'class'=>"myrounded btn_login extended_button btn btn-raised btn-info"
 	    ));
 	    ?>
 	    

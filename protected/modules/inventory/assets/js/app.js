@@ -421,21 +421,55 @@
 		//case-implementation
 		$( document ).on( "keyup", ".input_case", function(event) {
 			var case_qty = parseFloat( $(this).val() )+ 0;
+			var item_size = parseInt($(this).parent().parent().find("td:nth-child(1) span").text().slice(1,-1));
 			transaction_type = $(".adjustment_transaction_type").val();		
 			dump("transaction_type=>"+ transaction_type);
+			var cal_qty=0;
 
 			switch(transaction_type){
 				case "inventory_count":			  
 				  return;
 				break;
 				case "purchase_order":
-					alert("Case Section is working");
-				default:			  
-					stock_after_div = $(this).parent().parent().find("td:nth-child(5)") ;
-					if(!isNaN(qty)){
-						stock_after = in_stock+qty;
-					} else stock_after = in_stock;
+					switch(item_size){
+						case 750:
+							cal_qty=case_item_qty(case_qty,12);
+							$(this).parent().parent().find("td:nth-child(5) input").val(cal_qty).keyup();
+							break;
+						case "375":
+							cal_qty=case_item_qty(case_qty,24);
+							$(this).parent().parent().find("td:nth-child(5) input").val(cal_qty).keyup();
+							break;
+						case "180":
+							cal_qty=case_item_qty(case_qty,48);
+							$(this).parent().parent().find("td:nth-child(5) input").val(cal_qty).keyup();
+							break;
+						case "90":
+							cal_qty=case_item_qty(case_qty,96);
+							$(this).parent().parent().find("td:nth-child(5) input").val(cal_qty).keyup();
+							break;
+						case "650":
+							cal_qty=case_item_qty(case_qty,12);
+							$(this).parent().parent().find("td:nth-child(5) input").val(cal_qty).keyup();
+							break;
+						case "500":
+							cal_qty=case_item_qty(case_qty,24);
+							$(this).parent().parent().find("td:nth-child(5) input").val(cal_qty).keyup();
+							break;
+						case "330":
+							cal_qty=case_item_qty(case_qty,48);
+							$(this).parent().parent().find("td:nth-child(5) input").val(cal_qty).keyup();
+							break;
+						case "275":
+							cal_qty=case_item_qty(case_qty,96);
+							$(this).parent().parent().find("td:nth-child(5) input").val(cal_qty).keyup();
+							break;
+						default:
+							notify( "Size not supported. Please register size in ML/L.","info" );
+							break;
+					}
 				break;
+			}
 
 		});
 		$( document ).on( "keyup", ".input_qty", function(event) {
@@ -454,7 +488,7 @@
 				
 				case "loss":
 				case "damage":
-				  stock_after_div = $(this).parent().parent().find("td:nth-child(4)") ;
+				  var stock_after_div = $(this).parent().parent().find("td:nth-child(4)") ;
 				  if(!isNaN(qty)){
 					stock_after = in_stock-qty;
 				  } else stock_after = in_stock;
@@ -921,6 +955,13 @@
 	    return n;
 	};	
 	
+//case quantity calculation
+
+var case_item_qty = function(case_qty , case_count){
+	var res = parseInt(case_qty)*parseInt(case_count);
+	return res;
+};
+
 	/*MYCALL*/
 	var processAjax = function(action , data , single_call, silent){
 			
@@ -1584,15 +1625,13 @@
 							shtml+='</tr>';									 			   	   
 				   	   }
 				   } 
-				   //case calulation implemenatation
+				   
 				   if ((typeof item.po_id !== "undefined") && (item.po_id !== null)) {
 				      $item_qty = ' value="'+ prettyQty(item.qty) +'" ';	 
 				      if($total_receive>0){
 				      	$item_qty = ' value="'+ prettyQty(less_receive) +'" ';	 
 					  }
-					//   if(parseInt(size_name) == 750){
-					// 	$item_qty = 12 * parseFloat($item_case);
-					//   }
+					
 				      $total_amount =   parseFloat(item.qty) * parseFloat(item.cost_price);
 				      $po_details_id = '<input type="hidden" name="po_details_id[]" value="'+ item.po_details_id +'" >';
 				   }			   						   			   
