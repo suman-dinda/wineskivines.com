@@ -436,31 +436,31 @@
 							cal_qty=case_item_qty(case_qty,12);
 							$(this).parent().parent().find("td:nth-child(5) input").val(cal_qty).keyup();
 							break;
-						case "375":
+						case 375:
 							cal_qty=case_item_qty(case_qty,24);
 							$(this).parent().parent().find("td:nth-child(5) input").val(cal_qty).keyup();
 							break;
-						case "180":
+						case 180:
 							cal_qty=case_item_qty(case_qty,48);
 							$(this).parent().parent().find("td:nth-child(5) input").val(cal_qty).keyup();
 							break;
-						case "90":
+						case 90:
 							cal_qty=case_item_qty(case_qty,96);
 							$(this).parent().parent().find("td:nth-child(5) input").val(cal_qty).keyup();
 							break;
-						case "650":
+						case 650:
 							cal_qty=case_item_qty(case_qty,12);
 							$(this).parent().parent().find("td:nth-child(5) input").val(cal_qty).keyup();
 							break;
-						case "500":
+						case 500:
 							cal_qty=case_item_qty(case_qty,24);
 							$(this).parent().parent().find("td:nth-child(5) input").val(cal_qty).keyup();
 							break;
-						case "330":
+						case 330:
 							cal_qty=case_item_qty(case_qty,48);
 							$(this).parent().parent().find("td:nth-child(5) input").val(cal_qty).keyup();
 							break;
-						case "275":
+						case 275:
 							cal_qty=case_item_qty(case_qty,96);
 							$(this).parent().parent().find("td:nth-child(5) input").val(cal_qty).keyup();
 							break;
